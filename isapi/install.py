@@ -2,14 +2,19 @@
 
 # this code adapted from "Tomcat JK2 ISAPI redirector", part of Apache
 # Created July 2004, Mark Hammond.
-import sys, os, imp, shutil, stat
+import imp
 import operator
-from win32com.client import GetObject, Dispatch
-from win32com.client.gencache import EnsureModule, EnsureDispatch
-import win32api
-import pythoncom
-import winerror
+import os
+import shutil
+import stat
+import sys
 import traceback
+
+import pythoncom
+import win32api
+import winerror
+from win32com.client import Dispatch, GetObject
+from win32com.client.gencache import EnsureDispatch, EnsureModule
 
 _APP_INPROC = 0
 _APP_OUTPROC = 1
@@ -164,9 +169,15 @@ def FindPath(options, server, name):
 
 
 def LocateWebServerPath(description):
-    """
-    Find an IIS web server whose name or comment matches the provided
-    description (case-insensitive).
+    """Find an IIS web server whose name or comment matches the provided description.
+
+    :param description: IIS web server name or comment (case-insensitive)
+    :type description: str
+    :raise isapi.install.ItemNotFound: If no sites match the description
+    :return: IIS site path
+    :rtype: ?
+
+    Examples:
 
     >>> LocateWebServerPath('Default Web Site') # doctest: +SKIP
 
@@ -329,12 +340,14 @@ def CreateDirectory(params, options):
 def AssignScriptMaps(script_maps, target, update="replace"):
     """Updates IIS with the supplied script map information.
 
-    script_maps is a list of ScriptMapParameter objects
-
-    target is an IIS Virtual Directory to assign the script maps to
-
-    update is a string indicating how to update the maps, one of  ('start',
-    'end', or 'replace')
+    :param script_maps: A list of ScriptMapParameter objects
+    :type script_maps: List[ScriptMapParameter]
+    :param target: An IIS Virtual Directory to assign the script maps to
+    :type target: ?
+    :param update: Optional string indicating how to update the maps, one of ('start',
+        'end', or 'replace').
+    :type update: str
+    :raise isapi.install.ConfigurationError: If there is a configuration error
     """
     # determine which function to use to assign script maps
     script_map_func = "_AssignScriptMaps" + update.capitalize()
@@ -351,7 +364,15 @@ def AssignScriptMaps(script_maps, target, update="replace"):
 
 
 def get_unique_items(sequence, reference):
-    "Return items in sequence that can't be found in reference."
+    """Return items in sequence that cannot be found in reference.
+
+    :param sequence: A sequence?
+    :type sequence: ?
+    :param reference: A reference?
+    :type reference: ?
+    :return: The unique items
+    :rtype: Tuple[obj]
+    """
     return tuple([item for item in sequence if item not in reference])
 
 
@@ -576,7 +597,12 @@ def RemoveDirectory(params, options):
 
 
 def RemoveScriptMaps(vd_params, options):
-    "Remove script maps from the already installed virtual directory"
+    """Remove script maps from the already installed virtual directory.
+
+    :param vd_params: Virtual directory parameters
+    :type vd_params: VirtualDirParameters
+    :param options: Options for ?
+    """
     parent, name = vd_params.split_path()
     target_dir = GetObject(FindPath(options, vd_params.Server, parent))
     installed_maps = list(target_dir.ScriptMaps)
@@ -660,7 +686,18 @@ def GetLoaderModuleName(mod_name, check_module=None):
 
 
 def InstallModule(conf_module_name, params, options, log=lambda *args: None):
-    "Install the extension"
+    """Install the extension.
+
+    :param conf_module_name: Loader module name
+    :type conf_module_name: ?
+    :param params: Patch parameters
+    :type params: ?
+    :param options: Uninstall options
+    :type options: ?
+    :param log: Some args for a lambda function
+    :type log: ? or None
+    :raise isapi.install.ConfigurationError: If there is a configuration error
+    """
     if not hasattr(sys, "frozen"):
         conf_module_name = os.path.abspath(conf_module_name)
         if not os.path.isfile(conf_module_name):
@@ -673,7 +710,17 @@ def InstallModule(conf_module_name, params, options, log=lambda *args: None):
 
 
 def UninstallModule(conf_module_name, params, options, log=lambda *args: None):
-    "Remove the extension"
+    """Remove the extension.
+
+    :param conf_module_name: Loader module name
+    :type conf_module_name: ?
+    :param params: Patch parameters
+    :type params: ?
+    :param options: Uninstall options
+    :type options: ?
+    :param log: Some args for a lambda function
+    :type log: ? or None
+    """
     loader_dll = GetLoaderModuleName(conf_module_name, False)
     _PatchParamsModule(params, loader_dll, False)
     Uninstall(params, options)

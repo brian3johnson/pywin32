@@ -10,7 +10,7 @@ must ensure each of the required methods are implemented.
 
 
 class SimpleExtension:
-    "Base class for a simple ISAPI extension"
+    """Base class for a a simple ISAPI filter."""
 
     def __init__(self):
         pass
