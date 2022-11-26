@@ -7,10 +7,24 @@ Welcome to pywin32's documentation!
 ===================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   isapi/index
+   adodbapi/index
+   com/index
+   Pythonwin/index
+   SWIG/index
 
+The pywin32 package provides support for Windows-specific workflows using Python. This package contains several sub-packages:
+
+* ISAPI
+* ADODBAPI
+* COM
+
+pywin32 includes the Pythonwin GUI IDE.
+
+SWIG enables developers to build extensions?
 
 Indices and tables
 ==================
