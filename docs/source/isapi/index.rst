@@ -1,12 +1,17 @@
 Python ISAPI support
 ====================
 
+.. admonition:: Existing document
+   
+   * :file:`\\isapi\\doc\\isapi.html`
+   * :file:`\\isapi\\README.txt`
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   samples/samples
-   apidoc/modules
+   samples/index
+   apidoc/index
 
 .. seealso::
    * The :doc:`isapi related modules <apidoc/isapi>`
@@ -17,6 +22,10 @@ Python ISAPI support
 
 .. note::
    If you are viewing this documentation directly from disk, most links in this document will fail. You can also find this document in the CHM file that comes with pywin32, where the links will work.
+
+.. contents::
+   :depth: 1
+   :local:
 
 Introduction
 ------------
@@ -69,3 +78,13 @@ Using py2exe and the isapi package
 You can instruct py2exe to create a 'frozen' Python ISAPI filter/extension. In this case, py2exe will create a package with everything you need in one directory, and the Python source file embedded in the .zip file.
 
 In general, you will want to build a separate installation executable along with the ISAPI extension. This executable will be built from the same script. See the ISAPI sample in the py2exe distribution.
+
+From the README.txt
+-------------------
+
+A Python ISAPI extension. Contributed by Phillip Frantz, and is Copyright 2002-2003 by Blackdog Software Pty Ltd.
+
+See the :file:`samples` directory, and particularly :file:`samples\\README.txt`
+
+You can find documentation in the :file:`PyWin32.chm` file that comes with pywin32 - 
+you can open this from Pythonwin->Help, or from the start menu.
