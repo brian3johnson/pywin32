@@ -31,15 +31,15 @@ or, after running through 2to3.py, CPython 3.4 or later.
 __version__ = "2.6.2.0"
 version = "adodbapi v" + __version__
 
-import sys
 import copy
 import decimal
 import os
+import sys
 import weakref
 
-from . import process_connect_string
 from . import ado_consts as adc
 from . import apibase as api
+from . import process_connect_string
 
 try:
     verbose = int(os.environ["ADODBAPI_VERBOSE"])
@@ -51,9 +51,10 @@ if verbose:
 # --- define objects to smooth out IronPython <-> CPython differences
 onWin32 = False  # assume the worst
 if api.onIronPython:
-    from System import Activator, Type, DBNull, DateTime, Array, Byte
-    from System import Decimal as SystemDecimal
     from clr import Reference
+    from System import Activator, Array, Byte, DateTime, DBNull
+    from System import Decimal as SystemDecimal
+    from System import Type
 
     def Dispatch(dispatch):
         type = Type.GetTypeFromProgID(dispatch)
@@ -62,11 +63,12 @@ if api.onIronPython:
     def getIndexedValue(obj, index):
         return obj.Item[index]
 
+
 else:  # try pywin32
     try:
-        import win32com.client
         import pythoncom
         import pywintypes
+        import win32com.client
 
         onWin32 = True
 
@@ -110,8 +112,8 @@ def connect(*args, **kwargs):  # --> a db-api connection object
 
     call using:
     :connection_string -- An ADODB formatted connection string, see:
-         * http://www.connectionstrings.com
-         * http://www.asp101.com/articles/john/connstring/default.asp
+    * http://www.connectionstrings.com
+    * http://www.asp101.com/articles/john/connstring/default.asp
     :timeout -- A command timeout value, in seconds (default 30 seconds)
     """
     co = Connection()  # make an empty connection object
@@ -711,17 +713,14 @@ class Cursor(object):
             self._makeDescriptionFromRS()
         if isinstance(d, int):
             d = self.description[d]
-        desc = (
-            "Name= %s, Type= %s, DispSize= %s, IntSize= %s, Precision= %s, Scale= %s NullOK=%s"
-            % (
-                d[0],
-                adc.adTypeNames.get(d[1], str(d[1]) + " (unknown type)"),
-                d[2],
-                d[3],
-                d[4],
-                d[5],
-                d[6],
-            )
+        desc = "Name= %s, Type= %s, DispSize= %s, IntSize= %s, Precision= %s, Scale= %s NullOK=%s" % (
+            d[0],
+            adc.adTypeNames.get(d[1], str(d[1]) + " (unknown type)"),
+            d[2],
+            d[3],
+            d[4],
+            d[5],
+            d[6],
         )
         return desc
 
