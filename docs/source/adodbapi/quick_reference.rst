@@ -20,7 +20,8 @@ also find at
 <https://pypi.python.org/pypi/adodbapi>. Quick installation instructions
 (for users of CPython) are as follows: `pip3 install pywin32`.
 
-### About ADO, ODBC, and Connection Strings
+About ADO, ODBC, and Connection Strings
+---------------------------------------
 
 Microsoft engineers invented ODBC as a standard way of connecting to a
 tabular data source, such as an SQL database server. It was such a good
@@ -56,44 +57,16 @@ The software which connects ODBC to an engine is called a "Driver". One
 which talks in ADO is called a "Provider". Sometimes there will be a
 Provider for a Driver.
 
-### Driver (and Provider) download links:
+Driver (and Provider) download links:
+-------------------------------------
 
-The current (as of 2019) SQL Server OLE DB provider (which they call a
-"driver" here) is
-<https://www.microsoft.com/en-us/download/details.aspx?id=56730> which
-is linked from, and explained [here, in their
-document.](https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017)
+The current (as of 2019) SQL Server OLE DB provider (which they call a "driver" here) is <https://www.microsoft.com/en-us/download/details.aspx?id=56730> which is linked from, and explained [here, in their document.](https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017)
 
-- Jet (ACCESS database) and other file datasets (like .xls and .csv) "ACE"
-Provider:
-    - <http://www.microsoft.com/en-us/download/details.aspx?id=13255> a (32
-bit) Microsoft.Jet.OLEDB.4.0 Provider, which may be included with
-Windows. Note that you are not permitted load the 32 bit "ACE" provider
-if you have any 64-bit Office components installed. Conventional wisdom
-says that you must use 64 bit Python in this case. However, see the
-answer in
-<http://stackoverflow.com/questions/12270453/ms-access-db-engine-32-bit-with-office-64-bit>.
-If you decide to try hacking the installers, you may find
-<http://www.pantaray.com/msi_super_orca.html> to be a useful alternative
-to Orca. My experience is that such a [hacked installer (like this
-one](http://shares.digvil.info/redis)) ( can also be used on machines
-where "click to buy" versions of Office have been removed, but are still
-blocking installation of the redistributable provider.
-
-- To use any ODBC driver from 64 bit Python, you also need the MSDASQL
-provider. It is shipped with Server 2008, and Vista and later. For
-Server 2003, You will have to [download
-it](http://www.microsoft.com/en-us/download/details.aspx?id=20065) [from
-Microsoft.]{lang="en-US"}
-
-- MySQL driver <http://dev.mysql.com/downloads/connector/odbc/>
-or MariaDB driver <https://downloads.mariadb.org/connector-odbc/>
-or `choco install mysql.odbc`
-- PostgreSQL driver <http://www.postgresql.org/ftp/odbc/versions/msi/>
-(scroll all the way to the bottom) or `choco install psqlodbc`. 
-
-
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+* Jet (ACCESS database) and other file datasets (like .xls and .csv) "ACE" Provider:
+  * <http://www.microsoft.com/en-us/download/details.aspx?id=13255> a (32 bit) Microsoft.Jet.OLEDB.4.0 Provider, which may be included with Windows. Note that you are not permitted load the 32 bit "ACE" provider if you have any 64-bit Office components installed. Conventional wisdom says that you must use 64 bit Python in this case. However, see the answer in <http://stackoverflow.com/questions/12270453/ms-access-db-engine-32-bit-with-office-64-bit>. If you decide to try hacking the installers, you may find <http://www.pantaray.com/msi_super_orca.html> to be a useful alternative to Orca. My experience is that such a [hacked installer (like this one](http://shares.digvil.info/redis)) ( can also be used on machines where "click to buy" versions of Office have been removed, but are still blocking installation of the redistributable provider.
+* To use any ODBC driver from 64 bit Python, you also need the MSDASQL provider. It is shipped with Server 2008, and Vista and later. For Server 2003, You will have to [download it](http://www.microsoft.com/en-us/download/details.aspx?id=20065) [from Microsoft.]{lang="en-US"}
+* MySQL driver <http://dev.mysql.com/downloads/connector/odbc/> or MariaDB driver <https://downloads.mariadb.org/connector-odbc/> or `choco install mysql.odbc`
+* PostgreSQL driver <http://www.postgresql.org/ftp/odbc/versions/msi/> (scroll all the way to the bottom) or `choco install psqlodbc`.
 
 PEP-249
 -------
@@ -106,8 +79,8 @@ access api specification is found at:
 
 <http://www.python.org/dev/peps/pep-0249/>
 
-
-### Module level attributes:
+Module level attributes:
+------------------------
 
 The PEP requires several module level attributes. Older versions of
 adodbapi (which was once all one big file) defined a hundred or two. I
@@ -118,52 +91,53 @@ up the symbols she needs from apibase and ado\_consts.
 Part of the adodbapi package\'s \_\_init\_\_.py looks something like
 this:
 
-```python
-if sys.version_info < (3,0): # in Python 2, define all symbols, just like before
-    from apibase import *  # using this is bad
-    from ado_consts import *  # using this is worse
-else:
-    # but if the user is running Python 3, then keep the dictionary clean
-    from apibase import apilevel, threadsafety, paramstyle
-    from apibase import Warning, Error, InterfaceError, DatabaseError, DataError
-    from apibase import OperationalError, IntegrityError
-    from apibase import InternalError, ProgrammingError, NotSupportedError
-    from apibase import NUMBER, STRING, BINARY, DATETIME, ROWID
+.. code-blocK:: python
 
-from adodbapi import connect, Connection, __version__
-version = 'adodbapi v' + __version__
-```
+  if sys.version_info < (3,0): # in Python 2, define all symbols, just like before
+      from apibase import *  # using this is bad
+      from ado_consts import *  # using this is worse
+  else:
+      # but if the user is running Python 3, then keep the dictionary clean
+      from apibase import apilevel, threadsafety, paramstyle
+      from apibase import Warning, Error, InterfaceError, DatabaseError, DataError
+      from apibase import OperationalError, IntegrityError
+      from apibase import InternalError, ProgrammingError, NotSupportedError
+      from apibase import NUMBER, STRING, BINARY, DATETIME, ROWID
+
+  from adodbapi import connect, Connection, __version__
+  version = 'adodbapi v' + __version__
+
 Please, use only those last four symbols from adodbapi. All others
 should be imported directly from their own sub-modules. My tests and
 examples all follow that rule.
 
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
-
-### Connect (Use of the connect constructor)
+Connect (Use of the connect constructor)
+----------------------------------------
 
 As required by the PEP, the simplest way to connect is to use a "data
 set name
-```python
-import adodbapi
-myConn = adodbapi.connect('myDataSetName')
-```
-Which will work just fine, provided you (or someone) has done all of the
-hard work by going into "Control Panel" → "Administrative Tools" → "Data
-Sources (ODBC)"
-and set everything up for you under "myDataSetName".
+
+.. code-blocK:: python
+
+    import adodbapi
+    myConn = adodbapi.connect('myDataSetName')
+
+Which will work just fine, provided you (or someone) has done all of the hard work by going into "Control Panel" → "Administrative Tools" → "Data Sources (ODBC)" and set everything up for you under "myDataSetName".
 
 Usually, life is not so simple
 \...
 
-        import adodbapi 
-        myhost = r".\SQLEXPRESS"
-        mydatabase = "Northwind"
-        myuser = "guest"
-        mypassword = "12345678"
-        connStr = """Provider=SQLOLEDB.1; User ID=%s; Password=%s; 
-            Initial Catalog=%s;Data Source= %s"""
-        myConnStr = connStr % (myuser, mypassword, mydatabase, myhost)
-        myConn = adodbapi.connect(myConnStr)
+.. code-blocK:: python
+
+    import adodbapi 
+    myhost = r".\SQLEXPRESS"
+    mydatabase = "Northwind"
+    myuser = "guest"
+    mypassword = "12345678"
+    connStr = """Provider=SQLOLEDB.1; User ID=%s; Password=%s; 
+        Initial Catalog=%s;Data Source= %s"""
+    myConnStr = connStr % (myuser, mypassword, mydatabase, myhost)
+    myConn = adodbapi.connect(myConnStr)
 
 The PEP suggests that we should be able to create the connection using
 positional arguments. For us, that is difficult, because the syntax of
@@ -175,47 +149,51 @@ located by a \"%(spam)s\" construct. The second, third, forth, and fifth
 arguments are defined (by standard) as being \"user\", \"password\",
 \"host\", and \"database\".
 
-```python
-connStr = """Provider=SQLOLEDB.1; User ID=%(user)s;
-Password=%(password)s;\"Initial Catalog=%(database)s;
-Data Source= %(host)s"""
+.. code-blocK:: python
 
-myConn=adodbapi.connect(connStr, myuser, mypassword, myhost, mydatabase)
-```
+  connStr = """Provider=SQLOLEDB.1; User ID=%(user)s;
+  Password=%(password)s;\"Initial Catalog=%(database)s;
+  Data Source= %(host)s"""
+
+  myConn=adodbapi.connect(connStr, myuser, mypassword, myhost, mydatabase)
+
 Which will work.
 
 It would be better documented, however, to use keyword, rather than
 positional arguments:
-```python
-myConn = adodbapi.connect(connStr, user=myuser, password=mypassword, host=myhost, database=mydatabase)
-```
+
+.. code-blocK:: python
+
+  myConn = adodbapi.connect(connStr, user=myuser, password=mypassword, host=myhost, database=mydatabase)
 
 In adodbapi, you may also pass keywords using a dictionary structure,
 which also allows us to pass additional arguments:
-```python
-conn_args = {'host' : r".\\SQLEXPRESS\",
-    'database': "Northwind",
-    'user': "guest",
-    'password': "12345678",
-    'timeout': 60}
 
-myConn = adodbapi.connect(connStr,[],**conn_args)
-```
+.. code-blocK:: python
+
+  conn_args = {'host' : r".\\SQLEXPRESS\",
+      'database': "Northwind",
+      'user': "guest",
+      'password': "12345678",
+      'timeout': 60}
+
+  myConn = adodbapi.connect(connStr,[],**conn_args)
 
 Which works, but is ugly. So let\'s also put the connection string into
 the dictionary. As an extension, I allow the first (or second)
 positional argument to be the keyword dictionary.
-```python
-conn_args = {'host': r".\\SQLEXPRESS",
-    'database' : "Northwind",
-    'user': "guest",
-    'password' : "12345678"}
-conn_args['connection_string'] = """Provider=SQLOLEDB.1;
-    User ID=%(user)s; Password=%(password)s;
-    Initial Catalog=%(database)s; Data Source= %(host)s"""
 
-myConn = adodbapi.connect(conn_args)
-```
+.. code-blocK:: python
+
+  conn_args = {'host': r".\\SQLEXPRESS",
+      'database' : "Northwind",
+      'user': "guest",
+      'password' : "12345678"}
+  conn_args['connection_string'] = """Provider=SQLOLEDB.1;
+      User ID=%(user)s; Password=%(password)s;
+      Initial Catalog=%(database)s; Data Source= %(host)s"""
+
+  myConn = adodbapi.connect(conn_args)
 
 Not pretty, I will admit, but it is about as readable as connection
 strings get. Arbitrary keywords, are also expanded using the same
@@ -225,16 +203,12 @@ constructor recognizes when building your connection. For example
 "timeout=n".
 
 **Dictionary Keywords which have meaning inside the connect method:**
-- timeout=30 \# set the ADO connection timeout to \"n\" seconds.
-    (Default = 30) This value will also be used as the SQL command
-    timeout subsequently. The command timeout can be changed via the
-    timeout connection attribute.
-- paramstyle=\'qmark\' \# initialize the connection\'s paramstyle, like
-\'qmark\', \'format\', or \'named\'. (Default = \'qmark\')
-- autocommit=False \# initialize autocommit on the connection. (Default =
-False)
+* timeout=30 \# set the ADO connection timeout to \"n\" seconds. (Default = 30) This value will also be used as the SQL command timeout subsequently. The command timeout can be changed via the timeout connection attribute.
+* paramstyle=\'qmark\' \# initialize the connection\'s paramstyle, like \'qmark\', \'format\', or \'named\'. (Default = \'qmark\')
+* autocommit=False \# initialize autocommit on the connection. (Default = False)
 
-### Connection Keyword Macro Language:
+Connection Keyword Macro Language:
+----------------------------------
 
 It often happens, when building a connection string for a generic
 connection, that you need to know information about your host computer,
@@ -250,53 +224,44 @@ arguments, they will be in subsequent members.
 
 The result of the macro operation will be the value of the new key.
 
-- macro \"is64bit\": Test 64-bit-ed-ness of the proxy server.
-  If the server is running 64 bit Python, return argument\[1\], otherwise
-return argument\[2\]. Example:
+* macro \"is64bit\": Test 64-bit-ed-ness of the proxy server. If the server is running 64 bit Python, return argument\[1\], otherwise return argument\[2\]. Example:
 
-```pythonstub
-conn_keys['macro_is64bit'] = ['provider',
-   'Microsoft.ACE.OLEDB.12.0', "Microsoft.Jet.OLEDB.4.0"]
+.. code-blocK:: python
 
-conn_keys['connection_string'] = "Provider=%(provider)s; ... and ... more ... stuff\"
-```
+  conn_keys['macro_is64bit'] = ['provider',
+     'Microsoft.ACE.OLEDB.12.0', "Microsoft.Jet.OLEDB.4.0"]
 
-- macro "getuser": Retrieve the proxy server logged-in-user's username
-  
-    My systems administrator gave me a test database named after myself.
+  conn_keys['connection_string'] = "Provider=%(provider)s; ... and ... more ... stuff\"
 
-    I thought it would be handy to let others do a similar thing. so:
-```pythonstub
-conn_keys['macro_getuser'] = 'database'
+* macro "getuser": Retrieve the proxy server logged-in-user's username. My systems administrator gave me a test database named after myself. I thought it would be handy to let others do a similar thing. so:
 
-conn_keys['connection_string'] = "...stuff...; Initial Catalog=%(database)s; ..."
-```
-- macro "auto_security": Build ADO security string automagically.
-    If the username (key "user") is missing, blank, or None, use Windows
-login security ... otherwise use SQL Server security with "user" and
-"password". It runs this code:
-```pythonstub
-if macro_name == "auto_security":
-    if not 'user' in kwargs or not bool(kwargs['user']):
-        return new_key, 'Integrated Security=SSPI'
-    return new_key, 'User ID=%(user)s; Password=%(password)s'
+.. code-blocK:: python
 
-    # note that %(user) and %(password) are not substituted here,
-    # they are put in place to be substituted before being sent to ADO.
-```
-```pythonstub
-conn_keys['macro_auto_security'] = ['secure']
-conn_keys['user'] = None # username here for Server Security
-conn_keys['password'] = 'xys' # ignored if "user" is blank or undefined
-conn_keys['connection_string'] = "\...stuff...; %(secure)s"
-```
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+  conn_keys['macro_getuser'] = 'database'
+
+  conn_keys['connection_string'] = "...stuff...; Initial Catalog=%(database)s; ..."
+
+* macro "auto_security": Build ADO security string automagically. If the username (key "user") is missing, blank, or None, use Windows login security ... otherwise use SQL Server security with "user" and "password". It runs this code:
+
+.. code-blocK:: python
+
+  if macro_name == "auto_security":
+      if not 'user' in kwargs or not bool(kwargs['user']):
+          return new_key, 'Integrated Security=SSPI'
+      return new_key, 'User ID=%(user)s; Password=%(password)s'
+
+      # note that %(user) and %(password) are not substituted here,
+      # they are put in place to be substituted before being sent to ADO.
+
+.. code-blocK:: python
+
+  conn_keys['macro_auto_security'] = ['secure']
+  conn_keys['user'] = None # username here for Server Security
+  conn_keys['password'] = 'xys' # ignored if "user" is blank or undefined
+  conn_keys['connection_string'] = "\...stuff...; %(secure)s"
 
 Connection class
 ----------------
-
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
 A connection object holds an ADO connection in its .connector attribute.
 
@@ -337,20 +302,15 @@ Connection Methods: (non-standard)
 
 Connection Attributes
 
-- .errorhandler # (standard extension. See PEP.) (does not work on
-remote)
+- .errorhandler # (standard extension. See PEP.) (does not work on remote)
 
 - .messages[] # (standard extension. See PEP)
 
 - .connector # (Internal) the ADO connection object
 
-- .paramstyle # can be altered by the programmer to change the paramstyle
-in use. The supported values are 'qmark' (the default), 'format',
-and 'named'. Values of 'pyformat', and 'dynamic' are also accepted
-(see below).
+- .paramstyle # can be altered by the programmer to change the paramstyle in use. The supported values are 'qmark' (the default), 'format', and 'named'. Values of 'pyformat', and 'dynamic' are also accepted (see below).
 
-    The connection string keyword "paramstyle" will set the default for
-the class for future connections.
+    The connection string keyword "paramstyle" will set the default for the class for future connections.
 
 - .connection_string # the complete connection string which was used to start ADO.
 
@@ -358,31 +318,20 @@ the class for future connections.
 
 - .dbms_version # string identifying the version of the db engine.
 
-- .variantConversions # a map of ado types to the functions used to
-import them.(not available on remote)
+- .variantConversions # a map of ado types to the functions used to import them.(not available on remote)
 
 - .supportsTransactions # (bool) this driver is capable of commit()/rollback().
 
-- .dbapi # references the module defining the connection. (A proposed
-db-api V3 extension.) This is a way for higher level code to reach
-module-level attributes.
+- .dbapi # references the module defining the connection. (A proposed db-api V3 extension.) This is a way for higher level code to reach module-level attributes.
 
-- .timeout # supply a value for CommandTimeout. Note: the "timeout"
-connection value is stored in this attribute, and is used as the
-connection timeout. It is then re-used as the command timeout. The user
-may overcome this rather goofy "feature" by supplying a different
-value to this attribute after the connection is made. The value is in
-seconds, and will be used for all subsequent SQL commands.
-
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+- .timeout # supply a value for CommandTimeout. Note: the "timeout" connection value is stored in this attribute, and is used as the connection timeout. It is then re-used as the command timeout. The user may overcome this rather goofy "feature" by supplying a different value to this attribute after the connection is made. The value is in seconds, and will be used for all subsequent SQL commands.
 
 the Cursor class
 ----------------
 
 Cursor attributes:
 
-- .description # as defined by PEP-249 \-- a sequence of 7-item
-sequences:
+- .description # as defined by PEP-249 \-- a sequence of 7-item sequences:
 
 for each column, defines the column by:
 
@@ -429,7 +378,7 @@ Cursor attributes (non-standard)
 - .converters[] # a list of input-conversion functions, one per column.
    (not available on remote)
 
-- .columnNames{} # a dictionary of: ((lower-cased) column name : (column number).
+- .columnNames{} # a dictionary of: (lower-cased) column name : (column number).
 
 - .numberOfColumns # number of columns in present record set.
 
@@ -469,26 +418,18 @@ but your SQL format must be appropriate for your choice (see below).
 
     --> None. There is no return value, use .fetchxxx() to see data.
 
-- .executemany(operation, sequence-of-parameters) # runs the SQL
-operation several times, once for each group of parameters in
-sequence-of-parameters.
+- .executemany(operation, sequence-of-parameters) # runs the SQL operation several times, once for each group of parameters in sequence-of-parameters.
 
     \--\> .rowcount will be the sum of all .rowcounts, unless any was -1.
 
 - .fetchone() # get the next row from the result set. Calls ADO recordset.GetRows(1)
-
 - .fetchmany(size=cursor.arraysize) # get a "size" sequence of rows. Calls ADO recordset.GetRows(size)
-
-- .fetchall() # attempt to retrieve all remaining rows in the result set. Calls ADO recordset.GetRows() using a local cursor so may use a great
-deal of memory if the query set is large.
-
-- .nextset() \# If an operation (such as a stored procedure call) has
-produced multiple result sets, skip to the next available result set.
+- .fetchall() # attempt to retrieve all remaining rows in the result set. Calls ADO recordset.GetRows() using a local cursor so may use a great deal of memory if the query set is large.
+- .nextset() \# If an operation (such as a stored procedure call) has produced multiple result sets, skip to the next available result set.
 
     \--\> returns None if there are no more result sets, otherwise True.
 
 - .setinputsizes() # pass
-
 - .setoutputsizes() # pass
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
@@ -505,23 +446,18 @@ operation strings. Calling .execute() with any other string, or calling
 .prepare() again will invalidate the preparation.
 
 For example: cursor.executemany() is programmed internally like:
-```pythonstub
-    def executemany(self, operation, sequence_of_parameter_sequences):
-        self.prepare(operation)
-        for params in sequence_of_parameter_sequences:
-            self.execute(self.command, params)
-```
-- .get\_returned\_parameters() # some providers will not return the (modified) parameter list, nor the
-return\_value, until after the last recordset is closed. This method can
-be called (_after_ calling nextset() until it returns `None`) to get
-those values.
 
+.. code-blocK:: python
+
+      def executemany(self, operation, sequence_of_parameter_sequences):
+          self.prepare(operation)
+          for params in sequence_of_parameter_sequences:
+              self.execute(self.command, params)
+
+- .get\_returned\_parameters() # some providers will not return the (modified) parameter list, nor the return\_value, until after the last recordset is closed. This method can be called (_after_ calling nextset() until it returns `None`) to get those values.
 - .next() # The cursor can be used as an iterator, each iteration does fetchone()
-
 - .\_\_iter\_\_() 
-
 - \_\_enter\_\_() # the cursor is a context manager which will auto-close
-
 - .\_\_exit\_\_()
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
@@ -531,19 +467,21 @@ PARAMSTYLEs
 
 \-\-\-\-\-\-\-\-\-\-\--
 
-### What???
+What???
+-------
 
-((A quick explanation of "paramstyle" follows: if you already know this \-- skip this section.))
+.. note::
+    
+    A quick explanation of "paramstyle" follows: if you already know this \-- skip this section.
 
 Many SQL queries or commands require data as part of their content. For
 example:
 
-`UPDATE cheese SET qtyonhand = 0 WHERE name = 'MUNSTER'`
+.. code-blocK::
 
-Chances are, this command will be given many times, but with other
-values appearing where \"0\" and \"MUNSTER\" appear in this command. It
-is convenient (as well as more efficient in some cases) to pass these
-values as parameters.
+    `UPDATE cheese SET qtyonhand = 0 WHERE name = 'MUNSTER'`
+
+Chances are, this command will be given many times, but with other values appearing where "0" and "MUNSTER" appear in this command. It is convenient (as well as more efficient in some cases) to pass these values as parameters.
 
 Unfortunately, the ISO SQL standard has not defined a method for doing
 this, so every designer of an SQL engine is free to choose a new way of
@@ -554,10 +492,7 @@ method the engine requires. According to PEP, the module author will
 place a string in the module attribute named ".paramstyle" telling you
 which method to use. The defined possibilities are as follows\...
 
-**\'qmark\'** is the default used by ADO. As far as I know, every ADO
-driver uses it. The above query would be altered by placing a question
-mark where the parameters should go. The programmer then passes the
-parameters (as as sequence) in the correct order for the `?`s.
+**'qmark'** is the default used by ADO. As far as I know, every ADO driver uses it. The above query would be altered by placing a question mark where the parameters should go. The programmer then passes the parameters (as as sequence) in the correct order for the `?`s.
 
        sql = "UPDATE cheese SET qtyonhand = ? WHERE name = ?"
        args = [0, 'MUNSTER']
@@ -644,6 +579,8 @@ The Row class in ADODBAPI satisfies the PEP by having .fetchone() return a
 sequence-like "Row" object. It can be indexed and sliced like a list.
 This is the PEP standard method:
 
+.. code-blocK:: python
+
       crsr.execute("SELECT prodname, price, qtyonhand FROM cheese")
       row = crsr.fetchone()
       while row:
@@ -653,12 +590,16 @@ This is the PEP standard method:
 
 As an extension, a Row object can also be indexed by column name:
 
+.. code-blocK:: python
+
       crsr.execute("SELECT prodname, price, qtyonhand FROM cheese")
       for row in crsr:                        # note extension: using crsr as an iterator
          value = row['price'] * row['qtyonhand']
          print('Your {:10s} is worth {:10.2f}'.format(row['prodname'], value))
 
 But, _really_ lazy programmers, like me, use the column names as attributes:
+
+.. code-blocK:: python
 
       crsr.execute("SELECT prodname, price, qtyonhand FROM cheese")
       for row in crsr:
@@ -677,7 +618,7 @@ asks for it.
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
 variantConversions for the connection and the cursor
- ----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 Each Connection instance has an optional .variantConversions attribute.
 Usually it will not be present. If it is present, it will be used in
 preference to the module's variantConversions attribute. In order to avoid
@@ -696,6 +637,8 @@ each type and convert it into a Python value. As a convenience, the
 mapping for each member of the sequence with the same value. So, to
 change several data retrieval functions:
 
+.. code-blocK:: python
+
         import adodbapi.ado_consts as adc
         import adodbapi.apibase as api
         conn.variantConversions = api.variantConversions  # MAGIC: will make a copy.
@@ -703,6 +646,8 @@ change several data retrieval functions:
         conn.variantConversions[(adc.adTinyInt, adc.adChar)] = myByteFunc
 
 which will be equivalent to:
+
+.. code-blocK:: python
 
         conn.variantConversions[adc.adTinyInt] = myByteFunc
         conn.variantConversions[adc.adChar] = myByteFunc
@@ -714,6 +659,8 @@ in module adodbapi.apibase. For example:
 
 If I wish to retrieve all floating point values differently, I might
 use:
+
+.. code-blocK:: python
 
         conn.variantConversions = api.variantConversions
         conn.variantConversions[api.adoApproximateNumericTypes] = myFloatFunc
@@ -727,10 +674,14 @@ The cursor builds a list of conversion functions for each new query set,
 You may override the conversion for any column by altering the function
 for that column:
 
+.. code-blocK:: python
+
         crsr.conversions[4] = myFunc # change the reader for the fifth column
         crsr.fetchone()
 
 To do this by column name, use:
+
+.. code-blocK:: python
 
         crsr.conversions[crsr.columnNames['mycolumn']] = myFunc
 
