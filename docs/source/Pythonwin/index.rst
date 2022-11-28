@@ -18,6 +18,7 @@
    embeddingwin32ui
    docview
    architecture
+   contents
 
 .. contents::
    :depth: 1
