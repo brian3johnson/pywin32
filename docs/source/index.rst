@@ -16,6 +16,7 @@ Welcome to pywin32's documentation!
    Pythonwin/index
    SWIG/index
    win32/index
+   resources
 
 The pywin32 package provides support for Windows-specific workflows using Python. This package contains several sub-packages:
 
