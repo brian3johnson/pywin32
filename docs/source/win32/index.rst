@@ -12,6 +12,11 @@ win32 API
    process_info
    security_directories
    win32net
+   event
+   event_threading
+   file
+   file_recursive
+   security
    samples/index
    apidoc/index
 
