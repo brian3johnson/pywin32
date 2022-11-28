@@ -30,6 +30,7 @@ Python COM support
    cpp
    mts
    shell
+   directsound
    samples/index
    apidoc/index
 
