@@ -37,6 +37,29 @@ rst_prolog = """
 
 html_theme = "alabaster"
 html_static_path = ["_static"]
+html_sidebars = {
+    "**": [
+        "about.html",
+        "localtoc.html",
+        "navigation.html",
+        "searchbox.html",
+    ]
+}
+
+# -- Options for alabaster theme----------------------------------------------
+# https://alabaster.readthedocs.io/en/latest/customization.html
+
+html_theme_options = {
+    "logo_name": True,
+    "description": "Python wrapper for the Windows API",
+    "github_user": "mhammond",
+    "github_repo": "pywin32",
+    "github_banner": False,
+    "github_button": True,
+    "github_type": "star",
+    "badge_branch": "main",
+    "show_powered_by": True,
+}
 
 # -- Options for Sphinx autodoc extension ------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
