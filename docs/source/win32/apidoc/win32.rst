@@ -1,3 +1,4 @@
+=============
 win32 package
 =============
 
@@ -10,7 +11,7 @@ win32 package
    :local:
 
 win32
------
+=====
 
 .. automodule: win32
    :members:

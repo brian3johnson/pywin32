@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+=========================================
 Quick Start to Server side COM and Python
 =========================================
 
@@ -16,7 +17,7 @@ Quick Start to Server side COM and Python
    :local:
 
 Introduction
-------------
+============
 
 This documents how to quickly start implementing COM objects in Python. It is not a thorough discussion of the COM system, or of the concepts introduced by COM.
 
@@ -27,10 +28,10 @@ For information on using external COM objects from Python, please see a Quick St
 In this document we discuss the core functionality, registering the server, testing the class, debugging the class, exception handling and server policies (phew!).
 
 Implement the core functionality
---------------------------------
+================================
 
 Implement a stand-alone Python class with your functionality
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------
 
 .. code-block:: python
 
@@ -53,7 +54,7 @@ Implement a stand-alone Python class with your functionality
 This is obviously a very simple server. In particular, custom error handling would be needed for a production class server. In addition, there are some contrived properties just for demonstration purposes.
 
 Make Unicode concessions
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 At this stage, Python and Unicode don’t really work well together. All strings which come from COM will actually be Unicode objects rather than string objects.
 
@@ -68,7 +69,7 @@ Note the conversion of the "who" to "str(who)". This forces the Unicode object i
 For details on how to debug COM Servers to find this sort of error, please see debugging the class.
 
 Annotate the class with win32com specific attributes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------
 
 This is not a complete list of names, simply a list of properties used by this sample.
 
@@ -99,12 +100,12 @@ We change the class header to become:
    # Same from here…
 
 Registering and assigning a CLSID for the object
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------
 
 COM requires that all objects use a unique CLSID and be registered under a "user friendly" name. This documents the process.
 
 Generating the CLSID
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 Microsoft Visual C++ comes with various tools for generating CLSID's, which are quite suitable. Alternatively, the pythoncom module exports the function CreateGuid() to generate these identifiers.
 
@@ -117,7 +118,7 @@ Microsoft Visual C++ comes with various tools for generating CLSID's, which are 
 Obviously the GUID that you get will be different than that displayed here.
 
 Preparing for registration of the Class
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The win32com package allows yet more annotations to be applied to a class, allowing registration to be effected with 2 lines in your source file. The registration annotations used by this sample are:
 
@@ -158,7 +159,7 @@ The header of our class now becomes:
    # same from here
 
 Registering the Class
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
 The idiom that most Python COM Servers use is that they register themselves when run as a script (ie, when executed from the command line.) Thus the standard "if __name__=='__main___':" technique works well.
 
@@ -176,25 +177,25 @@ Registration becomes as simple as:
 Running the script will register our test server.
 
 Testing our Class
------------------
+=================
 
 For the purposes of this demonstration, we will test the class using Visual Basic. This code should run under any version of Visual Basic, including VBA found in Microsoft Office. Any COM compliant package could be used alternatively. VB has been used just to prove there is no "smoke and mirrors. For information on how to test the server using Python, please see the Quick Start to Client side COM documentation.
 
 This is not a tutorial in VB. The code is just presented! Run it, and it will work!
 
 Debugging the COM Server
-------------------------
+========================
 
 When things go wrong in COM Servers, there is often nowhere useful for the Python traceback to go, even if such a traceback is generated.
 
 Rather than discuss how it works, I will just present the procedure to debug your server:
 
-To register a debug version of your class, run the script (as above) but pass in a "--debug" parameter. Eg, for the server above, use the command line "testcomserver.py --debug".
+To register a debug version of your class, run the script (as above) but pass in a "==debug" parameter. Eg, for the server above, use the command line "testcomserver.py ==debug".
 
 To see the debug output generated (and any print statements you may choose to add!) you can simply select the "Remote Debug Trace Collector" from the Pythonwin Tools menu, or run the script "win32traceutil.py" from Windows Explorer or a Command Prompt.
 
 Exception Handling
-------------------
+==================
 
 Servers need to be able to provide exception information to their client. In some cases, it may be a simple return code (such as E_NOTIMPLEMENTED), but often it can contain much richer information, describing the error on detail, and even a help file and topic where more information can be found.
 
@@ -211,7 +212,7 @@ To make working with exceptions easier, there is a helper module "win32com.serve
 (Note the COMException class supports (and translates) "desc" as a shortcut for "description", but the framework requires "description")
 
 Server Policies
----------------
+===============
 
 This is information about how it all hangs together. The casual COM author need not know this.
 
@@ -222,7 +223,7 @@ This policy object handles all of the underlying COM functionality. For example,
 It should be noted that the operation of the "policy" object could be dictated by the Python object - the policy object has many defaults, but the actual Python class can always dictate its operation.
 
 Default Policy attributes
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 The default policy object has a few special attributes that define who the object is exposed to COM. The example above shows the _public_methods attribute, but this section describes all such attributes in detail.
 

@@ -1,4 +1,5 @@
-samples
+=======
+Samples
 =======
 
 .. admonition:: Existing document

@@ -1,3 +1,4 @@
+===================
 Windows NT Eventlog
 ===================
 
@@ -16,7 +17,7 @@ If you need to scan the eventlog of many servers or do specific filtering based 
 The library of primary importance is win32evtlog. With it you can connect to a server's eventlog with the call.
 
 Example
--------
+=======
 
 Here is the basic call:
 

@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+======================================
 win32com.shell and Windows Shell Links
 ======================================
 
@@ -18,7 +19,7 @@ win32com.shell and Windows Shell Links
 Following is documentation for the PyIShellLink object.
 
 Example
--------
+=======
 
 To create a PyIShellLink object:
 

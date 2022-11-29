@@ -1,3 +1,4 @@
+=============================================
 Recursive directory deletes and special files
 =============================================
 
@@ -37,7 +38,7 @@ The only question is where do you get attrs. It is included in the ever handy wi
 The example below can be useful, but, of course, be careful with it, since it deletes a lot of stuff. It is a recursive function  The example also makes use of some handy functions from the os module.
 
 Example
--------
+=======
 
 Here is a basic example of how to remove a directory tree:
 

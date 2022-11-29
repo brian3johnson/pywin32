@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+====================
 Python, C++, and COM
 ====================
 
@@ -30,7 +31,7 @@ abstract base classes (an idea used for COM interfaces) look like in
 python and C++.
 
 Example
--------
+=======
 
 Abstract Base classes:
 

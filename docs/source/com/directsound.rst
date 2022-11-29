@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+====================
 DirectSound examples
 ====================
 
@@ -19,7 +20,7 @@ DirectSound examples
 
 
 Example
--------
+=======
 
 Our raison d'etre - playing sounds:
 

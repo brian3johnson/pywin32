@@ -1,5 +1,6 @@
-Extending Python (directory permisisions w/GetNamedSecurityInfo) 
-================================================================
+===============================================================
+Extending Python (directory permissions w/GetNamedSecurityInfo)
+===============================================================
 
 .. admonition:: Existing document
    
@@ -12,12 +13,12 @@ Extending Python (directory permisisions w/GetNamedSecurityInfo)
 Python has a good framework in place to extend it's capabilities with C or C++. Often this is done for reasons of performance or to give it capabilities that aren't present in it's standard libraries. For example, standard python does not provide a way to acquire file and directory permissions on windows. However, Microsoft's GetSecurityInfo/GetNamedSecurityInfo does and is accessible via C++. We'll look at how one can build a small module that uses GetNamedSecurityInfo to return to python permission information for a file or directory.
 
 Introduction
-------------
+============
 
 Extending python, though not nearly as simple as pure python, is reasonably straightforward. The most convenient method of doing this is to separate the extension into it's own module which would act like any other python module one uses. It is straightforward enough that one can limit the need to use C++ to narrow well-defined extensions and have python manage the rest. Extending python to use Microsoft's Security API is an excellent candidate for this. Of the four security functions that allow one to deal with security descriptors, we're going to look at GetNamedSecurityInfo. Specifically, python is going to be extended so it can get permissions from a filesystem.
 
 Extending Python
-----------------
+================
 
 There are several ways one can extend python. You can take a raw wrapping approach, SWIG http://www.swig.org/ or BPL (Boost Python Libraries) http://www.boost.org/libs/python/doc/index.html. This extension is simple enough that we're going to wrap the C++ w/out the help of SWIG of BPL. This won't be an extensive discussion about extending python, just enough to serve as a starting point to deciphering and making your own win32 extensions. The approach to wrap has a few standard todos. You need a to:
 
@@ -43,7 +44,7 @@ Finally, you need to initialize the module (which is what happens when the modul
 These steps should become clearer once you see all the details of an actual extension.
 
 GetNamedSecurityInfo
---------------------
+====================
 
 GetNamedSecurityInfo retrieves a security descriptor from a string that specifies the object. This works well for strings that contain filenames. A Security Descriptor contains the security information about an object. Of that information, we're primarily concerned with the DACL (discretionary access control list), which contains a list of things that are allowed to interact with the object(in our case the file or directory). Specifically, we will process the ACEs in the DACL, each of which contains the removal/addition of permissions and what SIDs they are assigned to. To get and process the DACL, you need to follow these steps:
 GetNamedSecurityInfo -- Get the DACL
@@ -53,7 +54,7 @@ LookupAccountSid-- gives you the domain and name for the SID
 The following code goes through those 4 steps in greater detail. Refer to Microsoft MSDN references http://msdn.microsoft.com/ for info about the various win32 calls made.
 
 Extending Python for Directory Permissions
-------------------------------------------
+==========================================
 
 To setup Visual Studio correctly for building an extension, it is easiest to use a program called compile.py http://starship.python.net/crew/da/compile which builds the project for you. The Extension creates a dictionary of user or group plus the access mask. To Python it will look like:
 import fileperm
@@ -65,7 +66,7 @@ print all_perms
 {'\\Everyone': 2032127L, 'Domain\\fred': 1179817L, 'BUILTIN\\Users': 1179817L}
 
 C code
-~~~~~~
+------
 
 .. code-block:: c
    :linenos:
@@ -180,7 +181,7 @@ C code
    }
 
 Python code
-~~~~~~~~~~~
+-----------
 
 One thing the extension doesn't do is process the access mask into human
 readable names. Python can easily do that as shown in the program below.
@@ -383,7 +384,7 @@ permission structure for the tree.
          end = time.clock()-init
 
 In Conclusion
--------------
+=============
 
 Extending python isn't as simple as writing python, but it greatly expands
 python's capabilities. There are many details not covered here like
@@ -391,7 +392,7 @@ reference counting, threading, and error handeling. The python website has docum
 Extending Python http://www.python.org/doc/current/ext/ext.html .
 
 Further Info
-------------
+============
 
 Microsoft MSDN references http://msdn.microsoft.com/
 Extending Python http://www.python.org/doc/current/ext/ext.html
@@ -400,7 +401,7 @@ SWIG http://www.swig.org/
 BPL (Boost Python Libraries) http://www.boost.org/libs/python/doc/index.html
 
 Author
-------
+======
 
 John Nielsen, jn@who.net 
 - Have a great time with programming with python!

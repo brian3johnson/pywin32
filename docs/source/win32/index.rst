@@ -1,3 +1,4 @@
+=========
 win32 API
 =========
 
@@ -7,16 +8,16 @@ win32 API
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-   process_info
-   security_directories
-   win32net
+   Getting process info <process_info>
+   Extending Python <security_directories>
+   win32net <win32net>
    event
-   event_threading
-   file
-   file_recursive
-   security
+   Eventlog & Threading <event_threading>
+   File Locking <file>
+   Directory Deleting <file_recursive>
+   Windows NT Security <security>
    samples/index
    apidoc/index
 

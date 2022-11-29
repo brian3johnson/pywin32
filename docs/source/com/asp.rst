@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+==============
 ASP and Python
 ==============
 
@@ -25,7 +26,7 @@ Microsoft typically positions vbscript in the IIS role. Vbscript is adequate for
 Another thing ASP allows you to do is to mix code and HTML. Thus, you need some way to tell the server that the following is code. Since python is not used by default, you need to set your page to use it. You can do that by having the first line say: <%@ LANGUAGE =Python%>. Then after that point, anything between '<%' and '%>' delimeters will run as python code. Everything else will be treated as HTML. It is important to note that a python loop ends in the python block -- they don't extend past intervening html to the next block. For me that normally isn't an issue, since I do not like mixing code and html. Prefering a clean split of code and html, I generally generate webpages using templates all in python w/HTMLgen. Take a look at: http://www.python.org/topics/web/HTML.html for available resources w/HTML. An very basic page would look like:
 
 Example
--------
+=======
 
 Basic Python ASP page:
 

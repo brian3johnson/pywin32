@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+====================
 The win32com package
 ====================
 
@@ -22,7 +23,7 @@ The COM support can be thought of as existing in 2 main portions - the C++ suppo
 The win32com support is stand-alone. It does not require Pythonwin.
 
 The win32com package
---------------------
+====================
 
 To facilitate an orderly framework, the Python "ni" module has been used, and the entire package is known as "win32com". As is normal for such packages, win32com itself does not provide any functionality. Some of the modules are described below:
 
@@ -40,7 +41,7 @@ win32com.mapi
    Utilities for working with MAPI and the Microsoft Exchange Server
 
 The pythoncom module
---------------------
+====================
 
 The pythoncom module is the underlying C++ support for all COM related objects. In general, Python programmers will not use this module directly, but use win32com helper classes and functions.
 

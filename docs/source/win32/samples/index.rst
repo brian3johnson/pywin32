@@ -1,4 +1,5 @@
-samples
+=======
+Samples
 =======
 
 .. toctree::

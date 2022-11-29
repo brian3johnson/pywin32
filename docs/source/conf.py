@@ -52,6 +52,7 @@ html_sidebars = {
 html_theme_options = {
     "logo_name": True,
     "description": "Python wrapper for the Windows API",
+    "fixed_sidebar": False,
     "github_user": "mhammond",
     "github_repo": "pywin32",
     "github_banner": False,

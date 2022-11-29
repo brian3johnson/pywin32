@@ -1,3 +1,4 @@
+====================================
 Windows NT Security -- Impersonation
 ====================================
 
@@ -14,7 +15,7 @@ Python's win32 access to help to simplify providing privileged access.
 There may be times when you want to give specific access to someone with NT. One mechanism to do this is with the win32 calls: LogonUser and ImpersonateLoggedOnUser. LogonUser gives you a handel which ImpersonateLoggedOnUser can then use to "become" the user. To do this the thread calling, LogonUser, needs SE_TCB_NAME, SE_CHANGE_NOTIFY_NAME, and SE_ASSIGNPRIMARYTOKEN_NAME privileges. If you plan to do this with something like IIS and cgi, be careful, the anonymous account IIS uses is already impersonated from the system account. You will need to use the RevertToSelf, api call to first terminate the impersonation. And, the system account, a local account, ultimately limits you, regardless of who you log in as (COM/MTS can provide an alternative security solution).
 
 Example
--------
+=======
 
 The c++ api call for Logonasuser looks like:
 

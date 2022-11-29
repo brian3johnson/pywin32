@@ -1,3 +1,4 @@
+================
 adodbapi package
 ================
 
@@ -10,7 +11,7 @@ adodbapi package
    :local:
 
 adodbapi
---------
+========
 
 .. automodule:: adodbapi
    :members:
@@ -18,7 +19,7 @@ adodbapi
    :show-inheritance:
 
 adodbapi.ado_consts
--------------------
+===================
 
 .. automodule:: adodbapi.ado_consts
    :members:
@@ -26,7 +27,7 @@ adodbapi.ado_consts
    :show-inheritance:
 
 adodbapi.adodbapi
------------------
+=================
 
 .. automodule:: adodbapi.adodbapi
    :members:
@@ -34,7 +35,7 @@ adodbapi.adodbapi
    :show-inheritance:
 
 adodbapi.apibase
-----------------
+================
 
 .. automodule:: adodbapi.apibase
    :members:
@@ -42,7 +43,7 @@ adodbapi.apibase
    :show-inheritance:
 
 adodbapi.is64bit
-----------------
+================
 
 .. automodule:: adodbapi.is64bit
    :members:
@@ -50,7 +51,7 @@ adodbapi.is64bit
    :show-inheritance:
 
 adodbapi.process_connect_string
--------------------------------
+===============================
 
 .. automodule:: adodbapi.process_connect_string
    :members:
@@ -58,7 +59,7 @@ adodbapi.process_connect_string
    :show-inheritance:
 
 adodbapi.schema_table
----------------------
+=====================
 
 .. automodule:: adodbapi.schema_table
    :members:

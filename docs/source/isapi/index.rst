@@ -1,3 +1,4 @@
+====================
 Python ISAPI support
 ====================
 
@@ -8,7 +9,7 @@ Python ISAPI support
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
    samples/index
    apidoc/index
@@ -28,7 +29,7 @@ Python ISAPI support
    :local:
 
 Introduction
-------------
+============
 
 This documents Python support for hosting ISAPI extensions and filters inside Microsoft Internet Information Server (IIS). It assumes a basic understanding of the ISAPI filter and extension mechanism.
 
@@ -44,19 +45,19 @@ Most of the work is done in the :py:meth:`HttpFilterProc <isapi.simple.SimpleFil
 In addition to these components, there is an :doc:`apidoc/isapi`, containing support facilities (base-classes, exceptions, etc.), which can be leveraged by the extension.
 
 Base classes
-^^^^^^^^^^^^
+------------
 
 There are a number of base classes provided to make writing extensions a little simpler. Of particular note is :py:class:`isapi.threaded_extension.ThreadPoolExtension`. This implements a thread-pool and informs IIS that the request is progressing in the background. Your sub-class need only provide a :py:meth:`Dispatch <isapi.threaded_extension.ThreadPoolExtension.Dispatch>` method, which is called on one of the worker threads rather than the thread that the request came in on.
 
 There is base-class for a filter in :any:`isapi.simple`, but there is no equivalent threaded filter - filters work under a different model, where background processing is not possible.
 
 Samples
-^^^^^^^
+-------
 
 Please see the isapi/samples directory for some sample filters and extensions.
 
 Implementation
---------------
+==============
 
 A Python ISAPI filter extension consists of 2 main components:
 
@@ -64,7 +65,7 @@ A Python ISAPI filter extension consists of 2 main components:
 * A Python script used by that DLL to implement the filter or extension functionality.
 
 Extension DLL
-^^^^^^^^^^^^^
+-------------
 
 The DLL is usually managed automatically by the :any:`isapi.install` module. As the Python script for the extension is installed, a generic DLL provided with the isapi package is installed next to the script, and IIS configured to use this DLL.
 
@@ -73,14 +74,14 @@ The name of the DLL always has the same base name as the Python script, but with
 The Python script may provide 2 entry points - methods named ``__FilterFactory__`` and ``__ExtensionFactory__``, both taking no arguments and returning a filter or extension object.
 
 Using py2exe and the isapi package
-----------------------------------
+==================================
 
 You can instruct py2exe to create a 'frozen' Python ISAPI filter/extension. In this case, py2exe will create a package with everything you need in one directory, and the Python source file embedded in the .zip file.
 
 In general, you will want to build a separate installation executable along with the ISAPI extension. This executable will be built from the same script. See the ISAPI sample in the py2exe distribution.
 
 From the README.txt
--------------------
+===================
 
 A Python ISAPI extension. Contributed by Phillip Frantz, and is Copyright 2002-2003 by Blackdog Software Pty Ltd.
 

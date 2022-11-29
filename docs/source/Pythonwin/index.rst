@@ -1,3 +1,4 @@
+================
 |logo| Pythonwin
 ================
 
@@ -11,21 +12,21 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-   debugger/index
-   guienvironment
+   Debugger <debugger/index>
+   GUI Environment <guienvironment>
    embeddingwin32ui
-   docview
-   architecture
-   contents
+   Documents and Views <docview>
+   Pythonwin Architecture <architecture>
+   The Editor <contents>
 
 .. contents::
    :depth: 1
    :local:
 
 Introduction 
-------------
+============
 
 There are a few known problems (and probably lots of unknown ones)!
 
@@ -54,12 +55,12 @@ There are a few known problems (and probably lots of unknown ones)!
 Recent changes can be found at the end of this document.
 
 Demos
------
+=====
 
 There are many demos in the :file:`pywin\\demos` directory. To see a list of all the demos, run the program :program:`pywin\\demos\\guidemo.py` from inside |Pythonwin|.
 
 Documentation
--------------
+=============
 
 .. todo::
    What is the role/directive for win32ui?
@@ -79,7 +80,7 @@ Below is a list of external |Pythonwin|-specific documentation.
 * Check out the demos and the source code to the |Pythonwin| environment.
 
 Known Problems
---------------
+==============
 
 * Some of the configuration options (eg, "Docking Windows") do not take affect until you restart |Pythonwin|.
 * Under Windows 9x, any attempt to use |Pythonwin| features from an MS-DOS prompt seems to cause immediate death. This means that you can not use the |Pythonwin| debugger for programs running under Python.exe on Windows 9x. You should still be able to use the debugger normally from inside |Pythonwin| itself.
@@ -87,7 +88,7 @@ Known Problems
 * Some of the menu items are always grey. This functionality is simply not yet implemented in |Pythonwin|.
 
 Recent Changes
---------------
+==============
 
 Fixed a lot of the interactive window formatting problems. |Pythonwin| now always prints output as it receives it - this should stop |Pythonwin| from looking like it has completely hung when in fact it is just waiting for some code to finish.
 

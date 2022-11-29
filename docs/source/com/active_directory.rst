@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+================
 Active Directory
 ================
 
@@ -19,7 +20,7 @@ Active Directory
 Active Directory combines all sorts of domain-wide information into one spot. Using Microsoft's COM LDAP provider, python has good access to Active Directory.
 
 Introduction
-------------
+============
 
 To access active directory, it is easiest to put some boilerplate code into a functions for future use. This will be done w/python's COM access to Active Directory. If you use python's ldap library, you can do similar stuff. Unfortunately, Microsoft switched directions w/exchange. You used to be able to access a lot of exchange functionality with ldap which no longer exists. Now, COM is needed. 
 Here is a list of the functions:
@@ -31,10 +32,10 @@ Here is a list of the functions:
 * Later we'll add information about managing users and computers. 
 
 Getting Active Directory Objects
---------------------------------
+================================
 
 Discovery
-~~~~~~~~~
+---------
 
 A tool that can be of a great help is ADSIedit which is in the Windows 2000 support tools on the Windows 2000 server cdrom. It gives you the raw ldap view of active directory.
 
@@ -78,7 +79,7 @@ A tool that can be of a great help is ADSIedit which is in the Windows 2000 supp
     print '\tExchange stores:',string.join(ex_stores,"',")
 
 Making the object
-~~~~~~~~~~~~~~~~~
+-----------------
 
 One such useful function is opends. Ultimately, you need some sort of "LDAP://" string. The opends function builds it for you, by going to a default container. It also automatically authenticates w/a specific account. If you just give the function an id like 'fred', it will wrap it with something like:
 
@@ -111,7 +112,7 @@ or to get the groups fred is a member of
       return ldap.OpenDSObject(loc,Ad.ldap_auth,Ad.pw,1)
 
 What does the object have?
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 Now that you can connection to objects, how do you determine what properties you can get from the object. The following function, ad_dict, converts the avilable properties of the object to a python dictionary, that is then easily inspected. To do so is a little tricky. It first determines what schema the object has and uses the schema, to grab mandatory and optional properties of the object. For any value that evaluates to true, it builds a dictionary. It also uses a conv_time fuction that deals with the way active directory saves time information and converts it to something compatible with python's time library.
 
@@ -170,7 +171,7 @@ A lot of things convert to automatic python data types. For others, you'll get s
     return attr_dict
 
 The time property
-~~~~~~~~~~~~~~~~~
+-----------------
 
 Time in active directory is stored in a 64 bit integer that keeps track of the number of 100-nanosecond intervals which have passed since January 1, 1601. The 64-bit value uses 2 32 bit parts to store the time. The following is a function that returns the time in the typical format the python time libraries use (seconds since 1970). Here's an example where you'd use it:
 
@@ -193,26 +194,26 @@ user.pwdLastSet returns a com object, not a python data type.
     return (((long(h)<< 32) + long(l))-d)/10000000
 
 Managing Users
---------------
+==============
 
 User Basics
-~~~~~~~~~~~
+-----------
 
 Adding Exchange Access
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 In Conclusion
--------------
+=============
 
 So far we've only covered the basics of using Active Directory. Stay tuned for more.
 
 Further Info
-------------
+============
 
 `Microsoft MSDN references <https://msdn.microsoft.com/>`_
 
 Author
-------
+======
 
 John Nielsen, jn@who.net
 

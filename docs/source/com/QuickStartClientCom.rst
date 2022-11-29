@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+=========================================
 Quick Start to Client side COM and Python
 =========================================
 
@@ -16,7 +17,7 @@ Quick Start to Client side COM and Python
    :local:
 
 Introduction
-------------
+============
 
 This documents how to quickly start using COM from Python. It is not a thorough discussion of the COM system, or of the concepts introduced by COM.
 
@@ -32,10 +33,10 @@ In this document we discuss the following topics:
 * Using COM Constants with makepy.
 
 Quick Start
------------
+===========
 
 To use a COM object from Python
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 .. code-blocK:: python
 
@@ -58,12 +59,12 @@ Example
 And we will see the word "Hello" appear in the top cell.
 
 How do I know which methods and properties are available?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------------------------
 
 Good question. This is hard! You need to use the documentation with the products, or possibly a COM browser. Note however that COM browsers typically rely on these objects registering themselves in certain ways, and many objects to not do this. You are just expected to know.
 
 The Python COM browser
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 PythonCOM comes with a basic COM browser that may show you the information you need. Note that this package requires Pythonwin (ie, the MFC GUI environment) to be installed for this to work.
 
@@ -72,7 +73,7 @@ There are far better COM browsers available - I tend to use the one that comes w
 To run the browser, simply select it from the Pythonwin Tools menu, or double-click on the file win32com\client\combrowse.py
 
 Static Dispatch (or Type Safe) objects
---------------------------------------
+======================================
 
 In the above examples, if we printed the 'repr(o)' object above, it would have resulted in:
 
@@ -95,17 +96,17 @@ or
 The win32com.client.gencache module manages these generated files. This module has some documentation of its own, but you probably don't need to know the gory details!
 
 How do I get at the generated module?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 You will notice that the generated file name is long and cryptic - obviously not designed for humans to work with! So how do you get at the module object for the generated code?
 
 Hopefully, the answer is you shouldn't need to. All generated file support is generally available directly via win32com.client.Dispatch and win32com.client.constants. But should you ever really need the Python module object, the win32com.client.gencache module has functions specifically for this. The functions GetModuleForCLSID and GetModuleForProgID both return Python module objects that you can use in your code. See the docstrings in the gencache code for more details.
 
 To generate Python Sources supporting a COM object
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------------
 
 Example using Microsoft Office 97
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Either:
 
@@ -126,7 +127,7 @@ And that is it! Nothing more needed. No special import statements needed! Now, y
 Note that now Python knows the explicit type of the object.
 
 Using COM Constants
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Makepy automatically installs all generated constants from a type library in an object called win32com.clients.constants. You do not need to do anything special to make these constants work, other than create the object itself (ie, in the example above, the constants relating to Word would automatically be available after the w=win32com.client.Dispatch("Word.Application") statement.
 

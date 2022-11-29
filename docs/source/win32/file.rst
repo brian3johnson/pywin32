@@ -1,3 +1,4 @@
+==========================
 Windows NT Files - Locking
 ==========================
 
@@ -50,7 +51,7 @@ The python call is virtually the same with:
 The module win32con in python is invaluable for setting most of these attributes. Besides win32con, you need win32security to create a security attribute.
 
 Example
--------
+=======
 
 Here is a basic example of the raw program:
 

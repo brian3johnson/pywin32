@@ -1,4 +1,5 @@
-api
+===
+API
 ===
 
 .. toctree::

@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+==================
 Python COM support
 ==================
 
@@ -15,22 +16,23 @@ Python COM support
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-   QuickStartClientCom
-   QuickStartServerCom
-   GeneratedSupport
-   variant
-   package
-   PythonCOM
-   misc
+   Client-side COM <QuickStartClientCom>
+   Server-side COM <QuickStartServerCom>
+   Generated COM <GeneratedSupport>
+   VARIANT <variant>
+   win32com <package>
+   Python & COM <PythonCOM>
+   Miscellany <misc>
    active_directory
-   adsi
+   ADSI & Exchange <adsi>
    asp
    cpp
    mts
-   shell
+   win32com.shell <shell>
    directsound
+
    samples/index
    apidoc/index
 

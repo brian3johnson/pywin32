@@ -1,18 +1,16 @@
-.. pywin32 documentation master file, created by
-   sphinx-quickstart on Fri Nov 25 22:38:37 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to pywin32's documentation!
-===================================
+========================
+pywin32's documentation!
+========================
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Contents:
+   :maxdepth: 2
+   :caption: Site-wide Content
+   :hidden:
+   :titlesonly:
 
-   isapi/index
-   adodbapi/index
-   com/index
+   ISAPI <isapi/index>
+   ADODBAPI <adodbapi/index>
+   COM <com/index>
    Pythonwin/index
    SWIG/index
    win32/index

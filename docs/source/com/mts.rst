@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+=====================
 MTS and Python for NT
 =====================
 
@@ -65,7 +66,7 @@ back. IsCallerInRole determines whether or not the client calling the object
 is in the role you created that has lists of users or groups.
 
 Example
--------
+=======
 
 In python you setup the ObjectContext object in the following manner:
 

@@ -1,11 +1,12 @@
+===========
 com package
 ===========
 
 Submodules
-----------
+==========
 
 Module contents
----------------
+===============
 
 ..
    .. autofunction:: com.win32com.dynamic.Dispatch

@@ -1,3 +1,4 @@
+===============================
 Python ADODBAPI quick reference
 ===============================
 
@@ -21,7 +22,7 @@ also find at
 (for users of CPython) are as follows: `pip3 install pywin32`.
 
 About ADO, ODBC, and Connection Strings
----------------------------------------
+=======================================
 
 Microsoft engineers invented ODBC as a standard way of connecting to a
 tabular data source, such as an SQL database server. It was such a good
@@ -58,7 +59,7 @@ which talks in ADO is called a "Provider". Sometimes there will be a
 Provider for a Driver.
 
 Driver (and Provider) download links:
--------------------------------------
+=====================================
 
 The current (as of 2019) SQL Server OLE DB provider (which they call a "driver" here) is <https://www.microsoft.com/en-us/download/details.aspx?id=56730> which is linked from, and explained [here, in their document.](https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017)
 
@@ -69,7 +70,7 @@ The current (as of 2019) SQL Server OLE DB provider (which they call a "driver" 
 * PostgreSQL driver <http://www.postgresql.org/ftp/odbc/versions/msi/> (scroll all the way to the bottom) or `choco install psqlodbc`.
 
 PEP-249
--------
+=======
 
 This "quick reference" assumes that you are already familiar with
 Python, SQL, and the general principles of accessing a database using
@@ -80,7 +81,7 @@ access api specification is found at:
 <http://www.python.org/dev/peps/pep-0249/>
 
 Module level attributes:
-------------------------
+========================
 
 The PEP requires several module level attributes. Older versions of
 adodbapi (which was once all one big file) defined a hundred or two. I
@@ -112,7 +113,7 @@ should be imported directly from their own sub-modules. My tests and
 examples all follow that rule.
 
 Connect (Use of the connect constructor)
-----------------------------------------
+========================================
 
 As required by the PEP, the simplest way to connect is to use a "data
 set name
@@ -208,7 +209,7 @@ constructor recognizes when building your connection. For example
 * autocommit=False \# initialize autocommit on the connection. (Default = False)
 
 Connection Keyword Macro Language:
-----------------------------------
+==================================
 
 It often happens, when building a connection string for a generic
 connection, that you need to know information about your host computer,
@@ -261,7 +262,7 @@ The result of the macro operation will be the value of the new key.
   conn_keys['connection_string'] = "\...stuff...; %(secure)s"
 
 Connection class
-----------------
+================
 
 A connection object holds an ADO connection in its .connector attribute.
 
@@ -327,7 +328,7 @@ Connection Attributes
 - .timeout # supply a value for CommandTimeout. Note: the "timeout" connection value is stored in this attribute, and is used as the connection timeout. It is then re-used as the command timeout. The user may overcome this rather goofy "feature" by supplying a different value to this attribute after the connection is made. The value is in seconds, and will be used for all subsequent SQL commands.
 
 the Cursor class
-----------------
+================
 
 Cursor attributes:
 
@@ -463,12 +464,12 @@ For example: cursor.executemany() is programmed internally like:
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
 PARAMSTYLEs
------------
+===========
 
 \-\-\-\-\-\-\-\-\-\-\--
 
 What???
--------
+=======
 
 .. note::
     
@@ -566,7 +567,7 @@ paramstyle. I don't invalidate the cache.)
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
 Row Class & Rows Class for returned data
-----------------------------------------
+========================================
 
 The PEP specifies that .fetchone() returns a "single sequence". It
 does not spell out what kind of a sequence. Originally, adodbapi
@@ -618,7 +619,8 @@ asks for it.
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
 variantConversions for the connection and the cursor
-----------------------------------------------------------------------------------
+====================================================
+
 Each Connection instance has an optional .variantConversions attribute.
 Usually it will not be present. If it is present, it will be used in
 preference to the module's variantConversions attribute. In order to avoid
@@ -686,7 +688,7 @@ To do this by column name, use:
         crsr.conversions[crsr.columnNames['mycolumn']] = myFunc
 
 The Examples folder:
---------------------
+====================
 
 Several small complete example programs are included:
 
@@ -732,7 +734,7 @@ If you use "table_name=?" it will print a list of the tables in the .mdb.
 "filename=xxx" lets you open a different.mdb.
 
 Running the tests
------------------
+=================
 
 The test folder contains a set of unittest programs. Setting them up can
 be a bit complex, because you need several database servers to do a

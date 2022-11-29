@@ -4,6 +4,7 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
+=======================
 win32com.client.VARIANT
 =======================
 
@@ -16,7 +17,7 @@ win32com.client.VARIANT
    :local:
 
 Introduction
-------------
+============
 
 win32com attempts to provide a seamless COM interface and hide many COM implementation details, including the use of COM VARIANT structures. This means that in most cases, you just call a COM object using normal Python objects as parameters and get back normal Python objects as results.
 
@@ -25,12 +26,12 @@ However, in some cases this doesn't work very well, particularly when using "dyn
 The win32com.client.VARIANT object is designed to overcome these problems.
 
 Drawbacks
----------
+=========
 
 The primary issue with this approach is that the programmer must learn more about COM VARIANTs than otherwise - they need to know concepts such as variants being byref, holding arrays, or that some may hold 32bit unsigned integers while others hold 64bit signed ints, and they need to understand this in the context of a single method call. In short, this is a relatively advanced feature. The good news though is that use of these objects should never cause your program to hard-crash - the worst you should expect are Python or COM exceptions being thrown.
 
 The VARIANT object
-------------------
+==================
 
 The VARIANT object lives in win32com.client. The constructor takes 2 parameters - the 'variant type' and the value. The 'variant type' is an integer and can be one or more of the pythoncom.VT_* values, possibly or'd together.
 
@@ -49,7 +50,7 @@ For example, to create a VARIANT object which defines a byref array of 32bit int
 This variable can then be used whereever a COM VARIANT is expected.
 
 Example usage with dynamic objects
-----------------------------------
+==================================
 
 For this example we will use the COM object used for win32com testing, PyCOMTest.PyCOMTest. This object defines a method which is defined in IDL as:
 
@@ -97,7 +98,7 @@ The following example explicitly creates a VARIANT object with a variant type of
    >>>
 
 Usage with generated objects
-----------------------------
+============================
 
 In most cases, objects with makepy support (ie, 'generated' objects) don't need to use the VARIANT object - the type information means win32com can guess the right thing to pass. However, in some cases the VARIANT object can still be useful. Imagine a poorly specified object with IDL like:
 

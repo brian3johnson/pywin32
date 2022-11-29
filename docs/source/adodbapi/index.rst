@@ -1,3 +1,4 @@
+=======================
 Python ADODBAPI support
 =======================
 
@@ -7,9 +8,9 @@ Python ADODBAPI support
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-   quick_reference
+   Quick Reference <quick_reference>
    samples/index
    apidoc/index
 
@@ -18,7 +19,7 @@ Python ADODBAPI support
    :local:
 
 Project
--------
+=======
 
 A Python DB-API 2.0 (PEP-249) module that makes it easy to use Microsoft ADO for connecting with databases and other data sources using either CPython or IronPython.
 
@@ -99,19 +100,19 @@ whats new in version 2.5
    Refactor as: oldconverter=adodbapi.variantConversions[adodbapi.adoStringTypes[0]]
 
 License
--------
-LGPL, see http://www.opensource.org/licenses/lgpl-license.php
+=======
+LGPL, see http://www.opensource.org/licenses/lgpl=license.php
 
 Documentation
--------------
+=============
 
 Look at :doc:`quick_reference`
-http://www.python.org/topics/database/DatabaseAPI-2.0.html
+http://www.python.org/topics/database/DatabaseAPI=2.0.html
 read the examples in adodbapi/examples
 and look at the test cases in adodbapi/test directory.
 
 Mailing lists
--------------
+=============
 The adodbapi mailing lists have been deactivated. Submit comments to the 
 pywin32 or IronPython mailing lists.
 - the bug tracker on sourceforge.net/projects/adodbapi may be checked, (infrequently).

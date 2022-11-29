@@ -1,3 +1,4 @@
+=======================================================
 Getting process info: Win32 and COM with python and C++
 =======================================================
 
@@ -14,7 +15,7 @@ Python is a rich scripting language offering a lot of the power of C++ while ret
 When working with an unfamiliar API, python is great for helping you understand how to solve the problem without getting in the way. Even if you have to supply a C++ COM object, it is often easier to first figure out the details with python and then compose the C++ solution. Python is very similar to C++ pseudo-code, so you can follow it as an outline for the C++. In this case, we're going to talk about how to use both python and C++ to expose a list of processes and their corresponding ids with a COM object.
 
 Introduction
-------------
+============
 
 To get process information for both NT and W2K (but not the 9x family) you can use the Performance Data Helper library(PDH) available in the SDK at microsoft's ftp site. It provides a convenient interface to performance information stored fundamentally in the registry. The basic process of using the PDH encompasses the following:
 
@@ -37,7 +38,7 @@ The specific set of API called are the following:
 We'll cover these points now in more depth.
 
 Getting the process list: PdhEnumObjectItems
---------------------------------------------
+============================================
 
 The MSDN describes the call as the following:
 
@@ -168,7 +169,7 @@ The C++ call though essentially the same in spirit is much more involved. To hel
    }
 
 Getting the process ids: Several Pdh Calls
-------------------------------------------
+==========================================
 
 A whole sequence of calls are necessary once you get the process list. To refresh your memory, you need:
 
@@ -205,7 +206,7 @@ Again, the C++ code is more involved and makes use of Standand C++, vector, map,
    HRESULT getprocid (map<string,int>& m_inst, vector<string> &v_ids) { USES_CONVERSION; PDH_STATUS status = 0; HQUERY hQuery = NULL; HCOUNTER hCounter = NULL; DWORD dwType = 0; map<string,int> m_idinst; std::string objname="Process"; std::string counter="ID Process"; char *buffer;int junk,junk2; // initialize the query handle map < string, int>::iterator iter; for (iter=m_inst.begin();iter != m_inst.end();++iter) { for (int i=0;i<= iter->second;++i) { status = PdhOpenQuery( NULL, 0, &hQuery ); if ( status != ERROR_SUCCESS ) return status; TCHAR szCounterPath[2048]; DWORD dwPathSize = 2048; PDH_COUNTER_PATH_ELEMENTS pdh_elm; pdh_elm.szMachineName = NULL; pdh_elm.szObjectName = A2T(objname.c_str()); pdh_elm.szInstanceName = A2T(iter->first.c_str()); pdh_elm.szParentInstance = NULL; pdh_elm.dwInstanceIndex = i; pdh_elm.szCounterName = A2T(counter.c_str()); status = PdhMakeCounterPath( &pdh_elm, szCounterPath, &dwPathSize, 0 ); if ( status != ERROR_SUCCESS ) { return E_FAIL; } // Add the counter to the query //PdhAddCounter converts each counter path into a counter handle status = PdhAddCounter( hQuery, szCounterPath, 0, &hCounter ); if ( status != ERROR_SUCCESS ) { return E_FAIL; } //PdhCollectQueryData gets raw data for the counters status = PdhCollectQueryData(hQuery); if ( status != ERROR_SUCCESS ) { return E_FAIL; } //PdhGetFormattedCounterValue formats counter values for display DWORD dwFormat = PDH_FMT_DOUBLE; PDH_FMT_COUNTERVALUE fmtValue; status = PdhGetFormattedCounterValue (hCounter, dwFormat, (LPDWORD)NULL, &fmtValue); if (status == ERROR_SUCCESS) { buffer=_fcvt( fmtValue.doubleValue, 0, &junk,&junk2 ); string id=buffer; v_ids.push_back(iter->first+'\t'+id); } } status = PdhCloseQuery (hQuery); //PdhCloseQuery closes the query handle and it's counters } return S_OK; }
 
 The COM client
---------------
+==============
 
 The Python COM client which will call the C++ COM object and Python COM object does the following:
 
@@ -217,7 +218,7 @@ The Python COM client which will call the C++ COM object and Python COM object d
 As far as it is concerned, there is no difference between the 2 objects. Both returns a list of processes and their respective id's seperated by tab.
 
 Making the COM objects
-----------------------
+======================
 
 From a 1000 mile perspective, ATL C++ and python offer a class based COM object approach. In both approaches, the methods of the com object are simply methods of a class. However, creating a COM object in python is much easier than C++, again allowing you to focus on the problem first while still retaining the C++ feel.
 
@@ -235,7 +236,7 @@ Secondly: arrays. Since we are returning a list of processes and their ids, to b
 Now for some code:
 
 The Python COM object
----------------------
+=====================
 
 The Python COM object has 2 methods proclist and procids. Proclist is trivial, simply returning the list of processes from EnumObjectItems. Procids calls proclist, constructs a dictionary to count the number of processes with the same name, and then makes the necessary calls to their their ids. Each function simple returns the python list (which is then converted for you). If you later decide to only return a single string, simple change what you return, and python again will convert for you. Each method also uses the very cool function COMException which returns errors back to the client. In addition to the methods, there are 4 basic attributes, I set to define the COM object and a line to register it.
 
@@ -245,7 +246,7 @@ The Python COM object has 2 methods proclist and procids. Proclist is trivial, s
    import win32pdh, string, win32api from win32com.server.exception import COMException import win32com.server.util import win32com.client.dynamic #to generate guids use: #import pythoncom #print pythoncom.CreateGuid() class pyperf: # COM attributes. _reg_clsid_ = '{763AE791-1D6B-11D4-A38B-00902798B22B}' #guid for your class in registry _reg_desc_ = "get process list and ids" _reg_progid_ = "PyPerf.process" #The progid for this class _public_methods_ = ['procids','proclist' ] #names of callable methods def __init__(self): self.object='process' self.item='ID Process' def proclist(self): try: junk, instances = win32pdh.EnumObjectItems(None,None,self.object, win32pdh.PERF_DETAIL_WIZARD) return instances except: raise COMException("Problem getting process list") def procids(self): #each instance is a process, you can have multiple processes w/same name instances=self.proclist() proc_ids=[] proc_dict={} for instance in instances: if proc_dict.has_key(instance): proc_dict[instance] = proc_dict[instance] + 1 else: proc_dict[instance]=0 for instance, max_instances in proc_dict.items(): for inum in xrange(max_instances+1): try: hq = win32pdh.OpenQuery() # initializes the query handle path = win32pdh.MakeCounterPath( (None,self.object,instance, None, inum, self.item) ) counter_handle=win32pdh.AddCounter(hq, path) #convert counter path to counter handle win32pdh.CollectQueryData(hq) #collects data for the counter type, val = win32pdh.GetFormattedCounterValue(counter_handle, win32pdh.PDH_FMT_LONG) proc_ids.append(instance+'\t'+str(val)) win32pdh.CloseQuery(hq) except: raise COMException("Problem getting process id") proc_ids.sort() return proc_ids if __name__=='__main__': import win32com.server.register win32com.server.register.UseCommandLine(pyperf)
 
 The C++ COM object
-------------------
+==================
 
 As you notice from the idl, C++ COM object also exposes 2 methods, proclist and procids. Proclist calls the getinst function returns returns a map of processes, converts that to a vector of strings, and the calls make_safe to convert that to a Safe array of Variants. Procids does much the same except that after calling getinst, it then calls getprocid, which returns a vector of strings containing the processes and their ids. The vector of strings is then converted to a SafeArray with make_safe. Unlike python, you don't actually return the SafeArray(since every COM method has to return an HRESULT). Instead, you store the values in a Variant pointer.
 
@@ -537,19 +538,19 @@ Here is the source for the cpp file:
    }
 
 In Conclusion
--------------
+=============
 
 That was a quick tour of Python and C++ in the win32 and COM world. Both languages have their strengths and weaknesses. With C++ you have ultimate granularity and power. It obviously comes at a cost of more details to keep track of. Python's strength is rich productivity. It is fast to write the win32 and COM sever code, yet still have a sophisticated language at your disposal. You lose some of the flexibility of C++, which often does not matter. And, when it does, python can help you understand how to solve the problem, before wading into the details.
 
 Further Info
-------------
+============
 
 Pdh stuff found at ftp://ftp.microsoft.com in something similar to /developr/platformsdk/april2000/x86/redist/pdh
 Mirosoft MSDN references at http://msdn.microsoft.com
 Relevant Pdh Python libraries: win32pdh.py, win32pdhutil.py
 
 Author
-------
+======
 
 John Nielsen, jn@who.net 
 - Have a great time with programming with python!
