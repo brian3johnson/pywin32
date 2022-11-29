@@ -1,6 +1,6 @@
-=========
-win32 API
-=========
+================
+Win32 Extensions
+================
 
 .. admonition:: Existing document
    

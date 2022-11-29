@@ -1,6 +1,6 @@
-====================
-Python ISAPI support
-====================
+=====
+ISAPI
+=====
 
 .. admonition:: Existing document
    

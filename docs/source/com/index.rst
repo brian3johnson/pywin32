@@ -4,9 +4,9 @@
    image:: image/pycom_blowing.gif
    :alt: Python and COM, Blowing the rest away
 
-==================
-Python COM support
-==================
+=========
+PythonCOM
+=========
 
 .. admonition:: Existing document
    

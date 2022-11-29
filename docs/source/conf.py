@@ -27,9 +27,21 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 rst_prolog = """
+.. |pywin32| replace:: **Python for Windows Extensions**
 .. |Pythonwin| replace:: :program:`Pythonwin`
 .. |Scintilla| replace:: :program:`Scintilla`
 .. _Scintilla: http://www.scintilla.org/
+.. _Win32 API: https://learn.microsoft.com/en-us/windows/win32/
+.. |isapi| replace:: :abbr:`ISAPI (Internet Server Application Programming Interface)`
+.. _isapi_filters: https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525103(v=vs.90)
+.. _isapi_extensions: https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525282(v=vs.90)
+.. |adodbapi| replace:: ADO DB-API
+.. |ado| replace:: :abbr:`ADO (ActiveX Data Objects)`
+.. _Microsoft ActiveX Data Objects (ADO): https://learn.microsoft.com/en-us/sql/ado/
+.. |com| replace:: :abbr:`COM (Component Object Model)`
+.. _Component Object Model (COM): https://learn.microsoft.com/en-us/windows/win32/com/
+.. |iis| replace:: :abbr:`IIS (Internet Information Services)`
+.. _Microsoft Internet Information Services (IIS): https://learn.microsoft.com/en-us/iis/
 """
 
 # -- Options for HTML output -------------------------------------------------

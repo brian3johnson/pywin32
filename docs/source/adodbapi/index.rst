@@ -1,6 +1,6 @@
-=======================
-Python ADODBAPI support
-=======================
+==========
+|adodbapi|
+==========
 
 .. admonition:: Existing document
    
