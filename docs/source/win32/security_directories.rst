@@ -10,6 +10,8 @@ Extending Python (directory permissions w/GetNamedSecurityInfo)
    :depth: 1
    :local:
 
+.. sectionauthor:: John Nielsen <jn@who.net>
+
 Python has a good framework in place to extend it's capabilities with C or C++. Often this is done for reasons of performance or to give it capabilities that aren't present in it's standard libraries. For example, standard python does not provide a way to acquire file and directory permissions on windows. However, Microsoft's GetSecurityInfo/GetNamedSecurityInfo does and is accessible via C++. We'll look at how one can build a small module that uses GetNamedSecurityInfo to return to python permission information for a file or directory.
 
 Introduction
@@ -391,6 +393,8 @@ python's capabilities. There are many details not covered here like
 reference counting, threading, and error handeling. The python website has documentation about
 Extending Python http://www.python.org/doc/current/ext/ext.html .
 
+*Have a great time with programming with python!*
+
 Further Info
 ============
 
@@ -399,9 +403,3 @@ Extending Python http://www.python.org/doc/current/ext/ext.html
 compile.py http://starship.python.net/crew/da/compile
 SWIG http://www.swig.org/
 BPL (Boost Python Libraries) http://www.boost.org/libs/python/doc/index.html
-
-Author
-======
-
-John Nielsen, jn@who.net 
-- Have a great time with programming with python!

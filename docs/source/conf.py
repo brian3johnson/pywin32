@@ -26,12 +26,14 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.todo"]
 templates_path = ["_templates"]
 exclude_patterns = []
 
+show_authors = True
+
 rst_prolog = """
-.. |pywin32| replace:: **Python for Windows Extensions**
+.. |pywin32| replace:: **pywin32**
 .. |Pythonwin| replace:: :program:`Pythonwin`
 .. |Scintilla| replace:: :program:`Scintilla`
 .. _Scintilla: http://www.scintilla.org/
-.. _Win32 API: https://learn.microsoft.com/en-us/windows/win32/
+.. _Windows API: https://learn.microsoft.com/en-us/windows/win32/
 .. |isapi| replace:: :abbr:`ISAPI (Internet Server Application Programming Interface)`
 .. _isapi_filters: https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525103(v=vs.90)
 .. _isapi_extensions: https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525282(v=vs.90)
@@ -63,7 +65,7 @@ html_sidebars = {
 
 html_theme_options = {
     "logo_name": True,
-    "description": "Python wrapper for the Windows API",
+    "description": "Python for Windows Extensions",
     "fixed_sidebar": False,
     "github_user": "mhammond",
     "github_repo": "pywin32",

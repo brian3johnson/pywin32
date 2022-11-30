@@ -4,24 +4,25 @@ Python for Windows Extensions
 
 .. toctree::
    :maxdepth: 2
-   :caption: Site-wide Content
    :hidden:
    :titlesonly:
 
+   installation
    win32/index
    com/index
    adodbapi/index
    isapi/index
    Pythonwin/index
    SWIG/index
+   support
    resources
 
-|pywin32| (:dfn:`pywin32`) enables developers to work with most of Microsoft's Windows API and |com| interfaces in Python.
+**Python for Windows Extensions** (|pywin32|) enables developers to work with most of Microsoft's `Windows API`_ and `Component Object Model (COM)`_ interfaces in Python.
 
 Win32 Extensions
 ================
 
-The :doc:`win32/index` package provides access to the `Win32 API`_, including modules for obdc, win32evtlog, win32file, and many others. 
+The :doc:`win32/index` package provides access to the `Windows API`_, including modules for obdc, win32evtlog, win32file, and many others. 
 
 PythonCOM
 =========
@@ -31,7 +32,7 @@ Use the :doc:`com/index` package to interface with `Component Object Model (COM)
 |adodbapi|
 ==========
 
-The Python DB-API 2.0 (:pep:`249`) module, :doc:`adodbapi/index`, makes it easy to use `Microsoft ActiveX Data Objects (ADO)`_ for connecting with databases and other data sources using either CPython or IronPython.
+The Python DB-API 2.0-compliant (:pep:`249`) module, :doc:`adodbapi/index`, makes it easy to use `Microsoft ActiveX Data Objects (ADO)`_ for connecting with databases and other data sources using either `CPython <https://www.python.org/>`_ or `IronPython <https://ironpython.net/>`_.
 
 ISAPI
 =====

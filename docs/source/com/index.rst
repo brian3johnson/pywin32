@@ -15,7 +15,7 @@ PythonCOM
    * :file:`\\com\\readme.html`
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :hidden:
 
    Client-side COM <QuickStartClientCom>

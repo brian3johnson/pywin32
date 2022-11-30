@@ -10,6 +10,8 @@ Getting process info: Win32 and COM with python and C++
    :depth: 1
    :local:
 
+.. sectionauthor:: John Nielsen <jn@who.net>
+
 Python is a rich scripting language offering a lot of the power of C++ while retaining the ease of use of VBscript. With it's simplified C++ style, win32 access, and ability to make COM servers, it's a natural rapid development environment for the developer.
 
 When working with an unfamiliar API, python is great for helping you understand how to solve the problem without getting in the way. Even if you have to supply a C++ COM object, it is often easier to first figure out the details with python and then compose the C++ solution. Python is very similar to C++ pseudo-code, so you can follow it as an outline for the C++. In this case, we're going to talk about how to use both python and C++ to expose a list of processes and their corresponding ids with a COM object.
@@ -542,15 +544,11 @@ In Conclusion
 
 That was a quick tour of Python and C++ in the win32 and COM world. Both languages have their strengths and weaknesses. With C++ you have ultimate granularity and power. It obviously comes at a cost of more details to keep track of. Python's strength is rich productivity. It is fast to write the win32 and COM sever code, yet still have a sophisticated language at your disposal. You lose some of the flexibility of C++, which often does not matter. And, when it does, python can help you understand how to solve the problem, before wading into the details.
 
+*Have a great time with programming with python!*
+
 Further Info
 ============
 
 Pdh stuff found at ftp://ftp.microsoft.com in something similar to /developr/platformsdk/april2000/x86/redist/pdh
 Mirosoft MSDN references at http://msdn.microsoft.com
 Relevant Pdh Python libraries: win32pdh.py, win32pdhutil.py
-
-Author
-======
-
-John Nielsen, jn@who.net 
-- Have a great time with programming with python!

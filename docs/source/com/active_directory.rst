@@ -16,6 +16,7 @@ Active Directory
    :depth: 1
    :local:
 
+.. sectionauthor:: John Nielsen <jn@who.net>
 
 Active Directory combines all sorts of domain-wide information into one spot. Using Microsoft's COM LDAP provider, python has good access to Active Directory.
 
@@ -207,14 +208,9 @@ In Conclusion
 
 So far we've only covered the basics of using Active Directory. Stay tuned for more.
 
+*Have a great time with programming with python!*
+
 Further Info
 ============
 
 `Microsoft MSDN references <https://msdn.microsoft.com/>`_
-
-Author
-======
-
-John Nielsen, jn@who.net
-
-- Have a great time with programming with python!

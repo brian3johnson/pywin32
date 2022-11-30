@@ -16,6 +16,8 @@ ADSI, Exchange, and Python
    :depth: 1
    :local:
 
+.. sectionauthor:: John Nielsen <jn@who.net>
+
 Python's adsi access works really well with Exchange (late or early binding since you can read microsoft's type library). To get started, you will need to download adsi from microsoft: `Microsoft ADSI`_. Microsoft has documentation for using languages other than python in the sdk.
 
 Introduction
@@ -141,6 +143,8 @@ In Conclusion
 
 Microsoft's ADSI allows one to manage exchange w/out having to resort to the lower-level APIs. Python has no trouble accessing Microsoft's ADSI to help simplify user management.
 
+*Have a great time with programming with python!*
+
 Further Info
 ============
 
@@ -153,10 +157,3 @@ Further Info
 Relevant Python libraries: :code:`win32com.client`
 
 .. _Microsoft ADSI: https://www.microsoft.com/windows/server/Technical/directory/adsilinks.asp
-
-Author
-======
-
-John Nielsen, jn@who.net
-
-- Have a great time with programming with python!

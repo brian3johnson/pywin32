@@ -10,6 +10,8 @@ Windows Network Management: win32net
    :depth: 1
    :local:
 
+.. sectionauthor:: John Nielsen <jn@who.net>
+
 Python's win32 access to Network Management functions are very clean and simple. It exposes to python what normally is available to C++. There are several examples of this:
 
 * NetWkstaUserEnum/NetUserEnum -- Enumerate users on a machine or in a domain
@@ -138,14 +140,10 @@ In Conclusion
 
 Python's win32net library module offers most of the Windows NT Networking API from Python. Several examples are touched upon to show the simple access python gives one to the underlying api.
 
+*Have a great time with programming with python!*
+
 Further Info
 ============
 
 Microsoft MSDN references http://msdn.microsoft.com/
 Relevant Python libraries: win32net and win32netcon
-
-Author
-======
-
-John Nielsen, jn@who.net
-- Have a great time with programming with python!
