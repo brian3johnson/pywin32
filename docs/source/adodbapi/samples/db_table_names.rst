@@ -1,6 +1,12 @@
-========================
-db_table_names.py Sample
-========================
+=================
+db_table_names.py
+=================
+
+------
+Sample
+------
+
+Opens the same database & prints out a list of the tables in it.
 
 .. note::
 
