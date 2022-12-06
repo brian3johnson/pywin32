@@ -8,6 +8,7 @@ Python for Windows Extensions
    :titlesonly:
 
    installation
+   gettingstarted
    win32/index
    com/index
    adodbapi/index
