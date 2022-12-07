@@ -54,7 +54,7 @@ This "quick reference" assumes that you are already familiar with Python, SQL, a
 Module level attributes
 =======================
 
-The PEP requires several module level attributes. Older versions of adodbapi (which was once all one big file) defined a hundred or two. I hate that, but cannot break old code, so I decided to fix the problem for Python 3. If using Python3 the programmer must take the time to pick up the symbols she needs from :code:`apibase` and :code:`ado_consts`.
+The PEP requires several module level attributes. Older versions of adodbapi (which was once all one big file) defined a hundred or two. I hate that, but cannot break old code, so I decided to fix the problem for Python 3. If using Python3 the programmer must take the time to pick up the symbols she needs from :mod:`adodbapi.apibase` and :mod:`adodbapi.ado_consts`.
 
 Part of the adodbapi package's :file:`__init__.py` looks something like this:
 
@@ -203,11 +203,11 @@ The result of the macro operation will be the value of the new key.
 Connection class
 ================
 
-A :code:`connection` object holds an ADO connection in its :code:`.connector`` attribute.
+A :class:`.Connection` object holds an ADO connection in its :code:`.connector` attribute.
 
-A :code:`connection` object is usually created using the standard api constructor.
+A :class:`.Connection` object is usually created using the standard api constructor.
 
-Internally, it creates an empty :code:`connection` object, fills in the attributes needed, and then call its :code:`.connect()` method (which calls the ADO :code:`Open` method).
+Internally, it creates an empty :class:`.Connection` object, fills in the attributes needed, and then call its :meth:`.connect()` method (which calls the ADO :code:`Open` method).
 
 Connection Methods:
 
@@ -289,7 +289,7 @@ Cursor attributes (standard extensions):
 
 * :code:`.messages[]` # (see :pep:`249`)
 
-* :pep:`249`.arraysize` (=:code:`1`) # the default number of rows to fetch in :code:`fetchmany()`
+* :code:`.arraysize` (=:code:`1`) # the default number of rows to fetch in :code:`fetchmany()`
 
 Cursor attributes (non-standard):
 
