@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>API &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="adodbapi package" href="adodbapi.html" />
+    <link rel="prev" title="db_print.py" href="../samples/db_print.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="adodbapi.html">adodbapi package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#module-adodbapi">adodbapi</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.Binary"><code class="docutils literal notranslate"><span class="pre">Binary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.Date"><code class="docutils literal notranslate"><span class="pre">Date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.DateFromTicks"><code class="docutils literal notranslate"><span class="pre">DateFromTicks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.Time"><code class="docutils literal notranslate"><span class="pre">Time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.TimeFromTicks"><code class="docutils literal notranslate"><span class="pre">TimeFromTicks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.Timestamp"><code class="docutils literal notranslate"><span class="pre">Timestamp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.TimestampFromTicks"><code class="docutils literal notranslate"><span class="pre">TimestampFromTicks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#module-adodbapi.ado_consts">adodbapi.ado_consts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.ado_consts.ado_direction_name"><code class="docutils literal notranslate"><span class="pre">ado_direction_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.ado_consts.ado_type_name"><code class="docutils literal notranslate"><span class="pre">ado_type_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#adodbapi-connection">adodbapi.Connection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#connection-methods">Connection methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.close"><code class="docutils literal notranslate"><span class="pre">Connection.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.commit"><code class="docutils literal notranslate"><span class="pre">Connection.commit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection._rollback"><code class="docutils literal notranslate"><span class="pre">Connection._rollback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.cursor"><code class="docutils literal notranslate"><span class="pre">Connection.cursor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#connection-methods-non-standard">Connection methods (non-standard)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.__enter__"><code class="docutils literal notranslate"><span class="pre">Connection.__enter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.__exit__"><code class="docutils literal notranslate"><span class="pre">Connection.__exit__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.get_table_names"><code class="docutils literal notranslate"><span class="pre">Connection.get_table_names()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#connection-attributes">Connection attributes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.dbapi"><code class="docutils literal notranslate"><span class="pre">Connection.dbapi</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.errorhandler"><code class="docutils literal notranslate"><span class="pre">Connection.errorhandler</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.connector"><code class="docutils literal notranslate"><span class="pre">Connection.connector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.paramstyle"><code class="docutils literal notranslate"><span class="pre">Connection.paramstyle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.connection_string"><code class="docutils literal notranslate"><span class="pre">Connection.connection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.dbms_name"><code class="docutils literal notranslate"><span class="pre">Connection.dbms_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.dbms_version"><code class="docutils literal notranslate"><span class="pre">Connection.dbms_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Connection.supportsTransactions"><code class="docutils literal notranslate"><span class="pre">Connection.supportsTransactions</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#adodbapi-cursor">adodbapi.Cursor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor"><code class="docutils literal notranslate"><span class="pre">Cursor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#attributes">Attributes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor._description"><code class="docutils literal notranslate"><span class="pre">Cursor._description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.rowcount"><code class="docutils literal notranslate"><span class="pre">Cursor.rowcount</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#attributes-standard-extensions">Attributes (standard extensions)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.connection"><code class="docutils literal notranslate"><span class="pre">Cursor.connection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.errorhandler"><code class="docutils literal notranslate"><span class="pre">Cursor.errorhandler</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.messages"><code class="docutils literal notranslate"><span class="pre">Cursor.messages</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.arraysize"><code class="docutils literal notranslate"><span class="pre">Cursor.arraysize</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#attributes-non-standard">Attributes (non-standard)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.paramstyle"><code class="docutils literal notranslate"><span class="pre">Cursor.paramstyle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.rs"><code class="docutils literal notranslate"><span class="pre">Cursor.rs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.converters"><code class="docutils literal notranslate"><span class="pre">Cursor.converters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.columnNames"><code class="docutils literal notranslate"><span class="pre">Cursor.columnNames</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.numberOfColumns"><code class="docutils literal notranslate"><span class="pre">Cursor.numberOfColumns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.command"><code class="docutils literal notranslate"><span class="pre">Cursor.command</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.query"><code class="docutils literal notranslate"><span class="pre">Cursor.query</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#methods-standard">Methods (standard)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.callproc"><code class="docutils literal notranslate"><span class="pre">Cursor.callproc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.close"><code class="docutils literal notranslate"><span class="pre">Cursor.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.execute"><code class="docutils literal notranslate"><span class="pre">Cursor.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.operation"><code class="docutils literal notranslate"><span class="pre">Cursor.operation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.parameters"><code class="docutils literal notranslate"><span class="pre">parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.executemany"><code class="docutils literal notranslate"><span class="pre">Cursor.executemany()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.fetchone"><code class="docutils literal notranslate"><span class="pre">Cursor.fetchone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.fetchmany"><code class="docutils literal notranslate"><span class="pre">Cursor.fetchmany()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.fetchall"><code class="docutils literal notranslate"><span class="pre">Cursor.fetchall()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.nextset"><code class="docutils literal notranslate"><span class="pre">Cursor.nextset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.setinputsizes"><code class="docutils literal notranslate"><span class="pre">Cursor.setinputsizes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.setoutputsize"><code class="docutils literal notranslate"><span class="pre">Cursor.setoutputsize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#methods-extensions">Methods (extensions)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.prepare"><code class="docutils literal notranslate"><span class="pre">Cursor.prepare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.get_returned_parameters"><code class="docutils literal notranslate"><span class="pre">Cursor.get_returned_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.__next__"><code class="docutils literal notranslate"><span class="pre">Cursor.__next__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.__iter__"><code class="docutils literal notranslate"><span class="pre">Cursor.__iter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.__enter__"><code class="docutils literal notranslate"><span class="pre">Cursor.__enter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.Cursor.__exit__"><code class="docutils literal notranslate"><span class="pre">Cursor.__exit__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#connect">connect</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.connect"><code class="docutils literal notranslate"><span class="pre">connect()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#module-adodbapi.apibase">adodbapi.apibase</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.BINARY"><code class="docutils literal notranslate"><span class="pre">BINARY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.DATETIME"><code class="docutils literal notranslate"><span class="pre">DATETIME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.DBAPITypeObject"><code class="docutils literal notranslate"><span class="pre">DBAPITypeObject</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.DataError"><code class="docutils literal notranslate"><span class="pre">DataError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.DatabaseError"><code class="docutils literal notranslate"><span class="pre">DatabaseError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.Error"><code class="docutils literal notranslate"><span class="pre">Error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.FetchFailedError"><code class="docutils literal notranslate"><span class="pre">FetchFailedError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.IntegrityError"><code class="docutils literal notranslate"><span class="pre">IntegrityError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.InterfaceError"><code class="docutils literal notranslate"><span class="pre">InterfaceError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.InternalError"><code class="docutils literal notranslate"><span class="pre">InternalError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.MultiMap"><code class="docutils literal notranslate"><span class="pre">MultiMap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.NUMBER"><code class="docutils literal notranslate"><span class="pre">NUMBER</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.NotSupportedError"><code class="docutils literal notranslate"><span class="pre">NotSupportedError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.OperationalError"><code class="docutils literal notranslate"><span class="pre">OperationalError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.ProgrammingError"><code class="docutils literal notranslate"><span class="pre">ProgrammingError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.SQLrow"><code class="docutils literal notranslate"><span class="pre">SQLrow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.SQLrows"><code class="docutils literal notranslate"><span class="pre">SQLrows</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.STRING"><code class="docutils literal notranslate"><span class="pre">STRING</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter"><code class="docutils literal notranslate"><span class="pre">TimeConverter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter.COMDate"><code class="docutils literal notranslate"><span class="pre">TimeConverter.COMDate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter.ComDateFromTuple"><code class="docutils literal notranslate"><span class="pre">TimeConverter.ComDateFromTuple()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter.Date"><code class="docutils literal notranslate"><span class="pre">TimeConverter.Date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter.DateObjectFromCOMDate"><code class="docutils literal notranslate"><span class="pre">TimeConverter.DateObjectFromCOMDate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter.DateObjectToIsoFormatString"><code class="docutils literal notranslate"><span class="pre">TimeConverter.DateObjectToIsoFormatString()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter.Time"><code class="docutils literal notranslate"><span class="pre">TimeConverter.Time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.TimeConverter.Timestamp"><code class="docutils literal notranslate"><span class="pre">TimeConverter.Timestamp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.Warning"><code class="docutils literal notranslate"><span class="pre">Warning</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.changeFormatToQmark"><code class="docutils literal notranslate"><span class="pre">changeFormatToQmark()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.changeNamedToQmark"><code class="docutils literal notranslate"><span class="pre">changeNamedToQmark()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.convert_to_python"><code class="docutils literal notranslate"><span class="pre">convert_to_python()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtBuffer"><code class="docutils literal notranslate"><span class="pre">cvtBuffer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtDecimal"><code class="docutils literal notranslate"><span class="pre">cvtDecimal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtFloat"><code class="docutils literal notranslate"><span class="pre">cvtFloat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtInt"><code class="docutils literal notranslate"><span class="pre">cvtInt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtLong"><code class="docutils literal notranslate"><span class="pre">cvtLong()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtNumeric"><code class="docutils literal notranslate"><span class="pre">cvtNumeric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtString"><code class="docutils literal notranslate"><span class="pre">cvtString()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtUnicode"><code class="docutils literal notranslate"><span class="pre">cvtUnicode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.cvtUnusual"><code class="docutils literal notranslate"><span class="pre">cvtUnusual()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.mxDateTimeConverter"><code class="docutils literal notranslate"><span class="pre">mxDateTimeConverter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pyTypeToADOType"><code class="docutils literal notranslate"><span class="pre">pyTypeToADOType()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonDateTimeConverter"><code class="docutils literal notranslate"><span class="pre">pythonDateTimeConverter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonDateTimeConverter.Date"><code class="docutils literal notranslate"><span class="pre">pythonDateTimeConverter.Date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonDateTimeConverter.DateObjectFromCOMDate"><code class="docutils literal notranslate"><span class="pre">pythonDateTimeConverter.DateObjectFromCOMDate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonDateTimeConverter.Time"><code class="docutils literal notranslate"><span class="pre">pythonDateTimeConverter.Time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonDateTimeConverter.Timestamp"><code class="docutils literal notranslate"><span class="pre">pythonDateTimeConverter.Timestamp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonTimeConverter"><code class="docutils literal notranslate"><span class="pre">pythonTimeConverter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonTimeConverter.Date"><code class="docutils literal notranslate"><span class="pre">pythonTimeConverter.Date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonTimeConverter.DateObjectFromCOMDate"><code class="docutils literal notranslate"><span class="pre">pythonTimeConverter.DateObjectFromCOMDate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonTimeConverter.Time"><code class="docutils literal notranslate"><span class="pre">pythonTimeConverter.Time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.pythonTimeConverter.Timestamp"><code class="docutils literal notranslate"><span class="pre">pythonTimeConverter.Timestamp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.standardErrorHandler"><code class="docutils literal notranslate"><span class="pre">standardErrorHandler()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.apibase.variantConvertDate"><code class="docutils literal notranslate"><span class="pre">variantConvertDate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#module-adodbapi.is64bit">adodbapi.is64bit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.is64bit.Python"><code class="docutils literal notranslate"><span class="pre">Python()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.is64bit.os"><code class="docutils literal notranslate"><span class="pre">os()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#module-adodbapi.process_connect_string">adodbapi.process_connect_string</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.process_connect_string.macro_call"><code class="docutils literal notranslate"><span class="pre">macro_call()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.process_connect_string.process"><code class="docutils literal notranslate"><span class="pre">process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="adodbapi.html#module-adodbapi.schema_table">adodbapi.schema_table</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adodbapi.html#adodbapi.schema_table.names"><code class="docutils literal notranslate"><span class="pre">names()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">ADO DB-API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../quick_reference.html">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samples/index.html">Samples</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/adodbapi/apidoc/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

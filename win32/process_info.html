@@ -1,0 +1,637 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Getting process info: Win32 and COM with python and C++ &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Extending Python (directory permissions w/GetNamedSecurityInfo)" href="security_directories.html" />
+    <link rel="prev" title="Win32 Extensions" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="getting-process-info-win32-and-com-with-python-and-c">
+<h1>Getting process info: Win32 and COM with python and C++<a class="headerlink" href="#getting-process-info-win32-and-com-with-python-and-c" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-existing-document admonition">
+<p class="admonition-title">Existing document</p>
+<p><code class="file docutils literal notranslate"><span class="pre">\win32\help\process_info.html</span></code></p>
+</div>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction" id="id1">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#getting-the-process-list-pdhenumobjectitems" id="id2">Getting the process list: PdhEnumObjectItems</a></p></li>
+<li><p><a class="reference internal" href="#getting-the-process-ids-several-pdh-calls" id="id3">Getting the process ids: Several Pdh Calls</a></p></li>
+<li><p><a class="reference internal" href="#the-com-client" id="id4">The COM client</a></p></li>
+<li><p><a class="reference internal" href="#making-the-com-objects" id="id5">Making the COM objects</a></p></li>
+<li><p><a class="reference internal" href="#the-python-com-object" id="id6">The Python COM object</a></p></li>
+<li><p><a class="reference internal" href="#the-c-com-object" id="id7">The C++ COM object</a></p></li>
+<li><p><a class="reference internal" href="#in-conclusion" id="id8">In Conclusion</a></p></li>
+<li><p><a class="reference internal" href="#further-info" id="id9">Further Info</a></p></li>
+</ul>
+</nav>
+<p><em>Section author: John Nielsen &lt;<a class="reference external" href="mailto:jn&#37;&#52;&#48;who&#46;net">jn<span>&#64;</span>who<span>&#46;</span>net</a>&gt;</em></p>
+<p>Python is a rich scripting language offering a lot of the power of C++ while retaining the ease of use of VBscript. With it’s simplified C++ style, win32 access, and ability to make COM servers, it’s a natural rapid development environment for the developer.</p>
+<p>When working with an unfamiliar API, python is great for helping you understand how to solve the problem without getting in the way. Even if you have to supply a C++ COM object, it is often easier to first figure out the details with python and then compose the C++ solution. Python is very similar to C++ pseudo-code, so you can follow it as an outline for the C++. In this case, we’re going to talk about how to use both python and C++ to expose a list of processes and their corresponding ids with a COM object.</p>
+<section id="introduction">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>To get process information for both NT and W2K (but not the 9x family) you can use the Performance Data Helper library(PDH) available in the SDK at microsoft’s ftp site. It provides a convenient interface to performance information stored fundamentally in the registry. The basic process of using the PDH encompasses the following:</p>
+<ol class="arabic simple">
+<li><p>Get a list of all the objects you want</p></li>
+<li><p>Get a list of the object’s instances and data available for each instance: called ‘items’ or ‘counters’</p></li>
+<li><p>Get a group of performance data for each counter</p></li>
+</ol>
+<p>In our case the object we want is the process object, the object’s instances are it’s list of processes, and the counter we want for the processes is ‘ID Process’.</p>
+<p>The specific set of API called are the following:</p>
+<ol class="arabic simple">
+<li><p>PdhEnumObjectItems – get the list of instances (processes) for the process object</p></li>
+<li><p>PdhOpenQuery – initialize query handle which will contain all the counters (in our case only: ID Process)</p></li>
+<li><p>PdhMakeCounterPath – Each counter has a specific path, kind of like like a url</p></li>
+<li><p>PdhAddCounter – convert the path to a handle and group the counters paths(in this case only one) together for the query</p></li>
+<li><p>PdhCollectQueryData – gathers the actual data</p></li>
+<li><p>PdhGetFormattedCounterValue – call for each counter to convert the data to a typical format</p></li>
+<li><p>PdhCloseQuery – close the counters and the query handle</p></li>
+</ol>
+<p>We’ll cover these points now in more depth.</p>
+</section>
+<section id="getting-the-process-list-pdhenumobjectitems">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Getting the process list: PdhEnumObjectItems</a><a class="headerlink" href="#getting-the-process-list-pdhenumobjectitems" title="Permalink to this heading">¶</a></h2>
+<p>The MSDN describes the call as the following:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">PDH_STATUS</span><span class="w"> </span><span class="nf">PdhEnumObjectItems</span><span class="p">(</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="n">LPCTSTR</span><span class="w"> </span><span class="n">szDataSource</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">  </span><span class="n">LPCTSTR</span><span class="w"> </span><span class="n">szMachineName</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">  </span><span class="n">LPCTSTR</span><span class="w"> </span><span class="n">szObjectName</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">  </span><span class="n">LPTSTR</span><span class="w"> </span><span class="n">mszCounterList</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">  </span><span class="n">LPDWORD</span><span class="w"> </span><span class="n">pcchCounterListLength</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="n">LPTSTR</span><span class="w"> </span><span class="n">mszInstanceList</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">  </span><span class="n">LPDWORD</span><span class="w"> </span><span class="n">pcchInstanceListLength</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="n">DWORD</span><span class="w"> </span><span class="n">dwDetailLevel</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">  </span><span class="n">DWORD</span><span class="w"> </span><span class="n">dwFlags</span><span class="w"></span>
+<span class="linenos">11</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The python call is similar though simpler. For example, you do not need to bother with the list length – it takes care of that for you. Both the python and C++ examples are taken from their COM components shown later.To call make with python would look like the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">def</span> <span class="nf">proclist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos"> 2</span>    <span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 3</span>        <span class="n">junk</span><span class="p">,</span> <span class="n">instances</span> <span class="o">=</span> <span class="n">win32pdh</span><span class="o">.</span><span class="n">EnumObjectItems</span><span class="p">(</span>
+<span class="linenos"> 4</span>            <span class="kc">None</span><span class="p">,</span>
+<span class="linenos"> 5</span>            <span class="kc">None</span><span class="p">,</span>
+<span class="linenos"> 6</span>            <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">,</span>
+<span class="linenos"> 7</span>            <span class="n">win32pdh</span><span class="o">.</span><span class="n">PERF_DETAIL_WIZARD</span>
+<span class="linenos"> 8</span>         <span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>         <span class="k">return</span> <span class="n">instances</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="k">except</span><span class="p">:</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>        <span class="k">raise</span> <span class="n">COMException</span><span class="p">(</span><span class="s2">&quot;Problem getting process list&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The variable instances contains the list of processes, and you’ll find the item or counter than we want ‘ID Process’ present in the list of items. Since you can have multiple processes with the same name, in python it is convenient to use a dictionary to store a list of processes and how many you found for each type.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="n">instances</span><span class="p">:</span>
+<span class="linenos">2</span>    <span class="k">if</span> <span class="n">proc_dict</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
+<span class="linenos">3</span>        <span class="n">proc_dict</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">=</span> <span class="n">proc_dict</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="linenos">4</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">5</span>        <span class="n">proc_dict</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>The C++ call though essentially the same in spirit is much more involved. To help, I use map (like a python dictionary) and string from Standard C++. The additional things you need to manage are:</p>
+<ul class="simple">
+<li><p>strings – convert to TCHAR for ansi/unicode support using ATL macros</p></li>
+<li><p>the memory for the buffers that PdhEnumObjectItems needs</p></li>
+<li><p>Parse it’s NULL padded results.</p></li>
+</ul>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">HRESULT</span><span class="w"> </span><span class="n">getinst</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">m_inst</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="w">      </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">::</span><span class="n">iterator</span><span class="w"> </span><span class="n">iter</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">      </span><span class="n">USES_CONVERSION</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">      </span><span class="n">LPTSTR</span><span class="w">      </span><span class="n">szCountersBuf</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">      </span><span class="n">DWORD</span><span class="w">       </span><span class="n">dwCountersSize</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">      </span><span class="n">LPTSTR</span><span class="w">      </span><span class="n">szInstancesBuf</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">      </span><span class="n">DWORD</span><span class="w">       </span><span class="n">dwInstancesSize</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">      </span><span class="n">LPTSTR</span><span class="w">      </span><span class="n">szTemp</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="w">      </span><span class="n">PDH_STATUS</span><span class="w"> </span><span class="n">status</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">str_obj</span><span class="o">=</span><span class="s">&quot;Process&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="w">      </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhEnumObjectItems</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">16</span><span class="w">          </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">               </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">               </span><span class="n">A2CT</span><span class="p">(</span><span class="n">str_obj</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">               </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">               </span><span class="o">&amp;</span><span class="n">dwCountersSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">               </span><span class="n">szInstancesBuf</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">               </span><span class="o">&amp;</span><span class="n">dwInstancesSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">23</span><span class="w">               </span><span class="n">PERF_DETAIL_WIZARD</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">               </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="linenos">27</span><span class="w">              </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dwCountersSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">30</span><span class="w">              </span><span class="n">szCountersBuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">LPTSTR</span><span class="p">)</span><span class="n">malloc</span><span class="w"> </span><span class="p">(</span><span class="n">dwCountersSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">TCHAR</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">31</span><span class="w">              </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">szCountersBuf</span><span class="o">==</span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">32</span><span class="w">                       </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">33</span><span class="w">              </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">34</span><span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"></span>
+<span class="linenos">35</span><span class="w">              </span><span class="n">szCountersBuf</span><span class="o">=</span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dwInstancesSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">38</span><span class="w">               </span><span class="n">szInstancesBuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">LPTSTR</span><span class="p">)</span><span class="n">malloc</span><span class="w"> </span><span class="p">(</span><span class="n">dwInstancesSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">TCHAR</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">39</span><span class="w">               </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">szInstancesBuf</span><span class="o">==</span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">40</span><span class="w">                        </span><span class="n">free</span><span class="p">(</span><span class="n">szCountersBuf</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">41</span><span class="w">                        </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">42</span><span class="w">               </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">43</span><span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"></span>
+<span class="linenos">44</span><span class="w">              </span><span class="n">szInstancesBuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">45</span>
+<span class="linenos">46</span><span class="w">      </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhEnumObjectItems</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">47</span><span class="w">              </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">48</span><span class="w">              </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">49</span><span class="w">              </span><span class="n">A2CT</span><span class="p">(</span><span class="n">str_obj</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span><span class="w"></span>
+<span class="linenos">50</span><span class="w">              </span><span class="n">szCountersBuf</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">51</span><span class="w">              </span><span class="o">&amp;</span><span class="n">dwCountersSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">52</span><span class="w">              </span><span class="n">szInstancesBuf</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">53</span><span class="w">              </span><span class="o">&amp;</span><span class="n">dwInstancesSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">54</span><span class="w">              </span><span class="n">PERF_DETAIL_WIZARD</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">55</span><span class="w">              </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">56</span>
+<span class="linenos">57</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="linenos">58</span><span class="w">          </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">59</span>
+<span class="linenos">60</span><span class="w">      </span><span class="c1">//it&#39;s a series of contingous NULL terminated strings, ending w/zero length string</span>
+<span class="linenos">61</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">szInstancesBuf</span><span class="p">){</span><span class="w"></span>
+<span class="linenos">62</span><span class="w">              </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">szTemp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">szInstancesBuf</span><span class="p">;</span><span class="o">*</span><span class="n">szTemp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="n">szTemp</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">lstrlen</span><span class="p">(</span><span class="n">szTemp</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">63</span><span class="w">                       </span><span class="n">m_inst</span><span class="p">[</span><span class="n">T2A</span><span class="p">(</span><span class="n">szTemp</span><span class="p">)]</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//increment instance counter</span>
+<span class="linenos">64</span><span class="w">                       </span><span class="c1">//default value is zero for arith element</span>
+<span class="linenos">65</span><span class="w">              </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">66</span><span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">67</span>
+<span class="linenos">68</span><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">S_OK</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">69</span>
+<span class="linenos">70</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="getting-the-process-ids-several-pdh-calls">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Getting the process ids: Several Pdh Calls</a><a class="headerlink" href="#getting-the-process-ids-several-pdh-calls" title="Permalink to this heading">¶</a></h2>
+<p>A whole sequence of calls are necessary once you get the process list. To refresh your memory, you need:</p>
+<ol class="arabic simple">
+<li><p>PdhOpenQuery – initialize query handle which will contain all the counters (in our case only: ID Process)</p></li>
+<li><p>PdhMakeCounterPath – Each counter has a specific path, kind of like like a url</p></li>
+<li><p>PdhAddCounter – convert the path to a handle and group the counters paths(in this case only one) together for the query</p></li>
+<li><p>PdhCollectQueryData – gathers the actual data</p></li>
+<li><p>PdhGetFormattedCounterValue – call for each counter to convert the data to a typical format</p></li>
+<li><p>PdhCloseQuery – close the counters and the query handle</p></li>
+</ol>
+<p>As usual the python code matches this very cleanly (like pseudocode that actually runs) – you can figure out the basic meanings and sequences of the win32 calls without having to deal with other details.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">for</span> <span class="n">instance</span><span class="p">,</span> <span class="n">max_instances</span> <span class="ow">in</span> <span class="n">proc_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos"> 2</span>    <span class="k">for</span> <span class="n">inum</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">max_instances</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+<span class="linenos"> 3</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 4</span>            <span class="n">hq</span> <span class="o">=</span> <span class="n">win32pdh</span><span class="o">.</span><span class="n">OpenQuery</span><span class="p">()</span> <span class="c1"># initializes the query handle</span>
+<span class="linenos"> 5</span>            <span class="n">path</span> <span class="o">=</span> <span class="n">win32pdh</span><span class="o">.</span><span class="n">MakeCounterPath</span><span class="p">(</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">,</span><span class="n">instance</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">)</span> <span class="p">)</span>
+<span class="linenos"> 6</span>            <span class="n">counter_handle</span><span class="o">=</span><span class="n">win32pdh</span><span class="o">.</span><span class="n">AddCounter</span><span class="p">(</span><span class="n">hq</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="c1">#convert counter path to counter handle</span>
+<span class="linenos"> 7</span>            <span class="n">win32pdh</span><span class="o">.</span><span class="n">CollectQueryData</span><span class="p">(</span><span class="n">hq</span><span class="p">)</span> <span class="c1">#collects data for the counter</span>
+<span class="linenos"> 8</span>            <span class="nb">type</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">win32pdh</span><span class="o">.</span><span class="n">GetFormattedCounterValue</span><span class="p">(</span><span class="n">counter_handle</span><span class="p">,</span> <span class="n">win32pdh</span><span class="o">.</span><span class="n">PDH_FMT_LONG</span><span class="p">)</span>
+<span class="linenos"> 9</span>            <span class="n">proc_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">instance</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+<span class="linenos">10</span>            <span class="n">win32pdh</span><span class="o">.</span><span class="n">CloseQuery</span><span class="p">(</span><span class="n">hq</span><span class="p">)</span>
+<span class="linenos">11</span>        <span class="k">except</span><span class="p">:</span>
+<span class="linenos">12</span>            <span class="k">raise</span> <span class="n">COMException</span><span class="p">(</span><span class="s2">&quot;Problem getting process id&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Again, the C++ code is more involved and makes use of Standand C++, vector, map, and string. It converts a map of process names and the number for each name, to a vector of strings each which has tab-delimited process id entry. Also, the process id info is returned in the format of a double, which is converted to a string.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">HRESULT</span><span class="w"> </span><span class="nf">getprocid</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">m_inst</span><span class="p">,</span><span class="w"> </span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v_ids</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">USES_CONVERSION</span><span class="p">;</span><span class="w"> </span><span class="n">PDH_STATUS</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">HQUERY</span><span class="w"> </span><span class="n">hQuery</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"> </span><span class="n">HCOUNTER</span><span class="w"> </span><span class="n">hCounter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"> </span><span class="n">DWORD</span><span class="w"> </span><span class="n">dwType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">map</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_idinst</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">objname</span><span class="o">=</span><span class="s">&quot;Process&quot;</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">counter</span><span class="o">=</span><span class="s">&quot;ID Process&quot;</span><span class="p">;</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="p">;</span><span class="kt">int</span><span class="w"> </span><span class="n">junk</span><span class="p">,</span><span class="n">junk2</span><span class="p">;</span><span class="w"> </span><span class="c1">// initialize the query handle map &lt; string, int&gt;::iterator iter; for (iter=m_inst.begin();iter != m_inst.end();++iter) { for (int i=0;i&lt;= iter-&gt;second;++i) { status = PdhOpenQuery( NULL, 0, &amp;hQuery ); if ( status != ERROR_SUCCESS ) return status; TCHAR szCounterPath[2048]; DWORD dwPathSize = 2048; PDH_COUNTER_PATH_ELEMENTS pdh_elm; pdh_elm.szMachineName = NULL; pdh_elm.szObjectName = A2T(objname.c_str()); pdh_elm.szInstanceName = A2T(iter-&gt;first.c_str()); pdh_elm.szParentInstance = NULL; pdh_elm.dwInstanceIndex = i; pdh_elm.szCounterName = A2T(counter.c_str()); status = PdhMakeCounterPath( &amp;pdh_elm, szCounterPath, &amp;dwPathSize, 0 ); if ( status != ERROR_SUCCESS ) { return E_FAIL; } // Add the counter to the query //PdhAddCounter converts each counter path into a counter handle status = PdhAddCounter( hQuery, szCounterPath, 0, &amp;hCounter ); if ( status != ERROR_SUCCESS ) { return E_FAIL; } //PdhCollectQueryData gets raw data for the counters status = PdhCollectQueryData(hQuery); if ( status != ERROR_SUCCESS ) { return E_FAIL; } //PdhGetFormattedCounterValue formats counter values for display DWORD dwFormat = PDH_FMT_DOUBLE; PDH_FMT_COUNTERVALUE fmtValue; status = PdhGetFormattedCounterValue (hCounter, dwFormat, (LPDWORD)NULL, &amp;fmtValue); if (status == ERROR_SUCCESS) { buffer=_fcvt( fmtValue.doubleValue, 0, &amp;junk,&amp;junk2 ); string id=buffer; v_ids.push_back(iter-&gt;first+&#39;\t&#39;+id); } } status = PdhCloseQuery (hQuery); //PdhCloseQuery closes the query handle and it&#39;s counters } return S_OK; }</span>
+</pre></div>
+</div>
+</section>
+<section id="the-com-client">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">The COM client</a><a class="headerlink" href="#the-com-client" title="Permalink to this heading">¶</a></h2>
+<p>The Python COM client which will call the C++ COM object and Python COM object does the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span> <span class="nn">win32com.client</span> <span class="n">a</span><span class="o">=</span><span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;NtPerf.process&#39;</span><span class="p">)</span> <span class="c1"># C++ com object print a.procids() b=win32com.client.Dispatch(&#39;PyPerf.process&#39;) # python com object print b.procids()</span>
+</pre></div>
+</div>
+<p>As far as it is concerned, there is no difference between the 2 objects. Both returns a list of processes and their respective id’s seperated by tab.</p>
+</section>
+<section id="making-the-com-objects">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Making the COM objects</a><a class="headerlink" href="#making-the-com-objects" title="Permalink to this heading">¶</a></h2>
+<p>From a 1000 mile perspective, ATL C++ and python offer a class based COM object approach. In both approaches, the methods of the com object are simply methods of a class. However, creating a COM object in python is much easier than C++, again allowing you to focus on the problem first while still retaining the C++ feel.</p>
+<p>Much of the details with python COM objects are exposed through a default policy which leverages IDispatch. You simply add a few attributes your python class, to expose your methods, prog id, add a line to register your class, and you are done. The policy knows what to do. Thus, it’s easy enough to take a simple win32 class you wrote and add a few attributes and convert it to a COM object. Creating and developing python COM objects is simple, all that is needed is notepad. You don’t need a full blown IDE nor do you have to go back and find the source code that created the object, since the object is the source code. It lends itself to very rapid development.</p>
+<p>ATL provides wizards and a lot of the basic implementation goo (like COM interfaces for IUnknown and IDispatch), and wrappers for data types. However, there still a big difference between a simple console based app and an ATL COM object. The COM world of Variants, SafeArrays, and BSTR’s is (as we’ll see below) unfriendly to C++.</p>
+<p>Python behind the scenes converts back and forth between it’s native types and BSTR, Variants, SafeArrays, etc. When you change your COM object, you don’t have to worry about changing IDL and constructing new Variant structures, it is managed for you.</p>
+<p>In C++, it is more messy. First of all: strings. Since the concept of what text is isn’t consistent, COM standardizes with it’s own OLECHAR. Also, for non-COM text, because of issues between using ansi and unicode, you need to use the TCHAR data type which is a generic type that maps at compile time to what is necessary. And, with regard to BSTRs (length-prefixed strings), you need to convert the OLECHAR to BSTR’s with SysAllocString. You notice the COM object below uses the Standard C++ string (which I prefer to use). When necessary, it converts the string it to the necessary COM type leveraging ATL conversion macros and SysAllocString (another option is to use the CComBSTR class).</p>
+<p>Secondly: arrays. Since we are returning a list of processes and their ids, to be friendly with all languages, everything needs to be converted to SafeArrays of Variants housing BSTRs. Python does the conversion for you. With C++, you’ll need to make various Variant calls to create the necessary structure. In the C++ COM object, I’ve encapsulated all the necessary code in a single function that converts any vector of strings into a 1 dimensional safe array of variants.</p>
+<p>Now for some code:</p>
+</section>
+<section id="the-python-com-object">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">The Python COM object</a><a class="headerlink" href="#the-python-com-object" title="Permalink to this heading">¶</a></h2>
+<p>The Python COM object has 2 methods proclist and procids. Proclist is trivial, simply returning the list of processes from EnumObjectItems. Procids calls proclist, constructs a dictionary to count the number of processes with the same name, and then makes the necessary calls to their their ids. Each function simple returns the python list (which is then converted for you). If you later decide to only return a single string, simple change what you return, and python again will convert for you. Each method also uses the very cool function COMException which returns errors back to the client. In addition to the methods, there are 4 basic attributes, I set to define the COM object and a line to register it.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span> <span class="nn">win32pdh</span><span class="o">,</span> <span class="nn">string</span><span class="o">,</span> <span class="nn">win32api</span> <span class="kn">from</span> <span class="nn">win32com.server.exception</span> <span class="kn">import</span> <span class="n">COMException</span> <span class="kn">import</span> <span class="nn">win32com.server.util</span> <span class="kn">import</span> <span class="nn">win32com.client.dynamic</span> <span class="c1">#to generate guids use: #import pythoncom #print pythoncom.CreateGuid() class pyperf: # COM attributes. _reg_clsid_ = &#39;{763AE791-1D6B-11D4-A38B-00902798B22B}&#39; #guid for your class in registry _reg_desc_ = &quot;get process list and ids&quot; _reg_progid_ = &quot;PyPerf.process&quot; #The progid for this class _public_methods_ = [&#39;procids&#39;,&#39;proclist&#39; ] #names of callable methods def __init__(self): self.object=&#39;process&#39; self.item=&#39;ID Process&#39; def proclist(self): try: junk, instances = win32pdh.EnumObjectItems(None,None,self.object, win32pdh.PERF_DETAIL_WIZARD) return instances except: raise COMException(&quot;Problem getting process list&quot;) def procids(self): #each instance is a process, you can have multiple processes w/same name instances=self.proclist() proc_ids=[] proc_dict={} for instance in instances: if proc_dict.has_key(instance): proc_dict[instance] = proc_dict[instance] + 1 else: proc_dict[instance]=0 for instance, max_instances in proc_dict.items(): for inum in xrange(max_instances+1): try: hq = win32pdh.OpenQuery() # initializes the query handle path = win32pdh.MakeCounterPath( (None,self.object,instance, None, inum, self.item) ) counter_handle=win32pdh.AddCounter(hq, path) #convert counter path to counter handle win32pdh.CollectQueryData(hq) #collects data for the counter type, val = win32pdh.GetFormattedCounterValue(counter_handle, win32pdh.PDH_FMT_LONG) proc_ids.append(instance+&#39;\t&#39;+str(val)) win32pdh.CloseQuery(hq) except: raise COMException(&quot;Problem getting process id&quot;) proc_ids.sort() return proc_ids if __name__==&#39;__main__&#39;: import win32com.server.register win32com.server.register.UseCommandLine(pyperf)</span>
+</pre></div>
+</div>
+</section>
+<section id="the-c-com-object">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">The C++ COM object</a><a class="headerlink" href="#the-c-com-object" title="Permalink to this heading">¶</a></h2>
+<p>As you notice from the idl, C++ COM object also exposes 2 methods, proclist and procids. Proclist calls the getinst function returns returns a map of processes, converts that to a vector of strings, and the calls make_safe to convert that to a Safe array of Variants. Procids does much the same except that after calling getinst, it then calls getprocid, which returns a vector of strings containing the processes and their ids. The vector of strings is then converted to a SafeArray with make_safe. Unlike python, you don’t actually return the SafeArray(since every COM method has to return an HRESULT). Instead, you store the values in a Variant pointer.</p>
+<p>Here is the relevant excerpt from the IDL:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">interface</span><span class="w"> </span><span class="n">Iprocess</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">IDispatch</span><span class="w"></span>
+<span class="linenos">2</span><span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">3</span><span class="w">             </span><span class="p">[</span><span class="n">id</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">helpstring</span><span class="p">(</span><span class="s">&quot;lists current processes&quot;</span><span class="p">)]</span><span class="w"> </span><span class="n">HRESULT</span><span class="w"> </span><span class="n">proclist</span><span class="p">([</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">retval</span><span class="p">]</span><span class="w"> </span><span class="n">VARIANT</span><span class="w"> </span><span class="o">*</span><span class="n">plist</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">4</span><span class="w">             </span><span class="p">[</span><span class="n">id</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">helpstring</span><span class="p">(</span><span class="s">&quot;method procids&quot;</span><span class="p">)]</span><span class="w"> </span><span class="n">HRESULT</span><span class="w"> </span><span class="n">procids</span><span class="p">([</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">retval</span><span class="p">]</span><span class="w"> </span><span class="n">VARIANT</span><span class="w"> </span><span class="o">*</span><span class="n">pids</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">5</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Here is the source for the cpp file:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;stdafx.h&quot;</span><span class="cp"></span>
+<span class="linenos">  2</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Ntperf.h&quot;</span><span class="cp"></span>
+<span class="linenos">  3</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;process.h&quot;</span><span class="cp"></span>
+<span class="linenos">  4</span>
+<span class="linenos">  5</span><span class="c1">//MS stuff</span>
+<span class="linenos">  6</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pdh.h&quot;</span><span class="cp"></span>
+<span class="linenos">  7</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pdhmsg.h&quot;</span><span class="cp"></span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="c1">// fix problem with different versions of pdh.dll</span>
+<span class="linenos"> 10</span><span class="cp">#undef PdhOpenQuery      </span><span class="c1">//          PdhOpenQueryA</span>
+<span class="linenos"> 11</span><span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kr">__stdcall</span><span class="w"></span>
+<span class="linenos"> 12</span><span class="n">PdhOpenQuery</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="linenos"> 13</span><span class="w">                       </span><span class="n">IN</span><span class="w">      </span><span class="n">LPCSTR</span><span class="w">      </span><span class="n">szDataSource</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 14</span><span class="w">                       </span><span class="n">IN</span><span class="w">      </span><span class="n">DWORD</span><span class="w">       </span><span class="n">dwUserData</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 15</span><span class="w">                          </span><span class="n">IN</span><span class="w">      </span><span class="n">HQUERY</span><span class="w">      </span><span class="o">*</span><span class="n">phQuery</span><span class="w"></span>
+<span class="linenos"> 16</span><span class="w">                        </span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span><span class="c1">//STD C++ stuff</span>
+<span class="linenos"> 19</span><span class="cp">#pragma warning(disable : 4786) </span><span class="c1">//get rid of stl warnings</span>
+<span class="linenos"> 20</span><span class="cp">#include &amp;lt;string&amp;gt;</span>
+<span class="linenos"> 21</span><span class="cp">#include &amp;lt;vector&amp;gt;</span>
+<span class="linenos"> 22</span><span class="cp">#include &amp;lt;map&amp;gt;</span>
+<span class="linenos"> 23</span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span><span class="c1">/////////////////////////////////////////////////////////////////////////////</span>
+<span class="linenos"> 26</span><span class="c1">// Cprocess</span>
+<span class="linenos"> 27</span>
+<span class="linenos"> 28</span><span class="n">HRESULT</span><span class="w"> </span><span class="n">make_safe</span><span class="p">(</span><span class="n">vector</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v_list</span><span class="p">,</span><span class="w"> </span><span class="n">VARIANT</span><span class="w"> </span><span class="o">*</span><span class="n">plist</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 29</span>
+<span class="linenos"> 30</span><span class="w">        </span><span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">S_OK</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 31</span>
+<span class="linenos"> 32</span><span class="w">        </span><span class="n">USES_CONVERSION</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 33</span>
+<span class="linenos"> 34</span><span class="w">        </span><span class="n">VariantInit</span><span class="p">(</span><span class="n">plist</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 35</span><span class="w">        </span><span class="n">plist</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">vt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VT_ARRAY</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">VT_VARIANT</span><span class="p">;</span><span class="w"> </span><span class="c1">//set type of plist to variant array</span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span><span class="w">        </span><span class="c1">//now create the 1 dimensional safearray of variants</span>
+<span class="linenos"> 38</span><span class="w">        </span><span class="n">LPSAFEARRAY</span><span class="w"> </span><span class="n">psa</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 39</span><span class="w">        </span><span class="n">SAFEARRAYBOUND</span><span class="w"> </span><span class="n">rgsabound</span><span class="p">[]</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v_list</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">};</span><span class="w"> </span><span class="c1">// size elements, 0-based</span>
+<span class="linenos"> 40</span><span class="w">        </span><span class="n">psa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SafeArrayCreate</span><span class="p">(</span><span class="n">VT_VARIANT</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">rgsabound</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 41</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">psa</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">E_OUTOFMEMORY</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span><span class="w">        </span><span class="n">VARIANT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">VarArray</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 44</span><span class="w">   </span><span class="c1">//Increment lock count and get pointer to the array data</span>
+<span class="linenos"> 45</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">FAILED</span><span class="p">(</span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SafeArrayAccessData</span><span class="p">(</span><span class="n">psa</span><span class="p">,(</span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="n">VarArray</span><span class="w"> </span><span class="p">)))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 46</span><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">hr</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 47</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 48</span>
+<span class="linenos"> 49</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">v_list</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 50</span><span class="w">                </span><span class="n">VarArray</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">vt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VT_BSTR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 51</span><span class="w">             </span><span class="c1">//convert ascii to olestr then bstr</span>
+<span class="linenos"> 52</span><span class="w">             </span><span class="n">VarArray</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">bstrVal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SysAllocString</span><span class="p">(</span><span class="n">A2OLE</span><span class="p">(</span><span class="n">v_list</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">c_str</span><span class="p">()));</span><span class="w"></span>
+<span class="linenos"> 53</span><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">VarArray</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">bstrVal</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 54</span><span class="w">                        </span><span class="n">VariantClear</span><span class="p">(</span><span class="n">VarArray</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 55</span><span class="w">                     </span><span class="k">return</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">E_OUTOFMEMORY</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 56</span><span class="w">             </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span><span class="w">             </span><span class="n">SafeArrayUnaccessData</span><span class="p">(</span><span class="w"> </span><span class="n">psa</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 61</span>
+<span class="linenos"> 62</span><span class="w">     </span><span class="n">plist</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">parray</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa</span><span class="p">;</span><span class="w"> </span><span class="c1">//now set the array in plist to be the created array</span>
+<span class="linenos"> 63</span>
+<span class="linenos"> 64</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">S_OK</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 65</span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span><span class="n">HRESULT</span><span class="w"> </span><span class="n">getprocid</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="w"> </span><span class="n">m_inst</span><span class="p">,</span><span class="w"> </span><span class="n">vector</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v_ids</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 68</span>
+<span class="linenos"> 69</span><span class="w">        </span><span class="n">USES_CONVERSION</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 70</span><span class="w">     </span><span class="n">PDH_STATUS</span><span class="w">  </span><span class="n">status</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 71</span><span class="w">     </span><span class="n">HQUERY</span><span class="w">      </span><span class="n">hQuery</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 72</span><span class="w">     </span><span class="n">HCOUNTER</span><span class="w">    </span><span class="n">hCounter</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 73</span><span class="w">     </span><span class="n">DWORD</span><span class="w">       </span><span class="n">dwType</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span><span class="w">     </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="n">m_idinst</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 76</span>
+<span class="linenos"> 77</span><span class="w">     </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">objname</span><span class="o">=</span><span class="s">&quot;Process&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 78</span><span class="w">     </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">counter</span><span class="o">=</span><span class="s">&quot;ID Process&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 79</span><span class="w">     </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">buffer</span><span class="p">;</span><span class="kt">int</span><span class="w"> </span><span class="n">junk</span><span class="p">,</span><span class="n">junk2</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span><span class="w">        </span><span class="c1">// initialize the query handle</span>
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span><span class="w">     </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">::</span><span class="n">iterator</span><span class="w"> </span><span class="n">iter</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 84</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="o">=</span><span class="n">m_inst</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="n">iter</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">m_inst</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="o">++</span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span><span class="w">             </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">=</span><span class="w"> </span><span class="n">iter</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">second</span><span class="p">;</span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 87</span><span class="w">                     </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhOpenQuery</span><span class="p">(</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">hQuery</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 88</span><span class="w">                     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="linenos"> 89</span><span class="w">                             </span><span class="k">return</span><span class="w"> </span><span class="n">status</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 90</span>
+<span class="linenos"> 91</span><span class="w">                     </span><span class="n">TCHAR</span><span class="w">       </span><span class="n">szCounterPath</span><span class="p">[</span><span class="mi">2048</span><span class="p">];</span><span class="w"></span>
+<span class="linenos"> 92</span><span class="w">                     </span><span class="n">DWORD</span><span class="w">       </span><span class="n">dwPathSize</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 93</span><span class="w">                     </span><span class="n">PDH_COUNTER_PATH_ELEMENTS</span><span class="w"> </span><span class="n">pdh_elm</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span><span class="w">                     </span><span class="n">pdh_elm</span><span class="p">.</span><span class="n">szMachineName</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 96</span><span class="w">                     </span><span class="n">pdh_elm</span><span class="p">.</span><span class="n">szObjectName</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">A2T</span><span class="p">(</span><span class="n">objname</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span><span class="w"></span>
+<span class="linenos"> 97</span><span class="w">                     </span><span class="n">pdh_elm</span><span class="p">.</span><span class="n">szInstanceName</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">A2T</span><span class="p">(</span><span class="n">iter</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">first</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span><span class="w"></span>
+<span class="linenos"> 98</span><span class="w">                     </span><span class="n">pdh_elm</span><span class="p">.</span><span class="n">szParentInstance</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 99</span><span class="w">                     </span><span class="n">pdh_elm</span><span class="p">.</span><span class="n">dwInstanceIndex</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">100</span><span class="w">                     </span><span class="n">pdh_elm</span><span class="p">.</span><span class="n">szCounterName</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">A2T</span><span class="p">(</span><span class="n">counter</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span><span class="w"></span>
+<span class="linenos">101</span>
+<span class="linenos">102</span><span class="w">                     </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhMakeCounterPath</span><span class="p">(</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pdh_elm</span><span class="p">,</span><span class="w"> </span><span class="n">szCounterPath</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dwPathSize</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">103</span><span class="w">                     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">104</span>
+<span class="linenos">105</span>
+<span class="linenos">106</span><span class="w">                     </span><span class="c1">// Add the counter to the query</span>
+<span class="linenos">107</span><span class="w">                     </span><span class="c1">//PdhAddCounter converts each counter path into a counter handle</span>
+<span class="linenos">108</span><span class="w">                     </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhAddCounter</span><span class="p">(</span><span class="w"> </span><span class="n">hQuery</span><span class="p">,</span><span class="w"> </span><span class="n">szCounterPath</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">hCounter</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">109</span><span class="w">                     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">110</span>
+<span class="linenos">111</span><span class="w">                     </span><span class="c1">//PdhCollectQueryData gets raw data for the counters</span>
+<span class="linenos">112</span><span class="w">                     </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhCollectQueryData</span><span class="p">(</span><span class="n">hQuery</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">113</span>
+<span class="linenos">114</span><span class="w">                     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">115</span>
+<span class="linenos">116</span><span class="w">                     </span><span class="c1">//PdhGetFormattedCounterValue  formats counter values for display</span>
+<span class="linenos">117</span><span class="w">                     </span><span class="n">DWORD</span><span class="w">           </span><span class="n">dwFormat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PDH_FMT_DOUBLE</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">118</span><span class="w">                     </span><span class="n">PDH_FMT_COUNTERVALUE</span><span class="w">   </span><span class="n">fmtValue</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">119</span><span class="w">                     </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhGetFormattedCounterValue</span><span class="w"> </span><span class="p">(</span><span class="n">hCounter</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">120</span><span class="w">                             </span><span class="n">dwFormat</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">121</span><span class="w">                             </span><span class="p">(</span><span class="n">LPDWORD</span><span class="p">)</span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">122</span><span class="w">                             </span><span class="o">&amp;</span><span class="n">fmtValue</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">123</span>
+<span class="linenos">124</span>
+<span class="linenos">125</span><span class="w">                     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">126</span><span class="w">                             </span><span class="n">buffer</span><span class="o">=</span><span class="n">_fcvt</span><span class="p">(</span><span class="w"> </span><span class="n">fmtValue</span><span class="p">.</span><span class="n">doubleValue</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">junk</span><span class="p">,</span><span class="o">&amp;</span><span class="n">junk2</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">127</span><span class="w">                             </span><span class="n">string</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="n">buffer</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">128</span><span class="w">                             </span><span class="n">v_ids</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">iter</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">first</span><span class="o">+</span><span class="sc">&#39;\t&#39;</span><span class="o">+</span><span class="n">id</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">129</span><span class="w">                     </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">130</span>
+<span class="linenos">131</span><span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">132</span><span class="w">             </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhCloseQuery</span><span class="w"> </span><span class="p">(</span><span class="n">hQuery</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">133</span><span class="w">             </span><span class="c1">//PdhCloseQuery closes the query handle and it&#39;s counters</span>
+<span class="linenos">134</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">135</span>
+<span class="linenos">136</span>
+<span class="linenos">137</span><span class="w">     </span><span class="k">return</span><span class="w"> </span><span class="n">S_OK</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">138</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">139</span>
+<span class="linenos">140</span><span class="n">HRESULT</span><span class="w"> </span><span class="n">getinst</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="w"> </span><span class="n">m_inst</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">141</span>
+<span class="linenos">142</span><span class="w">     </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">::</span><span class="n">iterator</span><span class="w"> </span><span class="n">iter</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">143</span><span class="w">     </span><span class="n">USES_CONVERSION</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">144</span><span class="w">     </span><span class="n">LPTSTR</span><span class="w">      </span><span class="n">szCountersBuf</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">145</span><span class="w">  </span><span class="n">DWORD</span><span class="w">       </span><span class="n">dwCountersSize</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">146</span><span class="w">  </span><span class="n">LPTSTR</span><span class="w">      </span><span class="n">szInstancesBuf</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">147</span><span class="w">  </span><span class="n">DWORD</span><span class="w">       </span><span class="n">dwInstancesSize</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">148</span><span class="w">  </span><span class="n">LPTSTR</span><span class="w">      </span><span class="n">szTemp</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">149</span>
+<span class="linenos">150</span><span class="w">     </span><span class="n">PDH_STATUS</span><span class="w"> </span><span class="n">status</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">151</span>
+<span class="linenos">152</span><span class="w">     </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">str_obj</span><span class="o">=</span><span class="s">&quot;Process&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">153</span>
+<span class="linenos">154</span><span class="w">     </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhEnumObjectItems</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">155</span><span class="w">             </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">156</span><span class="w">             </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">157</span><span class="w">             </span><span class="n">A2CT</span><span class="p">(</span><span class="n">str_obj</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span><span class="w"></span>
+<span class="linenos">158</span><span class="w">             </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">159</span><span class="w">             </span><span class="o">&amp;</span><span class="n">dwCountersSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">160</span><span class="w">             </span><span class="n">szInstancesBuf</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">161</span><span class="w">             </span><span class="o">&amp;</span><span class="n">dwInstancesSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">162</span><span class="w">             </span><span class="n">PERF_DETAIL_WIZARD</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">163</span><span class="w">             </span><span class="mi">0</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">164</span>
+<span class="linenos">165</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="linenos">166</span><span class="w">             </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">167</span>
+<span class="linenos">168</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dwCountersSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">169</span><span class="w">             </span><span class="n">szCountersBuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">LPTSTR</span><span class="p">)</span><span class="n">malloc</span><span class="w"> </span><span class="p">(</span><span class="n">dwCountersSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">TCHAR</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">170</span><span class="w">             </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">szCountersBuf</span><span class="o">==</span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">171</span><span class="w">                     </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">172</span><span class="w">             </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">173</span><span class="w">     </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"></span>
+<span class="linenos">174</span><span class="w">             </span><span class="n">szCountersBuf</span><span class="o">=</span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">175</span>
+<span class="linenos">176</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dwInstancesSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">177</span><span class="w">             </span><span class="n">szInstancesBuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">LPTSTR</span><span class="p">)</span><span class="n">malloc</span><span class="w"> </span><span class="p">(</span><span class="n">dwInstancesSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="w"> </span><span class="p">(</span><span class="n">TCHAR</span><span class="p">));</span><span class="w"></span>
+<span class="linenos">178</span><span class="w">             </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">szInstancesBuf</span><span class="o">==</span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">179</span><span class="w">                     </span><span class="n">free</span><span class="p">(</span><span class="n">szCountersBuf</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">180</span><span class="w">                     </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">181</span><span class="w">             </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">182</span><span class="w">     </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"></span>
+<span class="linenos">183</span><span class="w">             </span><span class="n">szInstancesBuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">184</span>
+<span class="linenos">185</span><span class="w">     </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PdhEnumObjectItems</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">186</span><span class="w">             </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">187</span><span class="w">             </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">188</span><span class="w">             </span><span class="n">A2CT</span><span class="p">(</span><span class="n">str_obj</span><span class="p">.</span><span class="n">c_str</span><span class="p">()),</span><span class="w"></span>
+<span class="linenos">189</span><span class="w">             </span><span class="n">szCountersBuf</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">190</span><span class="w">             </span><span class="o">&amp;</span><span class="n">dwCountersSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">191</span><span class="w">             </span><span class="n">szInstancesBuf</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">192</span><span class="w">             </span><span class="o">&amp;</span><span class="n">dwInstancesSize</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">193</span><span class="w">             </span><span class="n">PERF_DETAIL_WIZARD</span><span class="w"></span>
+<span class="linenos">194</span><span class="w">             </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">195</span>
+<span class="linenos">196</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="linenos">197</span><span class="w">             </span><span class="k">return</span><span class="w"> </span><span class="n">E_FAIL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">198</span>
+<span class="linenos">199</span><span class="w">     </span><span class="c1">//it&#39;s a series of contingous NULL terminated strings, ending w/zero length string</span>
+<span class="linenos">200</span>
+<span class="linenos">201</span>
+<span class="linenos">202</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">szInstancesBuf</span><span class="p">){</span><span class="w"></span>
+<span class="linenos">203</span><span class="w">             </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">szTemp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">szInstancesBuf</span><span class="p">;</span><span class="o">*</span><span class="n">szTemp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="n">szTemp</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">lstrlen</span><span class="p">(</span><span class="n">szTemp</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">204</span><span class="w">                     </span><span class="n">m_inst</span><span class="p">[</span><span class="n">T2A</span><span class="p">(</span><span class="n">szTemp</span><span class="p">)]</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//increment instance counter</span>
+<span class="linenos">205</span><span class="w">                     </span><span class="c1">//default value is zero for arith element</span>
+<span class="linenos">206</span><span class="w">             </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">207</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">208</span>
+<span class="linenos">209</span>
+<span class="linenos">210</span>
+<span class="linenos">211</span><span class="w">     </span><span class="k">return</span><span class="w"> </span><span class="n">S_OK</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">212</span><span class="p">}</span><span class="w"></span>
+<span class="linenos">213</span>
+<span class="linenos">214</span><span class="w">   </span><span class="n">STDMETHODIMP</span><span class="w"> </span><span class="n">Cprocess</span><span class="o">::</span><span class="n">proclist</span><span class="p">(</span><span class="n">VARIANT</span><span class="w"> </span><span class="o">*</span><span class="n">plist</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">215</span><span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">216</span>
+<span class="linenos">217</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">plist</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">E_INVALIDARG</span><span class="p">;}</span><span class="w"></span>
+<span class="linenos">218</span>
+<span class="linenos">219</span><span class="w">     </span><span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NOERROR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">220</span>
+<span class="linenos">221</span><span class="w">     </span><span class="n">vector</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="n">test</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hello&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">222</span>
+<span class="linenos">223</span><span class="w">     </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="n">m_inst</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">224</span><span class="w">     </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">::</span><span class="n">iterator</span><span class="w"> </span><span class="n">iter</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">225</span>
+<span class="linenos">226</span><span class="w">        </span><span class="n">hr</span><span class="o">=</span><span class="n">getinst</span><span class="p">(</span><span class="n">m_inst</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">227</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">FAILED</span><span class="p">(</span><span class="n">hr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="k">return</span><span class="w"> </span><span class="n">hr</span><span class="p">;}</span><span class="w"></span>
+<span class="linenos">228</span>
+<span class="linenos">229</span><span class="w">     </span><span class="n">vector</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="n">v_inst</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">230</span><span class="w">     </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="o">=</span><span class="n">m_inst</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="n">iter</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">m_inst</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="o">++</span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">231</span><span class="w">             </span><span class="c1">//go through index of processes</span>
+<span class="linenos">232</span><span class="w">             </span><span class="k">for</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">iter</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">second</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="linenos">233</span><span class="w">                     </span><span class="c1">//put onto vector multiple procs w/same name</span>
+<span class="linenos">234</span><span class="w">                     </span><span class="n">v_inst</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">iter</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">first</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">235</span><span class="w">             </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">236</span><span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">237</span>
+<span class="linenos">238</span><span class="w">     </span><span class="c1">//send a vector of strings  and a variant to make_safe</span>
+<span class="linenos">239</span><span class="w">     </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">make_safe</span><span class="p">(</span><span class="n">v_inst</span><span class="p">,</span><span class="w"> </span><span class="n">plist</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">240</span>
+<span class="linenos">241</span><span class="w">        </span><span class="c1">//getprocid(m_inst);</span>
+<span class="linenos">242</span>
+<span class="linenos">243</span>
+<span class="linenos">244</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">hr</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">245</span>
+<span class="linenos">246</span><span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">247</span>
+<span class="linenos">248</span><span class="w">   </span><span class="n">STDMETHODIMP</span><span class="w"> </span><span class="n">Cprocess</span><span class="o">::</span><span class="n">procids</span><span class="p">(</span><span class="n">VARIANT</span><span class="w"> </span><span class="o">*</span><span class="n">pids</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">249</span><span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">250</span><span class="w">        </span><span class="c1">// TODO: Add your implementation code here</span>
+<span class="linenos">251</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pids</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">E_INVALIDARG</span><span class="p">;}</span><span class="w"></span>
+<span class="linenos">252</span>
+<span class="linenos">253</span><span class="w">        </span><span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NOERROR</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">254</span>
+<span class="linenos">255</span><span class="w">     </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="n">m_inst</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">256</span><span class="w">     </span><span class="n">map</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">::</span><span class="n">iterator</span><span class="w"> </span><span class="n">iter</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">257</span>
+<span class="linenos">258</span><span class="w">     </span><span class="n">hr</span><span class="o">=</span><span class="n">getinst</span><span class="p">(</span><span class="n">m_inst</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">259</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="n">FAILED</span><span class="p">(</span><span class="n">hr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="k">return</span><span class="w"> </span><span class="n">hr</span><span class="p">;}</span><span class="w"></span>
+<span class="linenos">260</span>
+<span class="linenos">261</span><span class="w">     </span><span class="n">vector</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="n">v_ids</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">262</span><span class="w">     </span><span class="n">getprocid</span><span class="p">(</span><span class="n">m_inst</span><span class="p">,</span><span class="n">v_ids</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">263</span>
+<span class="linenos">264</span><span class="w">     </span><span class="c1">//send a vector of strings  and a variant to make_safe</span>
+<span class="linenos">265</span><span class="w">     </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">make_safe</span><span class="p">(</span><span class="n">v_ids</span><span class="p">,</span><span class="w"> </span><span class="n">pids</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">266</span>
+<span class="linenos">267</span><span class="w">     </span><span class="c1">//getprocid(m_inst);</span>
+<span class="linenos">268</span>
+<span class="linenos">269</span><span class="w">     </span><span class="k">return</span><span class="w"> </span><span class="n">hr</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">270</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="in-conclusion">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">In Conclusion</a><a class="headerlink" href="#in-conclusion" title="Permalink to this heading">¶</a></h2>
+<p>That was a quick tour of Python and C++ in the win32 and COM world. Both languages have their strengths and weaknesses. With C++ you have ultimate granularity and power. It obviously comes at a cost of more details to keep track of. Python’s strength is rich productivity. It is fast to write the win32 and COM sever code, yet still have a sophisticated language at your disposal. You lose some of the flexibility of C++, which often does not matter. And, when it does, python can help you understand how to solve the problem, before wading into the details.</p>
+<p><em>Have a great time with programming with python!</em></p>
+</section>
+<section id="further-info">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Further Info</a><a class="headerlink" href="#further-info" title="Permalink to this heading">¶</a></h2>
+<p>Pdh stuff found at <a class="reference external" href="ftp://ftp.microsoft.com">ftp://ftp.microsoft.com</a> in something similar to /developr/platformsdk/april2000/x86/redist/pdh
+Mirosoft MSDN references at <a class="reference external" href="http://msdn.microsoft.com">http://msdn.microsoft.com</a>
+Relevant Pdh Python libraries: win32pdh.py, win32pdhutil.py</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Win32 Extensions</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Getting process info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_directories.html">Extending Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="win32net.html">win32net</a></li>
+<li class="toctree-l2"><a class="reference internal" href="event.html">Windows NT Eventlog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="event_threading.html">Eventlog &amp; Threading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file.html">File Locking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file_recursive.html">Directory Deleting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security.html">Windows NT Security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="samples/index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adodbapi/index.html">ADO DB-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/win32/process_info.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

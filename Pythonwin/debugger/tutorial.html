@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Pythonwin Debugger Tutorial &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Pythonwin Debugger Known Problems" href="knownproblems.html" />
+    <link rel="prev" title="Pythonwin Debugger Documentation" href="documentation.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="logo-pythonwin-debugger-tutorial">
+<h1><img alt="Pythonwin logo" src="../../_images/pythonwin.gif" /> Pythonwin Debugger Tutorial<a class="headerlink" href="#logo-pythonwin-debugger-tutorial" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-existing-document admonition">
+<p class="admonition-title">Existing document</p>
+<p><code class="file docutils literal notranslate"><span class="pre">\Pythonwin\doc\debugger\tutorial.html</span></code></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This debugger used to be known as the <code class="docutils literal notranslate"><span class="pre">win32dbg</span></code> package. Also, we have recently upgraded to a much better editor control. The screen shots in this tutorial do not reflect these recent changes. Although <code class="docutils literal notranslate"><span class="pre">win32dbg</span></code> will still work, you should substitute <code class="docutils literal notranslate"><span class="pre">pywin.debugger</span></code> for <code class="docutils literal notranslate"><span class="pre">win32dbg</span></code> in the screen-shots, and hopefully the new editor control will make the break-points etc even more obvious.</p>
+</div>
+<p>This tutorial shows how to debug a file provided with Pythonwin distribution. The module we will debug is called <code class="docutils literal notranslate"><span class="pre">`fail.py</span></code>, and is provided purely for demonstrating and testing the debugger. This file is located in the <code class="docutils literal notranslate"><span class="pre">Pythonwin\pywin\debugger</span></code> directory.</p>
+<p>This document does not attempt to discuss general debugging concepts. It is assumed that you understand the concepts of <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">In</span></code> to a routine, <code class="docutils literal notranslate"><span class="pre">Step</span> <span class="pre">Over</span></code> a routine, <code class="docutils literal notranslate"><span class="pre">call</span> <span class="pre">stack</span></code>, <code class="docutils literal notranslate"><span class="pre">break-point</span></code>, etc.</p>
+<p>When you have completed the tutorial, you should read the general debugger <a class="reference internal" href="documentation.html"><span class="doc">documentation</span></a>.</p>
+<p>In general, the user interface should be fairly intuitive. All toolbar items have status bar text and tool-tips, which will help determine their function.</p>
+<nav class="contents local" id="this-tutorial-covers-the-following-topics">
+<p class="topic-title">This tutorial covers the following topics:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#preparation-for-the-tutorial" id="id1">Preparation for the tutorial</a></p></li>
+<li><p><a class="reference internal" href="#starting-the-debugger" id="id2">Starting the Debugger</a></p></li>
+<li><p><a class="reference internal" href="#using-the-debugger" id="id3">Using the Debugger</a></p></li>
+<li><p><a class="reference internal" href="#setting-a-break-point" id="id4">Setting a Break-point</a></p></li>
+<li><p><a class="reference internal" href="#stepping-through-the-code" id="id5">Stepping through the code</a></p></li>
+<li><p><a class="reference internal" href="#examining-the-current-context" id="id6">Examining the current context</a></p></li>
+<li><p><a class="reference internal" href="#post-mortem-diagnostics" id="id7">Post-mortem diagnostics</a></p></li>
+</ul>
+</nav>
+<section id="preparation-for-the-tutorial">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Preparation for the tutorial</a><a class="headerlink" href="#preparation-for-the-tutorial" title="Permalink to this heading">¶</a></h2>
+<p>To prepare for the tutorial, ensure you have Pythonwin installed, then start either Pythonwin/Python, Windows Explorer, or an “MS-DOS” prompt.</p>
+</section>
+<section id="starting-the-debugger">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Starting the Debugger</a><a class="headerlink" href="#starting-the-debugger" title="Permalink to this heading">¶</a></h2>
+<section id="from-pythonwin-or-python">
+<h3>From <strong class="program">Pythonwin</strong> or <strong class="program">python</strong>:<a class="headerlink" href="#from-pythonwin-or-python" title="Permalink to this heading">¶</a></h3>
+<p>At the interactive window, type:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pywin.debugger.fail</span><span class="o">&lt;</span><span class="n">enter</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="from-windows-explorer">
+<h3>From Windows Explorer:<a class="headerlink" href="#from-windows-explorer" title="Permalink to this heading">¶</a></h3>
+<p>Navigate to the <code class="file docutils literal notranslate"><span class="pre">Pythonwin\pywin\debugger</span></code> directory, and double-click on the file <code class="file docutils literal notranslate"><span class="pre">fail.py</span></code>.</p>
+</section>
+<section id="from-the-ms-dos-prompt">
+<h3>From the MS-DOS Prompt:<a class="headerlink" href="#from-the-ms-dos-prompt" title="Permalink to this heading">¶</a></h3>
+<p>Change to the <code class="file docutils literal notranslate"><span class="pre">Pythonwin\pywin\debugger</span></code> directory.</p>
+<p>For Windows NT users, type:</p>
+<blockquote>
+<div><p><kbd class="kbd docutils literal notranslate">fail.py&lt;enter&gt;</kbd></p>
+</div></blockquote>
+<p>Or Windows 95/98 (sob - you would hope that 98 would have fixed some of 95s dumbness!)</p>
+<blockquote>
+<div><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">&lt;path</kbd> <kbd class="kbd docutils literal notranslate">to&gt;\python</kbd> <kbd class="kbd docutils literal notranslate">fail.py</kbd></kbd></p>
+</div></blockquote>
+<p>or</p>
+<blockquote>
+<div><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">start</kbd> <kbd class="kbd docutils literal notranslate">fail.py</kbd></kbd></p>
+</div></blockquote>
+</section>
+</section>
+<section id="using-the-debugger">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Using the Debugger</a><a class="headerlink" href="#using-the-debugger" title="Permalink to this heading">¶</a></h2>
+<p>If all goes well, you should see the debugger appear in a full GUI frame, with a particular line in <code class="file docutils literal notranslate"><span class="pre">fail.py</span></code> highlighted. Part of the screen should look something like:</p>
+<img alt="../../_images/tut1.gif" src="../../_images/tut1.gif" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This screen capture is wrong. Hopefully, what you can see on your screen is better and more obvious than this old picture!</p>
+</div>
+<p>In this case, the Python program has executed until it hit the statement <code class="code docutils literal notranslate"><span class="pre">pywin.debugger.set_trace()</span></code>.</p>
+<p>This statement is effectively a hard-coded break-point, which creates a debugger, and causes it to stop at the statement following the <code class="code docutils literal notranslate"><span class="pre">set_trace()</span></code>.</p>
+<p>The Debugger is showing the blue line as the <em>current</em> line. This is the next statement to be executed.</p>
+</section>
+<section id="setting-a-break-point">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Setting a Break-point</a><a class="headerlink" href="#setting-a-break-point" title="Permalink to this heading">¶</a></h2>
+<p>Our next step is to set a breakpoint somewhere inside the code that remains to be executed. As you can see, the Python program is about to call the function <code class="code docutils literal notranslate"><span class="pre">c()</span></code>. Examining the source, we can see that <code class="code docutils literal notranslate"><span class="pre">c()</span></code> calls <code class="code docutils literal notranslate"><span class="pre">d()</span></code>. The first line of <code class="code docutils literal notranslate"><span class="pre">d()</span></code> is a good spot!</p>
+<p>To set a break-point, perform the following steps.</p>
+<ul class="simple">
+<li><p>Select the <code class="file docutils literal notranslate"><span class="pre">fail.py</span></code> source file (or more generally, you can open another source file, and set a break-point there).</p></li>
+<li><p>Scroll to the location where a breakpoint should be set, and ensure the carat (edit box cursor) is on the line.</p></li>
+<li><p>Either: Select the <span class="guilabel">Hand</span> icon on the debugger toolbar. Or: Select the <span class="guilabel">Breakpoints</span> property page, and select the <span class="guilabel">Add/Clear</span> button.</p></li>
+</ul>
+<p>The debugger should then look something like:</p>
+<img alt="../../_images/tutbp1.gif" src="../../_images/tutbp1.gif" />
+<p>Note the current line is still colored blue, and the newly added break-point is colored red. You can also select the <span class="guilabel">Breakpoints</span> property-page and see the breakpoint listed there.</p>
+<p>We are now ready to run the debugger.</p>
+<ul class="simple">
+<li><p>Either: Select <span class="guilabel">Go</span> from one of the property-pages, or select the <span class="guilabel">Run</span> toolbar item.</p></li>
+</ul>
+<p>The debugger should vanish briefly, then re-appear after hitting the breakpoint.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The behaviour of the <em>hiding</em> can be changed, but with caveats - see the general debugger documentation for details on <code class="xref any docutils literal notranslate"><span class="pre">GUI</span> <span class="pre">versus</span> <span class="pre">Non-GUI</span> <span class="pre">Issues</span></code>).</p></li>
+<li><p>The debugger will show the break-point line in blue - there will be no visual indication the line is <em>both</em> a break-point, <em>and</em> the current line. As soon as the current line moves off this line, it will return to its break-point color.</p></li>
+</ul>
+</div>
+</section>
+<section id="stepping-through-the-code">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Stepping through the code</a><a class="headerlink" href="#stepping-through-the-code" title="Permalink to this heading">¶</a></h2>
+<p>Use the <span class="guilabel">Step</span> toolbar or dialog button to step through code. Stepping from the current location will step over the assignment of <code class="code docutils literal notranslate"><span class="pre">1</span></code> to the local variable <code class="samp docutils literal notranslate"><em><span class="pre">d</span></em></code>. Continuing to step will step into the function <code class="code docutils literal notranslate"><span class="pre">e()</span></code>.</p>
+</section>
+<section id="examining-the-current-context">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Examining the current context</a><a class="headerlink" href="#examining-the-current-context" title="Permalink to this heading">¶</a></h2>
+<p>Just to jump in, we should have a play with the property pages.</p>
+<ul class="simple">
+<li><p>Use the <span class="guilabel">Call Stack`</span> page to see the current context. Double-clicking will change the <em>current context</em>, and change the highlight. Expand and collapse each entry to view locals and globals.</p></li>
+<li><p>Use the <span class="guilabel">Interactive</span> page to view and change variables in the current context. For example, assuming that <code class="code docutils literal notranslate"><span class="pre">d()</span></code> is still the top call stack, entering <kbd class="kbd docutils literal notranslate">d&lt;enter&gt;</kbd> into the interactive page will print <code class="code docutils literal notranslate"><span class="pre">1</span></code>. Almost any Python expression/statement can be executed here, from the current context. Use the <span class="guilabel">Call Stack</span> page to change the current context (i.e., make another stack entry blue), and notice how “d” is likely to evaluate to the function <code class="code docutils literal notranslate"><span class="pre">d()</span></code> (i.e., the interactive page has changed contexts).</p></li>
+</ul>
+</section>
+<section id="post-mortem-diagnostics">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Post-mortem diagnostics</a><a class="headerlink" href="#post-mortem-diagnostics" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="file docutils literal notranslate"><span class="pre">fail.py</span></code> as distributed is setup to demonstrate “port-mortem” debugging - i.e., debugging after an exception has occurred.</p>
+<p>To demonstrate post-mortem diagnostics, simply:</p>
+<ul class="simple">
+<li><p>Click on the <span class="guilabel">Run</span> toolbar item or property page button</p></li>
+</ul>
+<p>The debugger will again vanish, and re-appear looking something like:</p>
+<img alt="../../_images/postmortem.gif" src="../../_images/postmortem.gif" />
+<p>Notice that there is now a new property page, titled “Exception”. This shows the traceback that Python would normally print if this exception was unhandled.</p>
+<p>All other features of the debugger work as expected. You can view each call stacks local and globals, etc. However, you can not force Python to ignore, or otherwise alter the normal Python exception processing. (except, or course, by stopping the debugger)</p>
+<p>OK - now jump to the general debugger <a class="reference internal" href="documentation.html"><span class="doc">documentation</span></a> to get a more detailed picture.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../adodbapi/index.html">ADO DB-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html"> Pythonwin</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Debugger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guienvironment.html">GUI Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../embeddingwin32ui.html"> Embedding Pythonwin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../docview.html">Documents and Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html">Pythonwin Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contents.html">The Editor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/Pythonwin/debugger/tutorial.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

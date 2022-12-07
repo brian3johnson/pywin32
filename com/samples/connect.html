@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>connect.py Sample &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API" href="../apidoc/index.html" />
+    <link rel="prev" title="Samples" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="connect-py-sample">
+<h1>connect.py Sample<a class="headerlink" href="#connect-py-sample" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Implements _both_ a connectable client, and a connectable server.</span>
+<span class="linenos"> 2</span><span class="c1">#</span>
+<span class="linenos"> 3</span><span class="c1"># Note that we cheat just a little - the Server in this demo is not created</span>
+<span class="linenos"> 4</span><span class="c1"># via Normal COM - this means we can avoid registering the server.</span>
+<span class="linenos"> 5</span><span class="c1"># However, the server _is_ accessed as a COM object - just the creation</span>
+<span class="linenos"> 6</span><span class="c1"># is cheated on - so this is still working as a fully-fledged server.</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="kn">import</span> <span class="nn">pythoncom</span>
+<span class="linenos"> 9</span><span class="kn">import</span> <span class="nn">win32com.server.util</span>
+<span class="linenos">10</span><span class="kn">import</span> <span class="nn">win32com.server.connect</span>
+<span class="linenos">11</span><span class="kn">from</span> <span class="nn">win32com.server.exception</span> <span class="kn">import</span> <span class="ne">Exception</span>
+<span class="linenos">12</span><span class="kn">from</span> <span class="nn">pywin32_testutil</span> <span class="kn">import</span> <span class="n">str2bytes</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="c1"># This is the IID of the Events interface both Client and Server support.</span>
+<span class="linenos">15</span><span class="n">IID_IConnectDemoEvents</span> <span class="o">=</span> <span class="n">pythoncom</span><span class="o">.</span><span class="n">MakeIID</span><span class="p">(</span><span class="s2">&quot;{A4988850-49C3-11d0-AE5D-52342E000000}&quot;</span><span class="p">)</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="c1"># The server which implements</span>
+<span class="linenos">18</span><span class="c1"># Create a connectable class, that has a single public method</span>
+<span class="linenos">19</span><span class="c1"># &#39;DoIt&#39;, which echos to a single sink &#39;DoneIt&#39;</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="k">class</span> <span class="nc">ConnectableServer</span><span class="p">(</span><span class="n">win32com</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">ConnectableServer</span><span class="p">):</span>
+<span class="linenos">23</span>    <span class="n">_public_methods_</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">24</span>        <span class="s2">&quot;DoIt&quot;</span>
+<span class="linenos">25</span>    <span class="p">]</span> <span class="o">+</span> <span class="n">win32com</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">ConnectableServer</span><span class="o">.</span><span class="n">_public_methods_</span>
+<span class="linenos">26</span>    <span class="n">_connect_interfaces_</span> <span class="o">=</span> <span class="p">[</span><span class="n">IID_IConnectDemoEvents</span><span class="p">]</span>
+<span class="linenos">27</span>    <span class="c1"># The single public method that the client can call on us</span>
+<span class="linenos">28</span>    <span class="c1"># (ie, as a normal COM server, this exposes just this single method.</span>
+<span class="linenos">29</span>    <span class="k">def</span> <span class="nf">DoIt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+<span class="linenos">30</span>        <span class="c1"># Simply broadcast a notification.</span>
+<span class="linenos">31</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_BroadcastNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NotifyDoneIt</span><span class="p">,</span> <span class="p">(</span><span class="n">arg</span><span class="p">,))</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span>    <span class="k">def</span> <span class="nf">NotifyDoneIt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+<span class="linenos">34</span>        <span class="n">interface</span><span class="o">.</span><span class="n">Invoke</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pythoncom</span><span class="o">.</span><span class="n">DISPATCH_METHOD</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="c1"># Here is the client side of the connection world.</span>
+<span class="linenos">38</span><span class="c1"># Define a COM object which implements the methods defined by the</span>
+<span class="linenos">39</span><span class="c1"># IConnectDemoEvents interface.</span>
+<span class="linenos">40</span><span class="k">class</span> <span class="nc">ConnectableClient</span><span class="p">:</span>
+<span class="linenos">41</span>    <span class="c1"># This is another cheat - I _know_ the server defines the &quot;DoneIt&quot; event</span>
+<span class="linenos">42</span>    <span class="c1"># as DISPID==1000 - I also know from the implementation details of COM</span>
+<span class="linenos">43</span>    <span class="c1"># that the first method in _public_methods_ gets 1000.</span>
+<span class="linenos">44</span>    <span class="c1"># Normally some explicit DISPID-&gt;Method mapping is required.</span>
+<span class="linenos">45</span>    <span class="n">_public_methods_</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;OnDoneIt&quot;</span><span class="p">]</span>
+<span class="linenos">46</span>
+<span class="linenos">47</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">48</span>        <span class="bp">self</span><span class="o">.</span><span class="n">last_event_arg</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">49</span>
+<span class="linenos">50</span>    <span class="c1"># A client must implement QI, and respond to a query for the Event interface.</span>
+<span class="linenos">51</span>    <span class="c1"># In addition, it must provide a COM object (which server.util.wrap) does.</span>
+<span class="linenos">52</span>    <span class="k">def</span> <span class="nf">_query_interface_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iid</span><span class="p">):</span>
+<span class="linenos">53</span>        <span class="kn">import</span> <span class="nn">win32com.server.util</span>
+<span class="linenos">54</span>
+<span class="linenos">55</span>        <span class="c1"># Note that this seems like a necessary hack.  I am responding to IID_IConnectDemoEvents</span>
+<span class="linenos">56</span>        <span class="c1"># but only creating an IDispatch gateway object.</span>
+<span class="linenos">57</span>        <span class="k">if</span> <span class="n">iid</span> <span class="o">==</span> <span class="n">IID_IConnectDemoEvents</span><span class="p">:</span>
+<span class="linenos">58</span>            <span class="k">return</span> <span class="n">win32com</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="linenos">59</span>
+<span class="linenos">60</span>    <span class="c1"># And here is our event method which gets called.</span>
+<span class="linenos">61</span>    <span class="k">def</span> <span class="nf">OnDoneIt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+<span class="linenos">62</span>        <span class="bp">self</span><span class="o">.</span><span class="n">last_event_arg</span> <span class="o">=</span> <span class="n">arg</span>
+<span class="linenos">63</span>
+<span class="linenos">64</span>
+<span class="linenos">65</span><span class="k">def</span> <span class="nf">CheckEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+<span class="linenos">66</span>    <span class="n">client</span><span class="o">.</span><span class="n">last_event_arg</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">67</span>    <span class="n">server</span><span class="o">.</span><span class="n">DoIt</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+<span class="linenos">68</span>    <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">last_event_arg</span> <span class="o">!=</span> <span class="n">val</span><span class="p">:</span>
+<span class="linenos">69</span>        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Sent </span><span class="si">%r</span><span class="s2">, but got back </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">last_event_arg</span><span class="p">))</span>
+<span class="linenos">70</span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="linenos">71</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sent and received </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+<span class="linenos">72</span>
+<span class="linenos">73</span>
+<span class="linenos">74</span><span class="c1"># A simple test script for all this.</span>
+<span class="linenos">75</span><span class="c1"># In the real world, it is likely that the code controlling the server</span>
+<span class="linenos">76</span><span class="c1"># will be in the same class as that getting the notifications.</span>
+<span class="linenos">77</span><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="linenos">78</span>    <span class="kn">import</span> <span class="nn">win32com.client.dynamic</span><span class="o">,</span> <span class="nn">win32com.client.connect</span>
+<span class="linenos">79</span>    <span class="kn">import</span> <span class="nn">win32com.server.policy</span>
+<span class="linenos">80</span>
+<span class="linenos">81</span>    <span class="n">server</span> <span class="o">=</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">dynamic</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">(</span>
+<span class="linenos">82</span>        <span class="n">win32com</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">ConnectableServer</span><span class="p">())</span>
+<span class="linenos">83</span>    <span class="p">)</span>
+<span class="linenos">84</span>    <span class="n">connection</span> <span class="o">=</span> <span class="n">win32com</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">SimpleConnection</span><span class="p">()</span>
+<span class="linenos">85</span>    <span class="n">client</span> <span class="o">=</span> <span class="n">ConnectableClient</span><span class="p">()</span>
+<span class="linenos">86</span>    <span class="n">connection</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">IID_IConnectDemoEvents</span><span class="p">)</span>
+<span class="linenos">87</span>    <span class="n">CheckEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="s2">&quot;Hello&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+<span class="linenos">88</span>    <span class="n">CheckEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">str2bytes</span><span class="p">(</span><span class="s2">&quot;Here is a null&gt;</span><span class="se">\x00</span><span class="s2">&lt;&quot;</span><span class="p">),</span> <span class="n">verbose</span><span class="p">)</span>
+<span class="linenos">89</span>    <span class="n">CheckEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="s2">&quot;Here is a null&gt;</span><span class="se">\x00</span><span class="s2">&lt;&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+<span class="linenos">90</span>    <span class="n">val</span> <span class="o">=</span> <span class="s2">&quot;test-</span><span class="se">\xe0\xf2</span><span class="s2">&quot;</span>  <span class="c1"># 2 extended characters.</span>
+<span class="linenos">91</span>    <span class="n">CheckEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+<span class="linenos">92</span>    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+<span class="linenos">93</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Everything seemed to work!&quot;</span><span class="p">)</span>
+<span class="linenos">94</span>    <span class="c1"># Aggressive memory leak checking (ie, do nothing!) :-)  All should cleanup OK???</span>
+<span class="linenos">95</span>
+<span class="linenos">96</span>
+<span class="linenos">97</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">98</span>    <span class="n">test</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">PythonCOM</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../QuickStartClientCom.html">Client-side COM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../QuickStartServerCom.html">Server-side COM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../GeneratedSupport.html">Generated COM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../variant.html">VARIANT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../package.html">win32com</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PythonCOM.html">Python &amp; COM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../misc.html">Miscellany</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../active_directory.html">Active Directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adsi.html">ADSI &amp; Exchange</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../asp.html">ASP and Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp.html">Python, C++, and COM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mts.html">MTS and Python for NT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../shell.html">win32com.shell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../directsound.html">DirectSound examples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../adodbapi/index.html">ADO DB-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/com/samples/connect.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

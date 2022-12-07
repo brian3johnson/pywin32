@@ -1,0 +1,613 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Python ADODBAPI quick reference &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Samples" href="samples/index.html" />
+    <link rel="prev" title="ADO DB-API" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="python-adodbapi-quick-reference">
+<h1>Python ADODBAPI quick reference<a class="headerlink" href="#python-adodbapi-quick-reference" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-existing-document admonition">
+<p class="admonition-title">Existing document</p>
+<p><code class="file docutils literal notranslate"><span class="pre">\adodbpi\quick_reference.md</span></code></p>
+</div>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#about-ado-odbc-and-connection-strings" id="id1">About ADO, ODBC, and Connection Strings</a></p></li>
+<li><p><a class="reference internal" href="#driver-and-provider-download-links" id="id2">Driver (and Provider) download links</a></p></li>
+<li><p><a class="reference internal" href="#pep-249" id="id3">PEP-249</a></p></li>
+<li><p><a class="reference internal" href="#module-level-attributes" id="id4">Module level attributes</a></p></li>
+<li><p><a class="reference internal" href="#connect-use-of-the-connect-constructor" id="id5">Connect (Use of the connect constructor)</a></p></li>
+<li><p><a class="reference internal" href="#connection-keyword-macro-language" id="id6">Connection Keyword Macro Language</a></p></li>
+<li><p><a class="reference internal" href="#connection-class" id="id7">Connection class</a></p></li>
+<li><p><a class="reference internal" href="#cursor-class" id="id8">Cursor class</a></p></li>
+<li><p><a class="reference internal" href="#paramstyles" id="id9">PARAMSTYLEs</a></p></li>
+<li><p><a class="reference internal" href="#what" id="id10">What???</a></p></li>
+<li><p><a class="reference internal" href="#row-class-rows-class-for-returned-data" id="id11">Row Class &amp; Rows Class for returned data</a></p></li>
+<li><p><a class="reference internal" href="#variantconversions-for-the-connection-and-the-cursor" id="id12">variantConversions for the connection and the cursor</a></p></li>
+<li><p><a class="reference internal" href="#the-examples-folder" id="id13">The Examples folder</a></p></li>
+<li><p><a class="reference internal" href="#running-the-tests" id="id14">Running the tests</a></p></li>
+</ul>
+</nav>
+<p>adodbapi is a Python DB-API 2.0 module that makes it easy to use Microsoft <abbr title="ActiveX Data Objects">ADO</abbr> for connecting with databases and other data sources using either CPython or IronPython.</p>
+<p>For complete installation instructions, see the README.txt file, which you may also find at <a class="reference external" href="https://pypi.python.org/pypi/adodbapi">https://pypi.python.org/pypi/adodbapi</a>. Quick installation instructions (for users of CPython) are as follows: <code class="code docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">pywin32</span></code>.</p>
+<section id="about-ado-odbc-and-connection-strings">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">About ADO, ODBC, and Connection Strings</a><a class="headerlink" href="#about-ado-odbc-and-connection-strings" title="Permalink to this heading">¶</a></h2>
+<p>Microsoft engineers invented ODBC as a standard way of connecting to a tabular data source, such as an SQL database server. It was such a good design that it was adopted almost universally. Therefore, Microsoft thought they should come up with something even better that everyone else did not have.</p>
+<p>That was ADO. In truth, ADO does have some features that ODBC does not have. For compatibility, it uses ODBC as its default mode of operation. One powerful anti-feature is: it is proprietary. You have to have Windows to use it.</p>
+<p>ODBC connections are made using a string, called a “data set name”, abbreviated “dsn”. A dsn can be very short. There is a utility program which stores the translations of a dsn to all of the information needed to connect to that data store. There is a more-or-less defined standard of how to pass that additional information using the dsn string for those cases where the dsn is not already known by the system.</p>
+<p>ADO uses a completely different way of accomplishing the same goal. To make matters worse, ADO operates, by default, in ODBC mode, so it must be able to process this information in either format. The resulting mass of confusion is called a “connection string”. There is an entire web site dedicated to giving examples of connection strings in numerous combinations. See <a class="reference external" href="http://www.connectionstrings.com/">http://www.connectionstrings.com/</a></p>
+<p>and for more explanation:</p>
+<p><a class="reference external" href="http://www.asp101.com/articles/john/connstring/default.asp">http://www.asp101.com/articles/john/connstring/default.asp</a></p>
+<p>The software which connects ODBC to an engine is called a “Driver”. One which talks in ADO is called a “Provider”. Sometimes there will be a Provider for a Driver.</p>
+</section>
+<section id="driver-and-provider-download-links">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Driver (and Provider) download links</a><a class="headerlink" href="#driver-and-provider-download-links" title="Permalink to this heading">¶</a></h2>
+<p>The current (as of 2019) SQL Server OLE DB provider (which they call a “driver” here) is <a class="reference external" href="https://www.microsoft.com/en-us/download/details.aspx?id=56730">https://www.microsoft.com/en-us/download/details.aspx?id=56730</a> which is linked from, and explained <a class="reference external" href="https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017">here, in their document</a>.</p>
+<ul class="simple">
+<li><p>Jet (ACCESS database) and other file datasets (like .xls and .csv) “ACE” Provider:</p>
+<ul>
+<li><p><a class="reference external" href="http://www.microsoft.com/en-us/download/details.aspx?id=13255">http://www.microsoft.com/en-us/download/details.aspx?id=13255</a> a (32 bit) Microsoft.Jet.OLEDB.4.0 Provider, which may be included with Windows. Note that you are not permitted load the 32 bit “ACE” provider if you have any 64-bit Office components installed. Conventional wisdom says that you must use 64 bit Python in this case. However, see the answer in <a class="reference external" href="http://stackoverflow.com/questions/12270453/ms-access-db-engine-32-bit-with-office-64-bit">http://stackoverflow.com/questions/12270453/ms-access-db-engine-32-bit-with-office-64-bit</a>. If you decide to try hacking the installers, you may find <a class="reference external" href="http://www.pantaray.com/msi_super_orca.html">http://www.pantaray.com/msi_super_orca.html</a> to be a useful alternative to Orca. My experience is that such a <a class="reference external" href="http://shares.digvil.info/redis">hacked installer (like this one)</a> can also be used on machines where “click to buy” versions of Office have been removed, but are still blocking installation of the redistributable provider.</p></li>
+</ul>
+</li>
+<li><p>To use any ODBC driver from 64 bit Python, you also need the MSDASQL provider. It is shipped with Server 2008 and Vista and later. For Server 2003, You will have to <a class="reference external" href="http://www.microsoft.com/en-us/download/details.aspx?id=20065">download it</a> from Microsoft.</p></li>
+<li><p>MySQL driver <a class="reference external" href="http://dev.mysql.com/downloads/connector/odbc/">http://dev.mysql.com/downloads/connector/odbc/</a> or MariaDB driver <a class="reference external" href="https://downloads.mariadb.org/connector-odbc/">https://downloads.mariadb.org/connector-odbc/</a> or <code class="code docutils literal notranslate"><span class="pre">choco</span> <span class="pre">install</span> <span class="pre">mysql.odbc</span></code></p></li>
+<li><p>PostgreSQL driver <a class="reference external" href="http://www.postgresql.org/ftp/odbc/versions/msi/">http://www.postgresql.org/ftp/odbc/versions/msi/</a> (scroll all the way to the bottom) or <code class="code docutils literal notranslate"><span class="pre">choco</span> <span class="pre">install</span> <span class="pre">psqlodbc</span></code>.</p></li>
+</ul>
+</section>
+<section id="pep-249">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">PEP-249</a><a class="headerlink" href="#pep-249" title="Permalink to this heading">¶</a></h2>
+<p>This “quick reference” assumes that you are already familiar with Python, SQL, and the general principles of accessing a database using the <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a> api. I may write a book later. Here, I only intend to cover the extensions and special features of adodbapi.</p>
+</section>
+<section id="module-level-attributes">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Module level attributes</a><a class="headerlink" href="#module-level-attributes" title="Permalink to this heading">¶</a></h2>
+<p>The PEP requires several module level attributes. Older versions of adodbapi (which was once all one big file) defined a hundred or two. I hate that, but cannot break old code, so I decided to fix the problem for Python 3. If using Python3 the programmer must take the time to pick up the symbols she needs from <a class="reference internal" href="apidoc/adodbapi.html#module-adodbapi.apibase" title="adodbapi.apibase"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adodbapi.apibase</span></code></a> and <a class="reference internal" href="apidoc/adodbapi.html#module-adodbapi.ado_consts" title="adodbapi.ado_consts"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adodbapi.ado_consts</span></code></a>.</p>
+<p>Part of the adodbapi package’s <code class="file docutils literal notranslate"><span class="pre">__init__.py</span></code> looks something like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span> <span class="c1"># in Python 2, define all symbols, just like before</span>
+    <span class="kn">from</span> <span class="nn">apibase</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c1"># using this is bad</span>
+    <span class="kn">from</span> <span class="nn">ado_consts</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c1"># using this is worse</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># but if the user is running Python 3, then keep the dictionary clean</span>
+    <span class="kn">from</span> <span class="nn">apibase</span> <span class="kn">import</span> <span class="n">apilevel</span><span class="p">,</span> <span class="n">threadsafety</span><span class="p">,</span> <span class="n">paramstyle</span>
+    <span class="kn">from</span> <span class="nn">apibase</span> <span class="kn">import</span> <span class="ne">Warning</span><span class="p">,</span> <span class="n">Error</span><span class="p">,</span> <span class="n">InterfaceError</span><span class="p">,</span> <span class="n">DatabaseError</span><span class="p">,</span> <span class="n">DataError</span>
+    <span class="kn">from</span> <span class="nn">apibase</span> <span class="kn">import</span> <span class="n">OperationalError</span><span class="p">,</span> <span class="n">IntegrityError</span>
+    <span class="kn">from</span> <span class="nn">apibase</span> <span class="kn">import</span> <span class="n">InternalError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">,</span> <span class="n">NotSupportedError</span>
+    <span class="kn">from</span> <span class="nn">apibase</span> <span class="kn">import</span> <span class="n">NUMBER</span><span class="p">,</span> <span class="n">STRING</span><span class="p">,</span> <span class="n">BINARY</span><span class="p">,</span> <span class="n">DATETIME</span><span class="p">,</span> <span class="n">ROWID</span>
+
+<span class="kn">from</span> <span class="nn">adodbapi</span> <span class="kn">import</span> <span class="n">connect</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">__version__</span>
+<span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;adodbapi v&#39;</span> <span class="o">+</span> <span class="n">__version__</span>
+</pre></div>
+</div>
+<p>Please, use only those last four symbols from adodbapi. All others should be imported directly from their own sub-modules. My tests and examples all follow that rule.</p>
+</section>
+<section id="connect-use-of-the-connect-constructor">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Connect (Use of the connect constructor)</a><a class="headerlink" href="#connect-use-of-the-connect-constructor" title="Permalink to this heading">¶</a></h2>
+<p>As required by the PEP, the simplest way to connect is to use a “data
+set name”.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adodbapi</span>
+<span class="n">myConn</span> <span class="o">=</span> <span class="n">adodbapi</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;myDataSetName&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Which will work just fine, provided you (or someone) has done all of the hard work by going into <span class="menuselection">Control Panel ‣ Administrative Tools ‣ Data Sources (ODBC)</span> and set everything up for you under <code class="code docutils literal notranslate"><span class="pre">'myDataSetName'</span></code>.</p>
+<p>Usually, life is not so simple…</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adodbapi</span>
+<span class="n">myhost</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;.\SQLEXPRESS&quot;</span>
+<span class="n">mydatabase</span> <span class="o">=</span> <span class="s2">&quot;Northwind&quot;</span>
+<span class="n">myuser</span> <span class="o">=</span> <span class="s2">&quot;guest&quot;</span>
+<span class="n">mypassword</span> <span class="o">=</span> <span class="s2">&quot;12345678&quot;</span>
+<span class="n">connStr</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Provider=SQLOLEDB.1; User ID=</span><span class="si">%s</span><span class="s2">; Password=</span><span class="si">%s</span><span class="s2">;</span>
+<span class="s2">Initial Catalog=</span><span class="si">%s</span><span class="s2">; Data Source= </span><span class="si">%s</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">myConnStr</span> <span class="o">=</span> <span class="n">connStr</span> <span class="o">%</span> <span class="p">(</span><span class="n">myuser</span><span class="p">,</span> <span class="n">mypassword</span><span class="p">,</span> <span class="n">mydatabase</span><span class="p">,</span> <span class="n">myhost</span><span class="p">)</span>
+<span class="n">myConn</span> <span class="o">=</span> <span class="n">adodbapi</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">myConnStr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The PEP suggests that we should be able to create the connection using positional arguments. For us, that is difficult, because the syntax of an ADO connection string is so varied that we have to tell the module where to insert the arguments. In order to do that, use Python’s old-style string formatting operations and label the places where the arguments should be inserted. An argument named <code class="code docutils literal notranslate"><span class="pre">spam</span></code> would be located by a <code class="code docutils literal notranslate"><span class="pre">%(spam)s</span></code> construct. The second, third, forth, and fifth arguments are defined (by standard) as being <code class="code docutils literal notranslate"><span class="pre">user</span></code>, <code class="code docutils literal notranslate"><span class="pre">password</span></code>, <code class="code docutils literal notranslate"><span class="pre">host</span></code>, and <code class="code docutils literal notranslate"><span class="pre">database</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">connStr</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Provider=SQLOLEDB.1; User ID=</span><span class="si">%(user)s</span><span class="s2">;</span>
+<span class="s2">Password=</span><span class="si">%(password)s</span><span class="s2">; Initial Catalog=</span><span class="si">%(database)s</span><span class="s2">;</span>
+<span class="s2">Data Source=</span><span class="si">%(host)s</span><span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">myConn</span><span class="o">=</span><span class="n">adodbapi</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">connStr</span><span class="p">,</span> <span class="n">myuser</span><span class="p">,</span> <span class="n">mypassword</span><span class="p">,</span> <span class="n">myhost</span><span class="p">,</span> <span class="n">mydatabase</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Which will work.</p>
+<p>It would be better documented, however, to use keyword, rather than positional arguments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">myConn</span> <span class="o">=</span> <span class="n">adodbapi</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">connStr</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">myuser</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">mypassword</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">myhost</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">mydatabase</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In adodbapi, you may also pass keywords using a dictionary structure, which also allows us to pass additional arguments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conn_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;host&#39;</span> <span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;.\SQLEXPRESS&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;database&#39;</span><span class="p">:</span> <span class="s2">&quot;Northwind&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="s2">&quot;guest&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="s2">&quot;12345678&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}</span>
+
+<span class="n">myConn</span> <span class="o">=</span> <span class="n">adodbapi</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">connStr</span><span class="p">,</span> <span class="p">[],</span> <span class="o">**</span><span class="n">conn_args</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Which works, but is ugly. So let’s also put the connection string into the dictionary. As an extension, I allow the first (or second) positional argument to be the keyword dictionary.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conn_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;.\SQLEXPRESS&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;database&#39;</span><span class="p">:</span> <span class="s2">&quot;Northwind&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="s2">&quot;guest&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="s2">&quot;12345678&quot;</span><span class="p">}</span>
+<span class="n">conn_args</span><span class="p">[</span><span class="s1">&#39;connection_string&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Provider=SQLOLEDB.1;</span>
+<span class="s2">User ID=</span><span class="si">%(user)s</span><span class="s2">; Password=</span><span class="si">%(password)s</span><span class="s2">;</span>
+<span class="s2">Initial Catalog=</span><span class="si">%(database)s</span><span class="s2">; Data Source= </span><span class="si">%(host)s</span><span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">myConn</span> <span class="o">=</span> <span class="n">adodbapi</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">conn_args</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Not pretty, I will admit, but it is about as readable as connection strings get. Arbitrary keywords, are also expanded using the same mechanism. For example, I often use “provider” to allow me to choose between database drivers. There are also built-in keywords which the constructor recognizes when building your connection. For example, <code class="code docutils literal notranslate"><span class="pre">timeout=n</span></code>.</p>
+<p><strong>Dictionary Keywords which have meaning inside the connect method:</strong></p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">timeout=30</span></code> # set the ADO connection <code class="code docutils literal notranslate"><span class="pre">timeout</span></code> to <code class="samp docutils literal notranslate"><em><span class="pre">n</span></em></code> seconds. (Default = <code class="code docutils literal notranslate"><span class="pre">30</span></code>) This value will also be used as the SQL command timeout subsequently. The command <code class="code docutils literal notranslate"><span class="pre">timeout</span></code> can be changed via the <code class="code docutils literal notranslate"><span class="pre">timeout</span></code> connection attribute.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">paramstyle='qmark'</span></code> # initialize the connection’s <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code>, like <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code>, <code class="code docutils literal notranslate"><span class="pre">'format'</span></code>, or <code class="code docutils literal notranslate"><span class="pre">'named'</span></code>. (Default = <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code>)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">autocommit=False`</span></code> # initialize <code class="code docutils literal notranslate"><span class="pre">autocommit</span></code> on the connection. (Default = <code class="code docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+</ul>
+</section>
+<section id="connection-keyword-macro-language">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Connection Keyword Macro Language</a><a class="headerlink" href="#connection-keyword-macro-language" title="Permalink to this heading">¶</a></h2>
+<p>It often happens, when building a connection string for a generic connection, that you need to know information about your host computer, such as, “Is it running 32-bit or 64-bit Python?” Keyword macros provide a method of passing that decision on to the server it run time.</p>
+<p>A macro is defined by using a keyword which starts with <code class="code docutils literal notranslate"><span class="pre">macro_</span></code> followed by the macro name. The value associated with the keyword must be a single string, or a valid Python sequence. The string or sequence is passed to the macro processor. The first <code class="code docutils literal notranslate"><span class="pre">([0])</span></code> argument will become the new keyword which the macro will produce. If the macro requires arguments, they will be in subsequent members.</p>
+<p>The result of the macro operation will be the value of the new key.</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">macro_is64bit</span></code>: Test 64-bit-ed-ness of the proxy server. If the server is running 64-bit Python, return argument <code class="code docutils literal notranslate"><span class="pre">[1]</span></code>, otherwise return argument <code class="code docutils literal notranslate"><span class="pre">[2]</span></code>. Example:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;macro_is64bit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;provider&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;Microsoft.ACE.OLEDB.12.0&#39;</span><span class="p">,</span> <span class="s2">&quot;Microsoft.Jet.OLEDB.4.0&quot;</span><span class="p">]</span>
+
+<span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;connection_string&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Provider=</span><span class="si">%(provider)s</span><span class="s2">; ... and ... more ... stuff</span><span class="se">\&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">macro_getuser</span></code>: Retrieve the proxy server logged-in-user’s username. “My systems administrator gave me a test database named after myself. I thought it would be handy to let others do a similar thing.” Thus:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;macro_getuser&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;database&#39;</span>
+
+<span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;connection_string&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;...stuff...; Initial Catalog=</span><span class="si">%(database)s</span><span class="s2">; ...&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">macro_auto_security</span></code>: Build ADO security string automagically. If the username (key <code class="code docutils literal notranslate"><span class="pre">user</span></code>) is missing, blank, or None, use Windows login security, otherwise use SQL Server security with <code class="code docutils literal notranslate"><span class="pre">user</span></code> and <code class="code docutils literal notranslate"><span class="pre">password</span></code>. It runs this code:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">macro_name</span> <span class="o">==</span> <span class="s2">&quot;auto_security&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;user&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="n">new_key</span><span class="p">,</span> <span class="s1">&#39;Integrated Security=SSPI&#39;</span>
+    <span class="k">return</span> <span class="n">new_key</span><span class="p">,</span> <span class="s1">&#39;User ID=</span><span class="si">%(user)s</span><span class="s1">; Password=</span><span class="si">%(password)s</span><span class="s1">&#39;</span>
+
+    <span class="c1"># note that %(user) and %(password) are not substituted here,</span>
+    <span class="c1"># they are put in place to be substituted before being sent to ADO.</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;macro_auto_security&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;secure&#39;</span><span class="p">]</span>
+<span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># username here for Server Security</span>
+<span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xys&#39;</span> <span class="c1"># ignored if &quot;user&quot; is blank or undefined</span>
+<span class="n">conn_keys</span><span class="p">[</span><span class="s1">&#39;connection_string&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;\...stuff...; </span><span class="si">%(secure)s</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="connection-class">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Connection class</a><a class="headerlink" href="#connection-class" title="Permalink to this heading">¶</a></h2>
+<p>A <a class="reference internal" href="apidoc/adodbapi.html#adodbapi.Connection" title="adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a> object holds an ADO connection in its <code class="code docutils literal notranslate"><span class="pre">.connector</span></code> attribute.</p>
+<p>A <a class="reference internal" href="apidoc/adodbapi.html#adodbapi.Connection" title="adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a> object is usually created using the standard api constructor.</p>
+<p>Internally, it creates an empty <a class="reference internal" href="apidoc/adodbapi.html#adodbapi.Connection" title="adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a> object, fills in the attributes needed, and then call its <code class="xref py py-meth docutils literal notranslate"><span class="pre">connect()</span></code> method (which calls the ADO <code class="code docutils literal notranslate"><span class="pre">Open</span></code> method).</p>
+<p>Connection Methods:</p>
+<p>The standard methods are supplied:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">.close()</span></code> # close the connection (does an ADO Close)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.commit()</span></code> # commits any pending transaction(s) on the connection</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.rollback()</span></code> # rolls back any pending transaction. If the engine attached to the present instance does not support transactions, this method will appear to not be present (an <code class="code docutils literal notranslate"><span class="pre">AttributeError</span></code> will be raised), as per the PEP.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.cursor()</span></code> # returns a new <code class="code docutils literal notranslate"><span class="pre">Cursor</span></code> object for the connection.</p></li>
+</ul>
+<p>Connection Methods: (non-standard)</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">.__enter__()</span></code> # the connection is a context manager for transactions</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.__exit__()</span></code> # if no errors occurred, <code class="code docutils literal notranslate"><span class="pre">.commit()</span></code>, otherwise <code class="code docutils literal notranslate"><span class="pre">.rollback()</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.get_table_names()</span></code> # returns a list of table names in your database. (schema)</p></li>
+</ul>
+<p>Connection Attributes</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.errorhandler</span></code> # (standard extension. See PEP.) (does not work on remote)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.messages[]</span></code> # (standard extension. See PEP)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.connector</span></code> # (Internal) the ADO connection object</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.paramstyle</span></code> # can be altered by the programmer to change the paramstyle in use. The supported values are <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code> (the default), <code class="code docutils literal notranslate"><span class="pre">'format'</span></code>, and <code class="code docutils literal notranslate"><span class="pre">'named'</span></code>. Values of <code class="code docutils literal notranslate"><span class="pre">'pyformat'</span></code>, and <code class="code docutils literal notranslate"><span class="pre">'dynamic'</span></code> are also accepted (see below).</p>
+<blockquote>
+<div><p>The connection string keyword <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> will set the default for the class for future connections.</p>
+</div></blockquote>
+</li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.connection_string</span></code> # the complete connection string which was used to start ADO.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.dbms_name</span></code> # string identifying the actual database engine from the connection.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.dbms_version</span></code> # string identifying the version of the db engine.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.variantConversions</span></code> # a map of ado types to the functions used to import them.(not available on remote)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.supportsTransactions</span></code> # (bool) this driver is capable of commit()/rollback().</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.dbapi</span></code> # references the module defining the connection. (A proposed db-api V3 extension.) This is a way for higher level code to reach module-level attributes.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.timeout</span></code> # supply a value for <code class="code docutils literal notranslate"><span class="pre">CommandTimeout</span></code>. Note: the <code class="code docutils literal notranslate"><span class="pre">timeout</span></code> connection value is stored in this attribute, and is used as the connection timeout. It is then re-used as the command timeout. The user may overcome this rather goofy “feature” by supplying a different value to this attribute after the connection is made. The value is in seconds, and will be used for all subsequent SQL commands.</p></li>
+</ul>
+</section>
+<section id="cursor-class">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Cursor class</a><a class="headerlink" href="#cursor-class" title="Permalink to this heading">¶</a></h2>
+<p>Cursor attributes:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">.description</span></code> # as defined by <span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a>, a sequence of 7-item sequences:</p></li>
+</ul>
+<p>for each column, defines the column by:</p>
+<p>[0] <code class="code docutils literal notranslate"><span class="pre">name`</span></code>: ADO <code class="code docutils literal notranslate"><span class="pre">field.Name</span></code></p>
+<p>[1] <code class="code docutils literal notranslate"><span class="pre">type_code</span></code>: ADO <code class="code docutils literal notranslate"><span class="pre">field.Type</span></code> - (values defined in
+<code class="code docutils literal notranslate"><span class="pre">adodbapi.ado_consts</span></code>)</p>
+<p>[2] <code class="code docutils literal notranslate"><span class="pre">display_size</span></code>: ADO <code class="code docutils literal notranslate"><span class="pre">field.ActualSize</span></code> or <code class="code docutils literal notranslate"><span class="pre">None</span></code></p>
+<p>[3] <code class="code docutils literal notranslate"><span class="pre">internal_size</span></code>: ADO <code class="code docutils literal notranslate"><span class="pre">field.DefinedSize</span></code></p>
+<p>[4] <code class="code docutils literal notranslate"><span class="pre">precision</span></code>: ADO <code class="code docutils literal notranslate"><span class="pre">field.Precision</span></code></p>
+<p>[5] <code class="code docutils literal notranslate"><span class="pre">scale</span></code>: ADO <code class="code docutils literal notranslate"><span class="pre">field.NumericScale</span></code></p>
+<p>[6] <code class="code docutils literal notranslate"><span class="pre">null_ok`</span></code>: ADO <code class="code docutils literal notranslate"><span class="pre">field.Attributes</span></code> &amp; <code class="code docutils literal notranslate"><span class="pre">adFldMayBeNull</span></code></p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">.rowcount</span></code> # <code class="code docutils literal notranslate"><span class="pre">-1</span></code> means “not known”. Will be ADO <code class="code docutils literal notranslate"><span class="pre">recordset.RecordCount</span></code> (if it works), otherwise, the count returned by the last ADO <code class="code docutils literal notranslate"><span class="pre">Execute</span></code> operation.</p></li>
+</ul>
+<p>Cursor attributes (standard extensions):</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">.connection</span></code> # back-link to the connection</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.errorhandler</span></code> # (see <span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a> - a function to process exceptions.)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.messages[]</span></code> # (see <span class="target" id="index-3"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a>)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.arraysize</span></code> (=:code:<cite>1</cite>) # the default number of rows to fetch in <code class="code docutils literal notranslate"><span class="pre">fetchmany()</span></code></p></li>
+</ul>
+<p>Cursor attributes (non-standard):</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">.paramstyle</span></code> # can be altered by the user to change paramstyle processing. (default taken from connection.) (see below)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.rs</span></code> # the internal ADO <code class="code docutils literal notranslate"><span class="pre">recordset</span></code> (local) or raw unpickled data (remote)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.converters[]</span></code> # a list of input-conversion functions, one per column. (not available on remote)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.columnNames{}</span></code> # a dictionary of: (lower-cased) column name : (column number).</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.numberOfColumns</span></code> # number of columns in present record set.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.command</span></code> # the last raw SQL command sent to the query (before any reformatting)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.query</span></code> # the text of last operation, as converted by reformatting</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.return_value</span></code> # the result returned by a previous <code class="code docutils literal notranslate"><span class="pre">.callproc()</span></code></p></li>
+</ul>
+<p>Cursor Methods (standard):</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">.callproc()</span></code> # execute a stored procedure, returning parameter values. A “returned value” (not an “out” parameter) will be in <code class="code docutils literal notranslate"><span class="pre">crsr.returnValue</span></code> -&gt; returns the (modified) parameter list</p></li>
+</ul>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.close()</span></code> # close the cursor, free the recordset</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>non-standard: in adodbapi, it is NOT an error to re-close a closed cursor</p>
+</div>
+</div></blockquote>
+</li>
+</ul>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.execute(operation,</span> <span class="pre">parameters)</span></code> # execute a query or command…</p>
+<blockquote>
+<div><ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">operation</span></code>: the text of the SQL.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">parameters</span></code>: parameters for the query or command…</p>
+<blockquote>
+<div><p>If <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> is <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code> this must be a sequence.</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> is <code class="code docutils literal notranslate"><span class="pre">'named'</span></code> this must be a mapping (dictionary).</p>
+<p>If <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> is <code class="code docutils literal notranslate"><span class="pre">'dynamic'</span></code>, <code class="code docutils literal notranslate"><span class="pre">'format'</span></code>, or <code class="code docutils literal notranslate"><span class="pre">'pyformat'</span></code> it could be either, but your SQL format must be appropriate for your choice (see below).</p>
+<p>-&gt; <code class="code docutils literal notranslate"><span class="pre">None</span></code>. There is no return value, use <code class="code docutils literal notranslate"><span class="pre">.fetchxxx()</span></code> to see data.</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.executemany(operation,</span> <span class="pre">sequence-of-parameters)</span></code> # runs the SQL operation several times, once for each group of parameters in sequence-of-parameters.</p>
+<blockquote>
+<div><p>-&gt; <code class="code docutils literal notranslate"><span class="pre">.rowcount</span></code> will be the sum of all <code class="code docutils literal notranslate"><span class="pre">.rowcounts</span></code>, unless any was <code class="code docutils literal notranslate"><span class="pre">-1</span></code>.</p>
+</div></blockquote>
+</li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.fetchone()</span></code> # get the next row from the result set. Calls ADO <code class="code docutils literal notranslate"><span class="pre">recordset.GetRows(1)</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.fetchmany(size=cursor.arraysize)</span></code> # get a <code class="code docutils literal notranslate"><span class="pre">size</span></code> sequence of rows. Calls ADO <code class="code docutils literal notranslate"><span class="pre">recordset.GetRows(size)</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.fetchall()</span></code> # attempt to retrieve all remaining rows in the result set. Calls ADO <code class="code docutils literal notranslate"><span class="pre">recordset.GetRows()</span></code> using a local cursor so may use a great deal of memory if the query set is large.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.nextset()</span></code> # If an operation (such as a stored procedure call) has produced multiple result sets, skip to the next available result set.</p>
+<blockquote>
+<div><p>-&gt; returns <code class="code docutils literal notranslate"><span class="pre">None</span></code> if there are no more result sets, otherwise <code class="code docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</div></blockquote>
+</li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.setinputsizes()</span></code> # pass</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.setoutputsizes()</span></code> # pass</p></li>
+</ul>
+<p>Cursor methods (extensions):</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.prepare(operation)</span></code> # initiate an SQL prepared statement.</p>
+<blockquote>
+<div><p>This method actually does very little, and the use of it may not speed up your program very much, if at all. It does store the SQL statement you pass (operation) in the cursor’s <code class="code docutils literal notranslate"><span class="pre">self.command</span></code> attribute, and sends the appropriate flag to ADO. It will cache converted <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> operation strings. Calling <code class="code docutils literal notranslate"><span class="pre">.execute()</span></code> with any other string, or calling <code class="code docutils literal notranslate"><span class="pre">.prepare()</span></code> again will invalidate the preparation.</p>
+<p>For example: <code class="code docutils literal notranslate"><span class="pre">cursor.executemany()</span></code> is programmed internally like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">executemany</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">sequence_of_parameter_sequences</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">sequence_of_parameter_sequences</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.get_returned_parameters()</span></code> # some providers will not return the (modified) parameter list, nor the <code class="code docutils literal notranslate"><span class="pre">return_value</span></code>, until after the last recordset is closed. This method can be called (_after_ calling <code class="code docutils literal notranslate"><span class="pre">nextset()</span></code> until it returns <code class="code docutils literal notranslate"><span class="pre">None</span></code>) to get those values.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.next()</span></code> # The cursor can be used as an iterator, each iteration does <code class="code docutils literal notranslate"><span class="pre">fetchone()</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.__iter__()</span></code></p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.__enter__()</span></code> # the cursor is a context manager which will auto-close</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">.__exit__()</span></code></p></li>
+</ul>
+</section>
+<section id="paramstyles">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">PARAMSTYLEs</a><a class="headerlink" href="#paramstyles" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="what">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">What???</a><a class="headerlink" href="#what" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A quick explanation of <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> follows: if you already know this, <a class="reference internal" href="#guru"><span class="std std-ref">skip this section</span></a>.</p>
+</div>
+<p>Many SQL queries or commands require data as part of their content. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`UPDATE cheese SET qtyonhand = 0 WHERE name = &#39;MUNSTER&#39;`
+</pre></div>
+</div>
+<p>Chances are, this command will be given many times, but with other values appearing where <code class="code docutils literal notranslate"><span class="pre">0</span></code> and <code class="code docutils literal notranslate"><span class="pre">'MUNSTER'</span></code> appear in this command. It is convenient (as well as more efficient in some cases) to pass these values as parameters.</p>
+<p>Unfortunately, the ISO SQL standard has not defined a method for doing this, so every designer of an SQL engine is free to choose a new way of expressing it. <span class="target" id="index-4"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a> recognizes several popular methods, and provides a way for the API module writer to communicate to the programmer which method he expects. It is left up to the programmer to adapt to whichever method the engine requires. According to PEP, the module author will place a string in the module attribute named <code class="code docutils literal notranslate"><span class="pre">.paramstyle</span></code> telling you which method to use. The defined possibilities are as follows…</p>
+<p><code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code> is the default used by ADO. As far as I know, every ADO driver uses it. The above query would be altered by placing a question mark where the parameters should go. The programmer then passes the parameters (as as sequence) in the correct order for each <code class="code docutils literal notranslate"><span class="pre">?</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;UPDATE cheese SET qtyonhand = ? WHERE name = ?&quot;</span>
+<span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MUNSTER&#39;</span><span class="p">]</span>
+<span class="n">crsr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">'format'</span></code> is used my many database engines, and blindly expected by django. The format looks like (but is emphatically not) the same as Python <code class="code docutils literal notranslate"><span class="pre">%s</span></code> string substitution.</p>
+<p>Again, the programmer supplies the parameters (as a sequence) in the correct order.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;UPDATE cheese SET qtyonhand = </span><span class="si">%s</span><span class="s2"> WHERE name = </span><span class="si">%s</span><span class="s2">&quot;</span>
+<span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MUNSTER&#39;</span><span class="p">]</span>
+<span class="n">crsr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">'named'</span></code> is used by Oracle, and is superior because it eliminates counting. Rather than keeping track of the parameters by position, the programmer passes the arguments as a mapping (dictionary) where each name is the key to find the correct place to make the substitution. She places names in the SQL string delimited by a leading colon (<code class="code docutils literal notranslate"><span class="pre">:</span></code>). Each key calls up the value for that place. In the following simple example, the syntax looks needlessly complex, but in queries which take a dozen or more parameters, it really helps.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;UPDATE cheese SET qtyonhand = :qty WHERE name = :prodname&quot;</span>
+<span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;qty&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;prodname&#39;</span> <span class="p">:</span> <span class="s1">&#39;MUNSTER&#39;</span><span class="p">}</span>
+<span class="n">crsr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">'pyformat'</span></code> also takes a dictionary of arguments, but uses a syntax like Python’s <code class="code docutils literal notranslate"><span class="pre">%</span></code> string operator:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">UPDATE</span> <span class="n">cheese</span> <span class="n">SET</span> <span class="n">qtyonhand</span> <span class="o">=</span> <span class="o">%</span><span class="p">(</span><span class="n">qty</span><span class="p">)</span><span class="n">s</span> <span class="n">WHERE</span> <span class="n">name</span> <span class="o">=%</span><span class="p">(</span><span class="n">prodname</span><span class="p">)</span><span class="n">s</span>
+<span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;qty&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;prodname&#39;</span> <span class="p">:</span> <span class="s1">&#39;MUNSTER&#39;</span><span class="p">}</span>
+<span class="n">crsr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In adodbapi, <code class="code docutils literal notranslate"><span class="pre">'format'</span></code> and <code class="code docutils literal notranslate"><span class="pre">'pyformat'</span></code> both use the same subroutine. It depends on the presence of <code class="code docutils literal notranslate"><span class="pre">%</span></code> in your SQL operation string to hint whether to expect a mapping or a sequence. That seems to be the way some other api adapters operate.</p>
+</div>
+<p>The other <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> possibility mentioned in the PEP is:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">'numeric'</span></code>, which takes a sequence. It not implemented in adodbapi. (If you want it, patches will be considered.):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UPDATE</span> <span class="n">cheese</span> <span class="n">SET</span> <span class="n">qtyonhand</span> <span class="o">=</span> <span class="p">:</span><span class="mi">1</span> <span class="n">WHERE</span> <span class="n">name</span> <span class="o">=</span> <span class="p">:</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p id="guru"><em>(Gurus: Start reading again here)</em></p>
+<p><code class="code docutils literal notranslate"><span class="pre">'dynamic'</span></code> [this <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> is a non-standard extension in adodbapi. It
+acts the same as <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code>, unless you pass a mapping (i.e., a dictionary) of parameters to your <code class="code docutils literal notranslate"><span class="pre">.execute()</span></code> method – in which case it will act the same as <code class="code docutils literal notranslate"><span class="pre">'named'</span></code>.]</p>
+<p>As an extension, adodbapi copies the module’s paramstyle attribute to each connection, and then to each cursor. The programmer is allowed to change the paramstyle to the one she prefers to use. When the <code class="code docutils literal notranslate"><span class="pre">.execute()</span></code> method runs, it checks which paramstyle is expected, then converts the operation string into <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code>, and then makes the ADO <code class="code docutils literal notranslate"><span class="pre">Execute</span></code> call.</p>
+<p>Extracting the appropriate SQL table values from Python objects is a complex operation. If your table receives unexpected values, try to simplify the objects you present as parameters. [Set the <code class="code docutils literal notranslate"><span class="pre">.verbose</span></code> attribute &gt; <code class="code docutils literal notranslate"><span class="pre">2</span></code> to get a debug listing of the parameters.]</p>
+<p>You may switch <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> as often as desired. If you want to use <code class="code docutils literal notranslate"><span class="pre">'named'</span></code> for <code class="code docutils literal notranslate"><span class="pre">UPDATE</span></code>s and <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code> for <code class="code docutils literal notranslate"><span class="pre">INSERT</span></code>s, go right ahead. (Restriction: provide a new SQL operation string object after you change <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code>. I don’t invalidate the cache.)</p>
+</section>
+<section id="row-class-rows-class-for-returned-data">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Row Class &amp; Rows Class for returned data</a><a class="headerlink" href="#row-class-rows-class-for-returned-data" title="Permalink to this heading">¶</a></h2>
+<p>The PEP specifies that <code class="code docutils literal notranslate"><span class="pre">.fetchone()</span></code> returns a “single sequence”. It does not spell out what kind of a sequence. Originally, adodbapi returned a tuple. It is supposed to be up to the programmer to count columns of the returned data to select the correct thing. In the past, I have often resorted to putting long lists of constants into my Python code to keep track of which column a dutum was in.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">Row</span></code> class in ADODBAPI satisfies the PEP by having <code class="code docutils literal notranslate"><span class="pre">.fetchone()</span></code> return a sequence-like <code class="code docutils literal notranslate"><span class="pre">Row</span></code> object. It can be indexed and sliced like a list. This is the PEP standard method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">crsr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT prodname, price, qtyonhand FROM cheese&quot;</span><span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">crsr</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+<span class="k">while</span> <span class="n">row</span><span class="p">:</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Your </span><span class="si">{:10s}</span><span class="s1"> is worth </span><span class="si">{:10.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">crsr</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>  <span class="c1"># returns None when no data remains</span>
+</pre></div>
+</div>
+<p>As an extension, a <code class="code docutils literal notranslate"><span class="pre">Row</span></code> object can also be indexed by column name:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">crsr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT prodname, price, qtyonhand FROM cheese&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">crsr</span><span class="p">:</span>  <span class="c1"># note extension: using crsr as an iterator</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;qtyonhand&#39;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Your </span><span class="si">{:10s}</span><span class="s1"> is worth </span><span class="si">{:10.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;prodname&#39;</span><span class="p">],</span> <span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>But, _really_ lazy programmers, like me, use the column names as attributes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">crsr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT prodname, price, qtyonhand FROM cheese&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">crsr</span><span class="p">:</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">price</span> <span class="o">*</span> <span class="n">row</span><span class="o">.</span><span class="n">qtyonhand</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Your </span><span class="si">{:10s}</span><span class="s1"> is worth </span><span class="si">{:10.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">prodname</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Now, isn’t that easier to read and understand?</p>
+<p>The PEP specifies that <code class="code docutils literal notranslate"><span class="pre">.fetchmany()</span></code> and <code class="code docutils literal notranslate"><span class="pre">.fetchall()</span></code> must return “a sequence of sequences”. This as satisfied by returning a <code class="code docutils literal notranslate"><span class="pre">Rows</span></code> object, which emits a sequence of <code class="code docutils literal notranslate"><span class="pre">Row</span></code> objects. Both <code class="code docutils literal notranslate"><span class="pre">Row</span></code> and <code class="code docutils literal notranslate"><span class="pre">Rows</span></code> are actually lazy—they do not fetch data from the queryset until the programmer asks for it.</p>
+</section>
+<section id="variantconversions-for-the-connection-and-the-cursor">
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">variantConversions for the connection and the cursor</a><a class="headerlink" href="#variantconversions-for-the-connection-and-the-cursor" title="Permalink to this heading">¶</a></h2>
+<p>Each <code class="code docutils literal notranslate"><span class="pre">Connection</span></code> instance has an optional <code class="code docutils literal notranslate"><span class="pre">.variantConversions</span></code> attribute. Usually it will not be present. If it is present, it will be used in preference to the module’s <code class="code docutils literal notranslate"><span class="pre">variantConversions</span></code> attribute. In order to avoid unintentional alterations, when you make an assignment to the attribute, it will be actually copied (by <code class="code docutils literal notranslate"><span class="pre">__setattr__</span></code>) rather than merely referenced.</p>
+<p>In older versions of adodbapi, the accepted practice for user defined conversions was to modify the module’s <code class="code docutils literal notranslate"><span class="pre">VariantConversionMap</span></code>. That still works, but please refrain.</p>
+<p>A <code class="code docutils literal notranslate"><span class="pre">variantConversionsMap</span></code> is a dictionary of ADO variable types (as defined in <code class="code docutils literal notranslate"><span class="pre">adodbapi.ado_consts</span></code>) with the function to be used to read each type and convert it into a Python value. As a convenience, the <code class="code docutils literal notranslate"><span class="pre">__setitem__</span></code> for this class will accept a sequence, and will enter a mapping for each member of the sequence with the same value. So, to change several data retrieval functions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">adodbapi.ado_consts</span> <span class="k">as</span> <span class="nn">adc</span>
+<span class="kn">import</span> <span class="nn">adodbapi.apibase</span> <span class="k">as</span> <span class="nn">api</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">variantConversions</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">variantConversions</span>  <span class="c1"># MAGIC: will make a copy.</span>
+
+<span class="n">conn</span><span class="o">.</span><span class="n">variantConversions</span><span class="p">[(</span><span class="n">adc</span><span class="o">.</span><span class="n">adTinyInt</span><span class="p">,</span> <span class="n">adc</span><span class="o">.</span><span class="n">adChar</span><span class="p">)]</span> <span class="o">=</span> <span class="n">myByteFunc</span>
+</pre></div>
+</div>
+<p>which will be equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conn</span><span class="o">.</span><span class="n">variantConversions</span><span class="p">[</span><span class="n">adc</span><span class="o">.</span><span class="n">adTinyInt</span><span class="p">]</span> <span class="o">=</span> <span class="n">myByteFunc</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">variantConversions</span><span class="p">[</span><span class="n">adc</span><span class="o">.</span><span class="n">adChar</span><span class="p">]</span> <span class="o">=</span> <span class="n">myByteFunc</span>
+</pre></div>
+</div>
+<p>Also, there is a supply of sequences used to initialize to default map, in module <code class="code docutils literal notranslate"><span class="pre">adodbapi.apibase</span></code>. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adoApproximateNumericTypes</span> <span class="o">=</span> <span class="p">(</span><span class="n">adc</span><span class="o">.</span><span class="n">adDouble</span><span class="p">,</span> <span class="n">adc</span><span class="o">.</span><span class="n">adSingle</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If I wish to retrieve all floating point values differently, I might use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conn</span><span class="o">.</span><span class="n">variantConversions</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">variantConversions</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">variantConversions</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">adoApproximateNumericTypes</span><span class="p">]</span> <span class="o">=</span> <span class="n">myFloatFunc</span>
+</pre></div>
+</div>
+<p>The cursor builds a list of conversion functions for each new query set, (in other words, each call to <code class="code docutils literal notranslate"><span class="pre">.execute()</span></code>, <code class="code docutils literal notranslate"><span class="pre">.callproc()</span></code> or <code class="code docutils literal notranslate"><span class="pre">.nextset()</span></code>).</p>
+<p>You may override the conversion for any column by altering the function for that column:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">crsr</span><span class="o">.</span><span class="n">conversions</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">myFunc</span> <span class="c1"># change the reader for the fifth column</span>
+<span class="n">crsr</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To do this by column name, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">crsr</span><span class="o">.</span><span class="n">conversions</span><span class="p">[</span><span class="n">crsr</span><span class="o">.</span><span class="n">columnNames</span><span class="p">[</span><span class="s1">&#39;mycolumn&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">myFunc</span>
+</pre></div>
+</div>
+</section>
+<section id="the-examples-folder">
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">The Examples folder</a><a class="headerlink" href="#the-examples-folder" title="Permalink to this heading">¶</a></h2>
+<p>Several small complete example programs are included:</p>
+<dl>
+<dt><code class="file docutils literal notranslate"><span class="pre">db_print_simple.py</span></code></dt><dd><p>A simple as possibe example. Opens a local <code class="file docutils literal notranslate"><span class="pre">.mdb</span></code> (ACCESS) datebase and reads rows from a table.</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">db_table_names.py</span></code></dt><dd><p>Opens the same database &amp; prints out a list of the tables in it.</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">is64bit.py</span></code></dt><dd><p>A copy of the one in the package, just here for import convenience.</p>
+<p><cite>is64bit.Python()</cite> → bool
+<cite>is64bit.os()</cite> → bool</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">test.mdb</span></code></dt><dd><p>The sample database for the examples. (Also copied into the test environment temporary folder when testing 64-bit Python programs. They cannot build <code class="file docutils literal notranslate"><span class="pre">.mdb</span></code> files.)</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">xls_write.py</span></code></dt><dd><p>Creates a simple <strong class="program">Excel</strong> spreadsheet.</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">xls_read.py</span></code></dt><dd><p>Read the above spreadsheet:</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">db_print.py</span></code></dt><dd><p>The only smart program in the folder. By default, this does the same thing as <code class="file docutils literal notranslate"><span class="pre">db_print_simple.py</span></code>. However, it also looks for command line arguments. Type <kbd class="kbd docutils literal notranslate">help</kbd> to see the options.</p>
+<p>If you use <code class="code docutils literal notranslate"><span class="pre">table_name=?</span></code> it will print a list of the tables in the <code class="file docutils literal notranslate"><span class="pre">.mdb</span></code>.</p>
+<p><code class="samp docutils literal notranslate"><span class="pre">filename=</span><em><span class="pre">X</span></em></code> lets you open a different <code class="file docutils literal notranslate"><span class="pre">.mdb</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="running-the-tests">
+<h2><a class="toc-backref" href="#id14" role="doc-backlink">Running the tests</a><a class="headerlink" href="#running-the-tests" title="Permalink to this heading">¶</a></h2>
+<p>The test folder contains a set of unittest programs. Setting them up can be a bit complex, because you need several database servers to do a complete test, and each one has a different configuration. Scripts in this folder try to work in Python 2.7 or Python 3.5 and newer.</p>
+<dl>
+<dt><code class="file docutils literal notranslate"><span class="pre">dbapi20.py</span></code></dt><dd><p>The standard test for API-2.0 compliance. Do not run this, it is imported only.</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">test_adodbapi_dbapi20.py</span></code></dt><dd><p>Imports the above and runs it on your local machine. You may have to actually install adodbapi in your Python library for it to work exactly right, especially on Python 3.0 to 3.2. It only works correctly against a <strong class="program">Microsoft SQL Server</strong>. <strong class="program">SQLexpress</strong> will do.</p>
+<p>The settings for how to reach your SQL server are in this file. Edit as needed.</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">adodbapitest.py</span></code></dt><dd><p>This tests the special features and extensions of adodbapi. It is much more complex than the <code class="file docutils literal notranslate"><span class="pre">dbapi20.py</span></code> test. You run this program, and it imports <code class="file docutils literal notranslate"><span class="pre">adodbapitestconfig.py</span></code>, which is where you put all of your setup information.</p>
+<p>The full operation runs up to 12 series of tests: four different database servers and three date-time formats, in all combinations. If the database servers are distant, this can take a while.</p>
+<p>It does some lightweight command line processing (actually the config does it).</p>
+<blockquote>
+<div><p><code class="code docutils literal notranslate"><span class="pre">--package</span></code> tries to build a proper Python package in a temporary location and adds it to sys.path so it can import a test version of the code. It will run 2to3 when it does this, if needed.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">--all</span></code> run as many of the 12 passes as possible.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">--mysql</span></code> run the <strong class="program">MySQL</strong> tests.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">--postgres</span></code> run the <strong class="program">PostgreSQL</strong> tests.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">--time</span></code> run all time tests. (If <strong class="program">mx-DateTime</strong> is not installed it will be skipped.)</p>
+<p><code class="code docutils literal notranslate"><span class="pre">--verbose=n</span></code> gives lots of information.</p>
+</div></blockquote>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">adodbapitestconfig.py</span></code></dt><dd><p><strong>E D I T . T H I S . F I L E !</strong></p>
+<p>You can run this script alone to test your settings quickly. Normally it is imported.</p>
+<p>This sets the configuration for its parent, creates a temporary work directory, reads the command line arguments, etc. You will edit this file—a lot! Many literals are set for my test environment. You must change them to yours.</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">runtests.bat</span></code></dt><dd><p>Convenient way to run the main and api tests using different Python versions.</p>
+</dd>
+<dt><code class="file docutils literal notranslate"><span class="pre">setuptestframework.py</span></code></dt><dd><p>If run as a main program, initialize a not-really-temporary directory for the server to use for remote testing. (Otherwise, it is a subroutine for test setup.)</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">ADO DB-API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="samples/index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/adodbapi/quick_reference.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

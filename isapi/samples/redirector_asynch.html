@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>redirector_asynch.py Sample &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="redirector_with_filter.py Sample" href="redirector_with_filter.html" />
+    <link rel="prev" title="advanced.py Sample" href="advanced.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="redirector-asynch-py-sample">
+<h1>redirector_asynch.py Sample<a class="headerlink" href="#redirector-asynch-py-sample" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># This is a sample ISAPI extension written in Python.</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="c1"># This is like the other &#39;redirector&#39; samples, but uses asnch IO when writing</span>
+<span class="linenos"> 4</span><span class="c1"># back to the client (it does *not* use asynch io talking to the remote</span>
+<span class="linenos"> 5</span><span class="c1"># server!)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="kn">from</span> <span class="nn">isapi</span> <span class="kn">import</span> <span class="n">isapicon</span><span class="p">,</span> <span class="n">threaded_extension</span>
+<span class="linenos"> 8</span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="linenos"> 9</span><span class="kn">import</span> <span class="nn">traceback</span>
+<span class="linenos">10</span><span class="kn">import</span> <span class="nn">urllib.request</span><span class="o">,</span> <span class="nn">urllib.parse</span><span class="o">,</span> <span class="nn">urllib.error</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="c1"># sys.isapidllhandle will exist when we are loaded by the IIS framework.</span>
+<span class="linenos">13</span><span class="c1"># In this case we redirect our output to the win32traceutil collector.</span>
+<span class="linenos">14</span><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s2">&quot;isapidllhandle&quot;</span><span class="p">):</span>
+<span class="linenos">15</span>    <span class="kn">import</span> <span class="nn">win32traceutil</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="c1"># The site we are proxying.</span>
+<span class="linenos">18</span><span class="n">proxy</span> <span class="o">=</span> <span class="s2">&quot;http://www.python.org&quot;</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="c1"># We synchronously read chunks of this size then asynchronously write them.</span>
+<span class="linenos">21</span><span class="n">CHUNK_SIZE</span> <span class="o">=</span> <span class="mi">8192</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span><span class="c1"># The callback made when IIS completes the asynch write.</span>
+<span class="linenos">24</span><span class="k">def</span> <span class="nf">io_callback</span><span class="p">(</span><span class="n">ecb</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">cbIO</span><span class="p">,</span> <span class="n">errcode</span><span class="p">):</span>
+<span class="linenos">25</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;IO callback&quot;</span><span class="p">,</span> <span class="n">ecb</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">cbIO</span><span class="p">,</span> <span class="n">errcode</span><span class="p">)</span>
+<span class="linenos">26</span>    <span class="n">chunk</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
+<span class="linenos">27</span>    <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+<span class="linenos">28</span>        <span class="n">ecb</span><span class="o">.</span><span class="n">WriteClient</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">isapicon</span><span class="o">.</span><span class="n">HSE_IO_ASYNC</span><span class="p">)</span>
+<span class="linenos">29</span>        <span class="c1"># and wait for the next callback to say this chunk is done.</span>
+<span class="linenos">30</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">31</span>        <span class="c1"># eof - say we are complete.</span>
+<span class="linenos">32</span>        <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="linenos">33</span>        <span class="n">ecb</span><span class="o">.</span><span class="n">DoneWithSession</span><span class="p">()</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span><span class="c1"># The ISAPI extension - handles all requests in the site.</span>
+<span class="linenos">37</span><span class="k">class</span> <span class="nc">Extension</span><span class="p">(</span><span class="n">threaded_extension</span><span class="o">.</span><span class="n">ThreadPoolExtension</span><span class="p">):</span>
+<span class="linenos">38</span>    <span class="s2">&quot;Python sample proxy server - asynch version.&quot;</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span>    <span class="k">def</span> <span class="nf">Dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ecb</span><span class="p">):</span>
+<span class="linenos">41</span>        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;IIS dispatching &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ecb</span><span class="o">.</span><span class="n">GetServerVariable</span><span class="p">(</span><span class="s2">&quot;URL&quot;</span><span class="p">),))</span>
+<span class="linenos">42</span>        <span class="n">url</span> <span class="o">=</span> <span class="n">ecb</span><span class="o">.</span><span class="n">GetServerVariable</span><span class="p">(</span><span class="s2">&quot;URL&quot;</span><span class="p">)</span>
+<span class="linenos">43</span>
+<span class="linenos">44</span>        <span class="n">new_url</span> <span class="o">=</span> <span class="n">proxy</span> <span class="o">+</span> <span class="n">url</span>
+<span class="linenos">45</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Opening </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_url</span><span class="p">)</span>
+<span class="linenos">46</span>        <span class="n">fp</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">new_url</span><span class="p">)</span>
+<span class="linenos">47</span>        <span class="n">headers</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+<span class="linenos">48</span>        <span class="n">ecb</span><span class="o">.</span><span class="n">SendResponseHeaders</span><span class="p">(</span><span class="s2">&quot;200 OK&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="linenos">49</span>        <span class="c1"># now send the first chunk asynchronously</span>
+<span class="linenos">50</span>        <span class="n">ecb</span><span class="o">.</span><span class="n">ReqIOCompletion</span><span class="p">(</span><span class="n">io_callback</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+<span class="linenos">51</span>        <span class="n">chunk</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">CHUNK_SIZE</span><span class="p">)</span>
+<span class="linenos">52</span>        <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+<span class="linenos">53</span>            <span class="n">ecb</span><span class="o">.</span><span class="n">WriteClient</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">isapicon</span><span class="o">.</span><span class="n">HSE_IO_ASYNC</span><span class="p">)</span>
+<span class="linenos">54</span>            <span class="k">return</span> <span class="n">isapicon</span><span class="o">.</span><span class="n">HSE_STATUS_PENDING</span>
+<span class="linenos">55</span>        <span class="c1"># no data - just close things now.</span>
+<span class="linenos">56</span>        <span class="n">ecb</span><span class="o">.</span><span class="n">DoneWithSession</span><span class="p">()</span>
+<span class="linenos">57</span>        <span class="k">return</span> <span class="n">isapicon</span><span class="o">.</span><span class="n">HSE_STATUS_SUCCESS</span>
+<span class="linenos">58</span>
+<span class="linenos">59</span>
+<span class="linenos">60</span><span class="c1"># The entry points for the ISAPI extension.</span>
+<span class="linenos">61</span><span class="k">def</span> <span class="nf">__ExtensionFactory__</span><span class="p">():</span>
+<span class="linenos">62</span>    <span class="k">return</span> <span class="n">Extension</span><span class="p">()</span>
+<span class="linenos">63</span>
+<span class="linenos">64</span>
+<span class="linenos">65</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">66</span>    <span class="c1"># If run from the command-line, install ourselves.</span>
+<span class="linenos">67</span>    <span class="kn">from</span> <span class="nn">isapi.install</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="linenos">68</span>
+<span class="linenos">69</span>    <span class="n">params</span> <span class="o">=</span> <span class="n">ISAPIParameters</span><span class="p">()</span>
+<span class="linenos">70</span>    <span class="c1"># Setup the virtual directories - this is a list of directories our</span>
+<span class="linenos">71</span>    <span class="c1"># extension uses - in this case only 1.</span>
+<span class="linenos">72</span>    <span class="c1"># Each extension has a &quot;script map&quot; - this is the mapping of ISAPI</span>
+<span class="linenos">73</span>    <span class="c1"># extensions.</span>
+<span class="linenos">74</span>    <span class="n">sm</span> <span class="o">=</span> <span class="p">[</span><span class="n">ScriptMapParams</span><span class="p">(</span><span class="n">Extension</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">Flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+<span class="linenos">75</span>    <span class="n">vd</span> <span class="o">=</span> <span class="n">VirtualDirParameters</span><span class="p">(</span>
+<span class="linenos">76</span>        <span class="n">Name</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span>
+<span class="linenos">77</span>        <span class="n">Description</span><span class="o">=</span><span class="n">Extension</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">,</span>
+<span class="linenos">78</span>        <span class="n">ScriptMaps</span><span class="o">=</span><span class="n">sm</span><span class="p">,</span>
+<span class="linenos">79</span>        <span class="n">ScriptMapUpdate</span><span class="o">=</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span>
+<span class="linenos">80</span>    <span class="p">)</span>
+<span class="linenos">81</span>    <span class="n">params</span><span class="o">.</span><span class="n">VirtualDirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">vd</span><span class="p">]</span>
+<span class="linenos">82</span>    <span class="n">HandleCommandLine</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../adodbapi/index.html">ADO DB-API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">ISAPI</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/isapi/samples/redirector_asynch.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

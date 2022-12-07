@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Windows NT Eventlog and Threading &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Windows NT Files - Locking" href="file.html" />
+    <link rel="prev" title="Windows NT Eventlog" href="event.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="windows-nt-eventlog-and-threading">
+<h1>Windows NT Eventlog and Threading<a class="headerlink" href="#windows-nt-eventlog-and-threading" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-existing-document admonition">
+<p class="admonition-title">Existing document</p>
+<p><code class="file docutils literal notranslate"><span class="pre">\win32\help\event.d</span></code> Part 2</p>
+</div>
+<p>Python’s threading to manage access access to many Eventlogs</p>
+<p>If you need to access the eventlog of many servers, it can take quite some time if you go through a list sequentially – since you need to wait for each operation to complete. There are a few ways you can do this in python. You can spawn many processes, use python’s win32 libraries for win32 style-threading, or use python’s native libraries.</p>
+<p>In NT spawning a process is slow (though in this case that may not matter) and it can be a little cumbersome to get them to share data. Since python’s win32 libraries are thread-safe, you can use python’s win32 libraries to do win32-style threading or use python’s native threading library to spawn threads. Win32 style threading is available via python’s win32process library. It gives you excellent control and ability to do some sophisticated stuff, however raw win32 threaded programming can be tricky. The final option is Python’s native high-level threading library which is built on top of a lower level thread library. It turns out that it is easy to use and
+cross-platform (well at least to platforms that support threading). It’s only disadvantage is that your thread control(synchronization, giving them priorities, suspending them, etc.)  is limited. In many cases, however, that is not important, you just need the ability to _easily_ do a few things at once. Thus, we’ll focus on Python’s native threading.</p>
+<p>One final note, the python interpreter has a global lock for threads forcing them to run serially. Which means only one thread can intrepret python code at any given time. After a certain amount of
+python code has been run, then control is switched to another thread. Thus, this means you can’t have things like many threads running on many processors. Fortunately, in cases with I/O and extension modules (in which you can manipulate the interpreter lock), this isn’t an issue. In our case (accessing the eventlog of many servers) the global lock shouldn’t be a bottleneck(i/o will be).</p>
+<p>There are a couple of ways to use the threading library. We’ll look at the case in which you override the run method of the threading.Thread class. The run method will contain the actual code you want to run many times.</p>
+<p>The basic procedure to follow is this. For every server in the list:</p>
+<ol class="arabic simple">
+<li><p>create a thread class</p></li>
+<li><p>call start method in thread class(which invokes your run method)</p></li>
+<li><p>call join method to force main thread to wait for threads to complete</p></li>
+<li><p>compile data together from all thread classes created.</p></li>
+</ol>
+<p>Since you don’t use the return values of the thread, you need to store data with the thread object that you create. Furthermore, you’ll notice we use the join method to force the calling thread to wait for the other threads to finish.</p>
+<p>Here is the skeleton of that:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#We are overiding run() method of the threading.Thread class.</span>
+<span class="k">class</span> <span class="nc">thread_it</span> <span class="p">(</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span> <span class="p">)</span> <span class="p">:</span>
+<span class="k">def</span> <span class="fm">__init__</span> <span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span> <span class="p">:</span>
+   <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+   <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="p">[]</span> <span class="c1">#store data here to get later</span>
+   <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">=</span><span class="n">server</span>
+<span class="c1"># the start() method invokes run</span>
+<span class="k">def</span> <span class="nf">run</span> <span class="p">(</span> <span class="bp">self</span> <span class="p">):</span> <span class="c1">#overridden from threading library</span>
+   <span class="k">try</span><span class="p">:</span>
+      <span class="k">pass</span> <span class="c1">#get event information here and store in data</span>
+   <span class="k">except</span><span class="p">:</span>
+      <span class="c1">#append any errors to self.data, to get later</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Error for &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())))</span>
+
+<span class="c1">######main here</span>
+<span class="k">try</span><span class="p">:</span>
+   <span class="n">l_servers</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;fred&#39;</span><span class="p">,</span><span class="s1">&#39;barney&#39;</span><span class="p">,</span><span class="s1">&#39;wilma&#39;</span><span class="p">,</span><span class="s1">&#39;betty&#39;</span><span class="p">)</span>
+   <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">l_servers</span><span class="p">:</span> <span class="c1">#make a thread for each server</span>
+            <span class="n">thread</span> <span class="o">=</span> <span class="n">thread_it</span> <span class="p">(</span><span class="n">server</span><span class="p">)</span>
+            <span class="n">threads</span><span class="o">.</span><span class="n">append</span> <span class="p">(</span> <span class="n">thread</span> <span class="p">)</span> <span class="c1">#append to the a threads list</span>
+
+   <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span> <span class="c1">#now go thru list and start threads running</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+   <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span> <span class="c1">#make main thread wait for all in list to complete</span>
+      <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+   <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span> <span class="c1">#print thread results</span>
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">thread</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+   <span class="nb">print</span> <span class="n">event</span>
+
+
+<span class="k">except</span><span class="p">:</span>
+   <span class="nb">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Looking at the skeleton, all one really needs to do is put the eventlog code in the run function and have it store results in the data variable. The main part is almost boilerplate code.  So you can see multi-threading at work, I’ve added a ‘now’ column to the eventlog printout which tells you the current time, and easily shows that the data was gathered simultaneously on the servers.</p>
+<p>Filling out the skeleton we get code like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">win32evtlog</span>
+<span class="kn">import</span> <span class="nn">win32evtlogutil</span>
+<span class="kn">import</span> <span class="nn">win32security</span>
+<span class="kn">import</span> <span class="nn">win32con</span>
+<span class="kn">import</span> <span class="nn">winerror</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="c1">#We are overiding run() method of the threading.Thread class.</span>
+<span class="k">class</span> <span class="nc">thread_it</span> <span class="p">(</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span> <span class="p">)</span> <span class="p">:</span>
+   <span class="k">def</span> <span class="fm">__init__</span> <span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">)</span> <span class="p">:</span>
+      <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="p">[]</span> <span class="c1">#store data here to get later</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">=</span><span class="n">server</span>
+<span class="c1"># the start() method invokes run</span>
+   <span class="k">def</span> <span class="nf">run</span> <span class="p">(</span> <span class="bp">self</span><span class="p">):</span> <span class="c1">#overridden from threading library</span>
+      <span class="n">flags</span> <span class="o">=</span> <span class="n">win32evtlog</span><span class="o">.</span><span class="n">EVENTLOG_BACKWARDS_READ</span><span class="o">|</span>\
+      <span class="n">win32evtlog</span><span class="o">.</span><span class="n">EVENTLOG_SEQUENTIAL_READ</span>
+      <span class="c1">#This dict converts the event type into a human readable form</span>
+      <span class="n">evt_dict</span><span class="o">=</span><span class="p">{</span><span class="n">win32con</span><span class="o">.</span><span class="n">EVENTLOG_AUDIT_FAILURE</span><span class="p">:</span><span class="s1">&#39;EVENTLOG_AUDIT_FAILURE&#39;</span><span class="p">,</span>\
+      <span class="n">win32con</span><span class="o">.</span><span class="n">EVENTLOG_AUDIT_SUCCESS</span><span class="p">:</span><span class="s1">&#39;EVENTLOG_AUDIT_SUCCESS&#39;</span><span class="p">,</span>\
+      <span class="n">win32con</span><span class="o">.</span><span class="n">EVENTLOG_INFORMATION_TYPE</span><span class="p">:</span><span class="s1">&#39;EVENTLOG_INFORMATION_TYPE&#39;</span><span class="p">,</span>\
+      <span class="n">win32con</span><span class="o">.</span><span class="n">EVENTLOG_WARNING_TYPE</span><span class="p">:</span><span class="s1">&#39;EVENTLOG_WARNING_TYPE&#39;</span><span class="p">,</span>\
+      <span class="n">win32con</span><span class="o">.</span><span class="n">EVENTLOG_ERROR_TYPE</span><span class="p">:</span><span class="s1">&#39;EVENTLOG_ERROR_TYPE&#39;</span><span class="p">}</span>
+      <span class="n">logtype</span><span class="o">=</span><span class="s1">&#39;System&#39;</span>
+      <span class="n">begin_sec</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+      <span class="n">begin_time</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S  &#39;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">begin_sec</span><span class="p">))</span>
+      <span class="k">try</span><span class="p">:</span>
+         <span class="n">hand</span><span class="o">=</span><span class="n">win32evtlog</span><span class="o">.</span><span class="n">OpenEventLog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span><span class="n">logtype</span><span class="p">)</span> <span class="c1">#open event log here</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;events found in the last 8 hours since:&#39;</span><span class="o">+</span><span class="n">begin_time</span><span class="o">+</span><span class="s1">&#39;for &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">)</span>
+         <span class="n">events</span><span class="o">=</span><span class="mi">1</span>
+         <span class="k">while</span> <span class="n">events</span><span class="p">:</span>
+            <span class="n">events</span><span class="o">=</span><span class="n">win32evtlog</span><span class="o">.</span><span class="n">ReadEventLog</span><span class="p">(</span><span class="n">hand</span><span class="p">,</span><span class="n">flags</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">ev_obj</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+               <span class="n">now_sec</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+               <span class="n">now_time</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;now=%H:%M:%S  &#39;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">now_sec</span><span class="p">))</span>
+
+               <span class="c1">#check if the event is recent enough</span>
+               <span class="c1">#only want data from last 8hrs</span>
+               <span class="n">the_time</span><span class="o">=</span><span class="n">ev_obj</span><span class="o">.</span><span class="n">TimeGenerated</span><span class="o">.</span><span class="n">Format</span><span class="p">()</span>
+               <span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">date2sec</span><span class="p">(</span><span class="n">the_time</span><span class="p">)</span>
+               <span class="k">if</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="n">begin_sec</span><span class="o">-</span><span class="mi">28800</span><span class="p">:</span> <span class="k">break</span>
+               <span class="c1">#data is recent enough, so print it out</span>
+               <span class="n">computer</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ev_obj</span><span class="o">.</span><span class="n">ComputerName</span><span class="p">)</span>
+               <span class="n">cat</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ev_obj</span><span class="o">.</span><span class="n">EventCategory</span><span class="p">)</span>
+               <span class="n">src</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ev_obj</span><span class="o">.</span><span class="n">SourceName</span><span class="p">)</span>
+               <span class="n">record</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ev_obj</span><span class="o">.</span><span class="n">RecordNumber</span><span class="p">)</span>
+               <span class="n">evt_id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">winerror</span><span class="o">.</span><span class="n">HRESULT_CODE</span><span class="p">(</span><span class="n">ev_obj</span><span class="o">.</span><span class="n">EventID</span><span class="p">))</span>
+               <span class="n">evt_type</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">evt_dict</span><span class="p">[</span><span class="n">ev_obj</span><span class="o">.</span><span class="n">EventType</span><span class="p">])</span>
+               <span class="n">msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">win32evtlogutil</span><span class="o">.</span><span class="n">SafeFormatMessage</span><span class="p">(</span><span class="n">ev_obj</span><span class="p">,</span> <span class="n">logtype</span><span class="p">))</span>
+               <span class="n">results</span><span class="o">=</span><span class="n">string</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">now_time</span><span class="p">,</span><span class="n">the_time</span><span class="p">,</span><span class="n">computer</span><span class="p">,</span><span class="n">src</span><span class="p">,</span><span class="n">cat</span><span class="p">,</span><span class="n">record</span><span class="p">,</span><span class="n">evt_id</span><span class="p">,</span><span class="n">evt_type</span><span class="p">,</span><span class="n">msg</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">15</span><span class="p">]),</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="n">begin_sec</span><span class="o">-</span><span class="mi">28800</span><span class="p">:</span> <span class="k">break</span>
+         <span class="n">win32evtlog</span><span class="o">.</span><span class="n">CloseEventLog</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span>
+      <span class="k">except</span><span class="p">:</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Error for &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())))</span>
+
+   <span class="k">def</span> <span class="nf">date2sec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">evt_date</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      This function converts dates with format</span>
+<span class="sd">      &#39;12/23/99 15:54:09&#39; to seconds since 1970.</span>
+<span class="sd">      &#39;&#39;&#39;</span>
+      <span class="n">regexp</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(.*)\s(.*)&#39;</span><span class="p">)</span> <span class="c1">#store result in site</span>
+      <span class="n">reg_result</span><span class="o">=</span><span class="n">regexp</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">evt_date</span><span class="p">)</span>
+      <span class="n">date</span><span class="o">=</span><span class="n">reg_result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">the_time</span><span class="o">=</span><span class="n">reg_result</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+      <span class="p">(</span><span class="n">mon</span><span class="p">,</span><span class="n">day</span><span class="p">,</span><span class="n">yr</span><span class="p">)</span><span class="o">=</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">string</span><span class="o">.</span><span class="n">atoi</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">date</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+      <span class="p">(</span><span class="n">hr</span><span class="p">,</span><span class="nb">min</span><span class="p">,</span><span class="n">sec</span><span class="p">)</span><span class="o">=</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">string</span><span class="o">.</span><span class="n">atoi</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">the_time</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">))</span>
+      <span class="n">tup</span><span class="o">=</span><span class="p">[</span><span class="n">yr</span><span class="p">,</span><span class="n">mon</span><span class="p">,</span><span class="n">day</span><span class="p">,</span><span class="n">hr</span><span class="p">,</span><span class="nb">min</span><span class="p">,</span><span class="n">sec</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+      <span class="n">sec</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">sec</span>
+<span class="c1">######main here</span>
+<span class="k">try</span><span class="p">:</span>
+   <span class="n">threads</span><span class="o">=</span><span class="p">[]</span>
+   <span class="n">data</span><span class="o">=</span><span class="p">[]</span>
+   <span class="n">l_servers</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;barney&#39;</span><span class="p">,</span><span class="s1">&#39;betty&#39;</span><span class="p">,</span><span class="s1">&#39;fred&#39;</span><span class="p">,</span><span class="s1">&#39;wilma&#39;</span><span class="p">]</span>
+   <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">l_servers</span><span class="p">:</span> <span class="c1">#make a thread for each server</span>
+         <span class="n">thread</span> <span class="o">=</span> <span class="n">thread_it</span> <span class="p">(</span><span class="n">server</span><span class="p">)</span>
+         <span class="n">threads</span><span class="o">.</span><span class="n">append</span> <span class="p">(</span> <span class="n">thread</span> <span class="p">)</span> <span class="c1">#append to the a threads list</span>
+
+   <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span> <span class="c1">#now go thru list and start threads running</span>
+         <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+   <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span> <span class="c1">#make main thread wait for all in list to complete</span>
+      <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+   <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span> <span class="c1">#compile all of the threads&#39; data together.</span>
+      <span class="nb">print</span> <span class="s1">&#39;###############&#39;</span>
+      <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">thread</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+         <span class="nb">print</span> <span class="n">event</span>
+
+<span class="k">except</span><span class="p">:</span>
+   <span class="nb">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>A very nice addition to this would be to convert it to a web application. HTMLgen is a useful tool in this context.</p>
+<p>Have a great time with programming with python!</p>
+<p>John Nielsen   <a class="reference external" href="mailto:nielsenjf&#37;&#52;&#48;my-deja&#46;com">nielsenjf<span>&#64;</span>my-deja<span>&#46;</span>com</a></p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Win32 Extensions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="process_info.html">Getting process info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_directories.html">Extending Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="win32net.html">win32net</a></li>
+<li class="toctree-l2"><a class="reference internal" href="event.html">Windows NT Eventlog</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Eventlog &amp; Threading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file.html">File Locking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file_recursive.html">Directory Deleting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security.html">Windows NT Security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="samples/index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adodbapi/index.html">ADO DB-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/win32/event_threading.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

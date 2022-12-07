@@ -1,0 +1,1024 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>adodbapi package &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ISAPI" href="../../isapi/index.html" />
+    <link rel="prev" title="API" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="adodbapi-package">
+<h1>adodbapi package<a class="headerlink" href="#adodbapi-package" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Create docstrings for remaining module members</p></li>
+</ul>
+</div>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#module-adodbapi" id="id3">adodbapi</a></p></li>
+<li><p><a class="reference internal" href="#module-adodbapi.ado_consts" id="id4">adodbapi.ado_consts</a></p></li>
+<li><p><a class="reference internal" href="#adodbapi-connection" id="id5">adodbapi.Connection</a></p></li>
+<li><p><a class="reference internal" href="#adodbapi-cursor" id="id6">adodbapi.Cursor</a></p></li>
+<li><p><a class="reference internal" href="#module-adodbapi.apibase" id="id7">adodbapi.apibase</a></p></li>
+<li><p><a class="reference internal" href="#module-adodbapi.is64bit" id="id8">adodbapi.is64bit</a></p></li>
+<li><p><a class="reference internal" href="#module-adodbapi.process_connect_string" id="id9">adodbapi.process_connect_string</a></p></li>
+<li><p><a class="reference internal" href="#module-adodbapi.schema_table" id="id10">adodbapi.schema_table</a></p></li>
+</ul>
+</nav>
+<section id="module-adodbapi">
+<span id="adodbapi"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">adodbapi</a><a class="headerlink" href="#module-adodbapi" title="Permalink to this heading">¶</a></h2>
+<p>adodbapi - A python DB API 2.0 (PEP 249) interface to Microsoft ADO</p>
+<p>Copyright (C) 2002 Henrik Ekelund, version 2.1 by Vernon Cole
+* <a class="reference external" href="http://sourceforge.net/projects/adodbapi">http://sourceforge.net/projects/adodbapi</a></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.Binary">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">Binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aString</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object capable of holding a binary (long) string value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.Date">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">Date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Date" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a date value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.DateFromTicks">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">DateFromTicks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.DateFromTicks" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a date value from the given ticks value
+(number of seconds since the epoch; see the documentation of the standard Python time module for details).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.Time">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Time" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.TimeFromTicks">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">TimeFromTicks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.TimeFromTicks" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time value from the given ticks value
+(number of seconds since the epoch; see the documentation of the standard Python time module for details).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.Timestamp">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">Timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time stamp value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.TimestampFromTicks">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">TimestampFromTicks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.TimestampFromTicks" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time stamp value from the given
+ticks value (number of seconds since the epoch;
+see the documentation of the standard Python time module for details).</p>
+</dd></dl>
+
+</section>
+<section id="module-adodbapi.ado_consts">
+<span id="adodbapi-ado-consts"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">adodbapi.ado_consts</a><a class="headerlink" href="#module-adodbapi.ado_consts" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.ado_consts.ado_direction_name">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.ado_consts.</span></span><span class="sig-name descname"><span class="pre">ado_direction_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ado_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.ado_consts.ado_direction_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.ado_consts.ado_type_name">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.ado_consts.</span></span><span class="sig-name descname"><span class="pre">ado_type_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ado_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.ado_consts.ado_type_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="adodbapi-connection">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">adodbapi.Connection</a><a class="headerlink" href="#adodbapi-connection" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.Connection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">Connection</span></span><a class="headerlink" href="#adodbapi.Connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A <a class="reference internal" href="#adodbapi.Connection" title="adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a> object holds an ADO connection in its <code class="code docutils literal notranslate"><span class="pre">.connector</span></code> attribute.</p>
+<p>A <a class="reference internal" href="#adodbapi.Connection" title="adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a> object is usually created using the standard api constructor.</p>
+<p>Internally, it creates an empty <a class="reference internal" href="#adodbapi.Connection" title="adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Connection</span></code></a> object, fills in the attributes needed, and then call its <code class="xref py py-meth docutils literal notranslate"><span class="pre">connect()</span></code> method (which calls the ADO <code class="code docutils literal notranslate"><span class="pre">Open</span></code> method).</p>
+</dd></dl>
+
+<section id="connection-methods">
+<h3>Connection methods<a class="headerlink" href="#connection-methods" title="Permalink to this heading">¶</a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Connection.close">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Connection.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the connection now (rather than whenever __del__ is called).</p>
+<p>The connection will be unusable from this point forward;
+an Error (or subclass) exception will be raised if any operation is attempted with the connection.
+The same applies to all cursor objects trying to use the connection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Connection.commit">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Connection.commit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Commit any pending transaction to the database.</p>
+<p>Note that if the database supports an auto-commit feature,
+this must be initially off. An interface method may be provided to turn it back on.
+Database modules that do not support transactions should implement this method with void functionality.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Connection._rollback">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">_rollback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Connection._rollback" title="Permalink to this definition">¶</a></dt>
+<dd><p>In case a database does provide transactions this method causes the the database to roll back to
+the start of any pending transaction. Closing a connection without committing the changes first will
+cause an implicit rollback to be performed.</p>
+<p>If the database does not support the functionality required by the method, the interface should
+throw an exception in case the method is used.
+The preferred approach is to not implement the method and thus have Python generate
+an AttributeError in case the method is requested. This allows the programmer to check for database
+capabilities using the standard hasattr() function.</p>
+<p>For some dynamically configured interfaces it may not be appropriate to require dynamically making
+the method available. These interfaces should then raise a NotSupportedError to indicate the
+non-ability to perform the roll back when the method is invoked.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Connection.cursor">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">cursor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Connection.cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new Cursor Object using the connection.</p>
+<p>returns an <a class="reference internal" href="#adodbapi.Cursor" title="adodbapi.adodbapi.Cursor"><code class="xref py py-class docutils literal notranslate"><span class="pre">adodbapi.adodbapi.Cursor</span></code></a></p>
+</dd></dl>
+
+</section>
+<section id="connection-methods-non-standard">
+<h3>Connection methods (non-standard)<a class="headerlink" href="#connection-methods-non-standard" title="Permalink to this heading">¶</a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Connection.__enter__">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">__enter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Connection.__enter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The connection is a context manager for transactions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Connection.__exit__">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">__exit__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_tb</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Connection.__exit__" title="Permalink to this definition">¶</a></dt>
+<dd><p>If no errors occurred, <a class="reference internal" href="#adodbapi.Connection.commit" title="adodbapi.Connection.commit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">commit()</span></code></a>, otherwise <a class="reference internal" href="#adodbapi.Connection._rollback" title="adodbapi.Connection._rollback"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_rollback()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Connection.get_table_names">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">get_table_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Connection.get_table_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of table names in your database. (schema)</p>
+</dd></dl>
+
+</section>
+<section id="connection-attributes">
+<h3>Connection attributes<a class="headerlink" href="#connection-attributes" title="Permalink to this heading">¶</a></h3>
+<dl class="py property">
+<dt class="sig sig-object py" id="adodbapi.Connection.dbapi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">dbapi</span></span><a class="headerlink" href="#adodbapi.Connection.dbapi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a reference to the DBAPI module for this Connection.</p>
+<p>references the module defining the connection. (A proposed db-api V3 extension.) This is a way for higher level code to reach module-level attributes.</p>
+</dd></dl>
+
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>autodoc fails to generate .messages, variantConversions, and .timeout</p></li>
+<li><p>These are all <em>private</em> attributes. Should they be converted to <em>properties</em>?</p></li>
+</ul>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Connection.errorhandler">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">errorhandler</span></span><a class="headerlink" href="#adodbapi.Connection.errorhandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>(standard extension. See PEP.) (does not work on remote)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Connection.connector">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">connector</span></span><a class="headerlink" href="#adodbapi.Connection.connector" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Internal) the ADO connection object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Connection.paramstyle">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">paramstyle</span></span><a class="headerlink" href="#adodbapi.Connection.paramstyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>can be altered by the programmer to change the paramstyle in use. The supported values are <code class="code docutils literal notranslate"><span class="pre">'qmark'</span></code> (the default), <code class="code docutils literal notranslate"><span class="pre">'format'</span></code>, and <code class="code docutils literal notranslate"><span class="pre">'named'</span></code>. Values of <code class="code docutils literal notranslate"><span class="pre">'pyformat'</span></code>, and <code class="code docutils literal notranslate"><span class="pre">'dynamic'</span></code> are also accepted (see below).</p>
+<p>The connection string keyword <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> will set the default for the class for future connections.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Connection.connection_string">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">connection_string</span></span><a class="headerlink" href="#adodbapi.Connection.connection_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>the complete connection string which was used to start ADO.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Connection.dbms_name">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">dbms_name</span></span><a class="headerlink" href="#adodbapi.Connection.dbms_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>string identifying the actual database engine from the connection.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Connection.dbms_version">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">dbms_version</span></span><a class="headerlink" href="#adodbapi.Connection.dbms_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>string identifying the version of the db engine.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Connection.supportsTransactions">
+<span class="sig-prename descclassname"><span class="pre">Connection.</span></span><span class="sig-name descname"><span class="pre">supportsTransactions</span></span><a class="headerlink" href="#adodbapi.Connection.supportsTransactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>(bool) this driver is capable of <a class="reference internal" href="#adodbapi.Connection.commit" title="adodbapi.Connection.commit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">commit()</span></code></a>/<code class="xref py py-meth docutils literal notranslate"><span class="pre">rollback()</span></code>.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="adodbapi-cursor">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">adodbapi.Cursor</a><a class="headerlink" href="#adodbapi-cursor" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.Cursor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">Cursor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>.description is created/accessed only via __getattr__. Is a list[tuple]</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor._description">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">_description</span></span><a class="headerlink" href="#adodbapi.Cursor._description" title="Permalink to this definition">¶</a></dt>
+<dd><p>as defined by <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a>, a sequence of 7-item sequences</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.rowcount">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">rowcount</span></span><a class="headerlink" href="#adodbapi.Cursor.rowcount" title="Permalink to this definition">¶</a></dt>
+<dd><p>type is / returns int</p>
+<p><code class="code docutils literal notranslate"><span class="pre">-1</span></code> means “not known”. Will be ADO <code class="code docutils literal notranslate"><span class="pre">recordset.RecordCount</span></code> (if it works), otherwise, the count returned by the last ADO <code class="code docutils literal notranslate"><span class="pre">Execute</span></code> operation.</p>
+</dd></dl>
+
+</section>
+<section id="attributes-standard-extensions">
+<h3>Attributes (standard extensions)<a class="headerlink" href="#attributes-standard-extensions" title="Permalink to this heading">¶</a></h3>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.connection">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">connection</span></span><a class="headerlink" href="#adodbapi.Cursor.connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>back-link to the <a class="reference internal" href="#adodbapi.Connection" title="adodbapi.adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">adodbapi.adodbapi.Connection</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.errorhandler">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">errorhandler</span></span><a class="headerlink" href="#adodbapi.Cursor.errorhandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>(see <span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a> - a function to process exceptions.)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.messages">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">messages</span></span><a class="headerlink" href="#adodbapi.Cursor.messages" title="Permalink to this definition">¶</a></dt>
+<dd><p>(see <span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0249/"><strong>PEP 249</strong></a>)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.arraysize">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">arraysize</span></span><a class="headerlink" href="#adodbapi.Cursor.arraysize" title="Permalink to this definition">¶</a></dt>
+<dd><p>(=:code:<cite>1</cite>) # the default number of rows to fetch in <code class="code docutils literal notranslate"><span class="pre">fetchmany()</span></code></p>
+</dd></dl>
+
+</section>
+<section id="attributes-non-standard">
+<h3>Attributes (non-standard)<a class="headerlink" href="#attributes-non-standard" title="Permalink to this heading">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>autodoc fails to generate .returnValue</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.paramstyle">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">paramstyle</span></span><a class="headerlink" href="#adodbapi.Cursor.paramstyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>can be altered by the user to change paramstyle processing. (default taken from connection.) (see below)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.rs">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">rs</span></span><a class="headerlink" href="#adodbapi.Cursor.rs" title="Permalink to this definition">¶</a></dt>
+<dd><p>the internal ADO <code class="code docutils literal notranslate"><span class="pre">recordset</span></code> (local) or raw unpickled data (remote)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.converters">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">converters</span></span><a class="headerlink" href="#adodbapi.Cursor.converters" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of input-conversion functions, one per column. (not available on remote)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.columnNames">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">columnNames</span></span><a class="headerlink" href="#adodbapi.Cursor.columnNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>a dictionary of: (lower-cased) column name : (column number).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.numberOfColumns">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">numberOfColumns</span></span><a class="headerlink" href="#adodbapi.Cursor.numberOfColumns" title="Permalink to this definition">¶</a></dt>
+<dd><p>number of columns in present record set.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.command">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#adodbapi.Cursor.command" title="Permalink to this definition">¶</a></dt>
+<dd><p>the last raw SQL command sent to the query (before any reformatting)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="adodbapi.Cursor.query">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">query</span></span><a class="headerlink" href="#adodbapi.Cursor.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the last query executed</p>
+<p>the text of last operation, as converted by reformatting</p>
+</dd></dl>
+
+</section>
+<section id="methods-standard">
+<h3>Methods (standard)<a class="headerlink" href="#methods-standard" title="Permalink to this heading">¶</a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.callproc">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">callproc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.callproc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call a stored database procedure with the given name.
+The sequence of parameters must contain one entry for each
+argument that the sproc expects. The result of the
+call is returned as modified copy of the input
+sequence.  Input parameters are left untouched, output and
+input/output parameters replaced with possibly new values.</p>
+<p>The sproc may also provide a result set as output,
+which is available through the standard .fetch*() methods.
+Extension: A “return_value” property may be set on the
+cursor if the sproc defines an integer return value.</p>
+<p>execute a stored procedure, returning parameter values. A “returned value” (not an “out” parameter) will be in <code class="code docutils literal notranslate"><span class="pre">crsr.returnValue</span></code> -&gt; returns the (modified) parameter list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.close">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dont_tell_me</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the cursor now (rather than whenever __del__ is called).
+The cursor will be unusable from this point forward; an Error (or subclass)
+exception will be raised if any operation is attempted with the cursor.</p>
+<p>close the cursor, free the recordset</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>non-standard: in adodbapi, it is NOT an error to re-close a closed cursor</p>
+</div>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.execute">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare and execute a database operation (query or command).</p>
+<p>Parameters may be provided as sequence or mapping and will be bound to variables in the operation.
+Variables are specified in a database-specific notation
+(see the module’s paramstyle attribute for details). [5]
+A reference to the operation will be retained by the cursor.
+If the same operation object is passed in again, then the cursor
+can optimize its behavior. This is most effective for algorithms
+where the same operation is used, but different parameters are bound to it (many times).</p>
+<p>For maximum efficiency when reusing an operation, it is best to use
+the setinputsizes() method to specify the parameter types and sizes ahead of time.
+It is legal for a parameter to not match the predefined information;
+the implementation should compensate, possibly with a loss of efficiency.</p>
+<p>The parameters may also be specified as list of tuples to e.g. insert multiple rows in
+a single operation, but this kind of usage is depreciated: executemany() should be used instead.</p>
+<p>Return value is not defined.</p>
+<p>[5] The module will use the __getitem__ method of the parameters object to map either positions
+(integers) or names (strings) to parameter values. This allows for both sequences and mappings
+to be used as input.
+The term “bound” refers to the process of binding an input value to a database execution buffer.
+In practical terms, this means that the input value is directly used as a value in the operation.
+The client should not be required to “escape” the value so that it can be used – the value
+should be equal to the actual database value.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.Cursor.operation">
+<span class="sig-name descname"><span class="pre">operation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#adodbapi.Cursor.operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>the text of the SQL.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="adodbapi.parameters">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#adodbapi.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>parameters for the query or command…</p>
+</dd></dl>
+
+<p>execute a query or command…</p>
+<p>does not return anything / returns None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.executemany">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">executemany</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_of_parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.executemany" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare a database operation (query or command)
+and then execute it against all parameter sequences or mappings found in the sequence seq_of_parameters.</p>
+<blockquote>
+<div><p>Return values are not defined.</p>
+</div></blockquote>
+<p>runs the SQL operation several times, once for each group of parameters in sequence-of-parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.fetchone">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">fetchone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.fetchone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch the next row of a query result set, returning a single sequence,
+or None when no more data is available.</p>
+<p>An Error (or subclass) exception is raised if the previous call to executeXXX()
+did not produce any result set or no call was issued yet.</p>
+<p>returns <a class="reference internal" href="#adodbapi.apibase.SQLrow" title="adodbapi.apibase.SQLrow"><code class="xref py py-class docutils literal notranslate"><span class="pre">adodbapi.apibase.SQLrow</span></code></a>
+get the next row from the result set. Calls ADO <code class="code docutils literal notranslate"><span class="pre">recordset.GetRows(1)</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.fetchmany">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">fetchmany</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.fetchmany" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch the next set of rows of a query result, returning a list of tuples. An empty sequence is returned when no more rows are available.</p>
+<p>The number of rows to fetch per call is specified by the parameter.
+If it is not given, the cursor’s arraysize determines the number of rows to be fetched.
+The method should try to fetch as many rows as indicated by the size parameter.
+If this is not possible due to the specified number of rows not being available,
+fewer rows may be returned.</p>
+<p>An Error (or subclass) exception is raised if the previous call to executeXXX()
+did not produce any result set or no call was issued yet.</p>
+<p>Note there are performance considerations involved with the size parameter.
+For optimal performance, it is usually best to use the arraysize attribute.
+If the size parameter is used, then it is best for it to retain the same value from
+one fetchmany() call to the next.</p>
+<p>returns <a class="reference internal" href="#adodbapi.apibase.SQLrows" title="adodbapi.apibase.SQLrows"><code class="xref py py-class docutils literal notranslate"><span class="pre">adodbapi.apibase.SQLrows</span></code></a></p>
+<p>get a <code class="code docutils literal notranslate"><span class="pre">size</span></code> sequence of rows. Calls ADO <code class="code docutils literal notranslate"><span class="pre">recordset.GetRows(size)</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.fetchall">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">fetchall</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.fetchall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch all (remaining) rows of a query result, returning them as a sequence of sequences (e.g. a list of tuples).</p>
+<p>Note that the cursor’s arraysize attribute
+can affect the performance of this operation.
+An Error (or subclass) exception is raised if the previous call to executeXXX()
+did not produce any result set or no call was issued yet.</p>
+<p>attempt to retrieve all remaining rows in the result set. Calls ADO <code class="code docutils literal notranslate"><span class="pre">recordset.GetRows()</span></code> using a local cursor so may use a great deal of memory if the query set is large.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.nextset">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">nextset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.nextset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip to the next available recordset, discarding any remaining rows from the current recordset.</p>
+<p>If there are no more sets, the method returns None. Otherwise, it returns a true
+value and subsequent calls to the fetch methods will return rows from the next result set.</p>
+<p>An Error (or subclass) exception is raised if the previous call to executeXXX()
+did not produce any result set or no call was issued yet.</p>
+<p>If an operation (such as a stored procedure call) has produced multiple result sets, skip to the next available result set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.setinputsizes">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">setinputsizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sizes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.setinputsizes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.setoutputsize">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">setoutputsize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.setoutputsize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="methods-extensions">
+<h3>Methods (extensions)<a class="headerlink" href="#methods-extensions" title="Permalink to this heading">¶</a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.prepare">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>initiate an SQL prepared statement.</p>
+<blockquote>
+<div><p>This method actually does very little, and the use of it may not speed up your program very much, if at all. It does store the SQL statement you pass (operation) in the cursor’s <code class="code docutils literal notranslate"><span class="pre">self.command</span></code> attribute, and sends the appropriate flag to ADO. It will cache converted <code class="code docutils literal notranslate"><span class="pre">paramstyle</span></code> operation strings. Calling <code class="code docutils literal notranslate"><span class="pre">.execute()</span></code> with any other string, or calling <code class="code docutils literal notranslate"><span class="pre">.prepare()</span></code> again will invalidate the preparation.</p>
+<p>For example: <code class="code docutils literal notranslate"><span class="pre">cursor.executemany()</span></code> is programmed internally like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">executemany</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">sequence_of_parameter_sequences</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">sequence_of_parameter_sequences</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.get_returned_parameters">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">get_returned_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.get_returned_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>with some providers, returned parameters and the .return_value are not available until
+after the last recordset has been read.  In that case, you must coll nextset() until it
+returns None, then call this method to get your returned information.</p>
+<p>some providers will not return the (modified) parameter list, nor the <code class="code docutils literal notranslate"><span class="pre">return_value</span></code>, until after the last recordset is closed. This method can be called (_after_ calling <code class="code docutils literal notranslate"><span class="pre">nextset()</span></code> until it returns <code class="code docutils literal notranslate"><span class="pre">None</span></code>) to get those values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.__next__">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.__next__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The cursor can be used as an iterator, each iteration does <code class="code docutils literal notranslate"><span class="pre">fetchone()</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.__iter__">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.__enter__">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">__enter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.__enter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allow database cursors to be used with context managers.</p>
+<p>the cursor is a context manager which will auto-close</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.Cursor.__exit__">
+<span class="sig-prename descclassname"><span class="pre">Cursor.</span></span><span class="sig-name descname"><span class="pre">__exit__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_tb</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.Cursor.__exit__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allow database cursors to be used with context managers.</p>
+</dd></dl>
+
+</section>
+<section id="connect">
+<h3>connect<a class="headerlink" href="#connect" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.connect">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.</span></span><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to a database.</p>
+<p>call using:
+:connection_string – An ADODB formatted connection string, see:
+* <a class="reference external" href="http://www.connectionstrings.com">http://www.connectionstrings.com</a>
+* <a class="reference external" href="http://www.asp101.com/articles/john/connstring/default.asp">http://www.asp101.com/articles/john/connstring/default.asp</a>
+:timeout – A command timeout value, in seconds (default 30 seconds)</p>
+<p>returns <a class="reference internal" href="#adodbapi.Connection" title="adodbapi.adodbapi.Connection"><code class="xref py py-class docutils literal notranslate"><span class="pre">adodbapi.adodbapi.Connection</span></code></a></p>
+</dd></dl>
+
+</section>
+</section>
+<section id="module-adodbapi.apibase">
+<span id="adodbapi-apibase"></span><h2><a class="toc-backref" href="#id7" role="doc-backlink">adodbapi.apibase</a><a class="headerlink" href="#module-adodbapi.apibase" title="Permalink to this heading">¶</a></h2>
+<p>adodbapi.apibase - A python DB API 2.0 (PEP 249) interface to Microsoft ADO</p>
+<p>Copyright (C) 2002 Henrik Ekelund, version 2.1 by Vernon Cole
+* <a class="reference external" href="http://sourceforge.net/projects/pywin32">http://sourceforge.net/projects/pywin32</a>
+* <a class="reference external" href="http://sourceforge.net/projects/adodbapi">http://sourceforge.net/projects/adodbapi</a></p>
+<dl class="py data">
+<dt class="sig sig-object py" id="adodbapi.apibase.BINARY">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">BINARY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;adodbapi.apibase.DBAPITypeObject</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#adodbapi.apibase.BINARY" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type object is used to describe numeric columns in a database.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="adodbapi.apibase.DATETIME">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">DATETIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;adodbapi.apibase.DBAPITypeObject</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#adodbapi.apibase.DATETIME" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type object is used to describe the “Row ID” column in a database.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.DBAPITypeObject">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">DBAPITypeObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">valuesTuple</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.DBAPITypeObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.DataError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">DataError</span></span><a class="headerlink" href="#adodbapi.apibase.DataError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.DatabaseError" title="adodbapi.apibase.DatabaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.DatabaseError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">DatabaseError</span></span><a class="headerlink" href="#adodbapi.apibase.DatabaseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.Error" title="adodbapi.apibase.Error"><code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.Error">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><a class="headerlink" href="#adodbapi.apibase.Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.FetchFailedError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">FetchFailedError</span></span><a class="headerlink" href="#adodbapi.apibase.FetchFailedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.OperationalError" title="adodbapi.apibase.OperationalError"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationalError</span></code></a></p>
+<p>Error is used by RawStoredProcedureQuerySet to determine when a fetch
+failed due to a connection being closed or there is no record set
+returned. (Non-standard, added especially for django)</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.IntegrityError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">IntegrityError</span></span><a class="headerlink" href="#adodbapi.apibase.IntegrityError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.DatabaseError" title="adodbapi.apibase.DatabaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.InterfaceError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">InterfaceError</span></span><a class="headerlink" href="#adodbapi.apibase.InterfaceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.Error" title="adodbapi.apibase.Error"><code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.InternalError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">InternalError</span></span><a class="headerlink" href="#adodbapi.apibase.InternalError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.DatabaseError" title="adodbapi.apibase.DatabaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseError</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.MultiMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">MultiMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aDict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.MultiMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+<p>A dictionary of ado.type : function – but you can set multiple items by passing a sequence of keys</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="adodbapi.apibase.NUMBER">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">NUMBER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;adodbapi.apibase.DBAPITypeObject</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#adodbapi.apibase.NUMBER" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type object is used to describe date/time columns in a database.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.NotSupportedError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">NotSupportedError</span></span><a class="headerlink" href="#adodbapi.apibase.NotSupportedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.DatabaseError" title="adodbapi.apibase.DatabaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.OperationalError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">OperationalError</span></span><a class="headerlink" href="#adodbapi.apibase.OperationalError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.DatabaseError" title="adodbapi.apibase.DatabaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.ProgrammingError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">ProgrammingError</span></span><a class="headerlink" href="#adodbapi.apibase.ProgrammingError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.DatabaseError" title="adodbapi.apibase.DatabaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseError</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.SQLrow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">SQLrow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.SQLrow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.SQLrows">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">SQLrows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ado_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfRows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cursor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.SQLrows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="adodbapi.apibase.STRING">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">STRING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;adodbapi.apibase.DBAPITypeObject</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#adodbapi.apibase.STRING" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type object is used to describe (long) binary columns in a database (e.g. LONG, RAW, BLOBs).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">TimeConverter</span></span><a class="headerlink" href="#adodbapi.apibase.TimeConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter.COMDate">
+<span class="sig-name descname"><span class="pre">COMDate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.TimeConverter.COMDate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a ComDate from a date-time</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter.ComDateFromTuple">
+<span class="sig-name descname"><span class="pre">ComDateFromTuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microseconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.TimeConverter.ComDateFromTuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter.Date">
+<span class="sig-name descname"><span class="pre">Date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.TimeConverter.Date" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a date value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter.DateObjectFromCOMDate">
+<span class="sig-name descname"><span class="pre">DateObjectFromCOMDate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comDate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.TimeConverter.DateObjectFromCOMDate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an object of the wanted type from a ComDate</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter.DateObjectToIsoFormatString">
+<span class="sig-name descname"><span class="pre">DateObjectToIsoFormatString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.TimeConverter.DateObjectToIsoFormatString" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function should return a string in the format ‘YYYY-MM-dd HH:MM:SS:ms’ (ms optional)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter.Time">
+<span class="sig-name descname"><span class="pre">Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.TimeConverter.Time" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.TimeConverter.Timestamp">
+<span class="sig-name descname"><span class="pre">Timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.TimeConverter.Timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time stamp value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="adodbapi.apibase.Warning">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">Warning</span></span><a class="headerlink" href="#adodbapi.apibase.Warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.changeFormatToQmark">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">changeFormatToQmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.changeFormatToQmark" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.changeNamedToQmark">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">changeNamedToQmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.changeNamedToQmark" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.convert_to_python">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">convert_to_python</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.convert_to_python" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtBuffer">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtBuffer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtDecimal">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtDecimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtDecimal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtFloat">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtFloat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtFloat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtInt">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtInt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtInt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtLong">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtLong</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtLong" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtNumeric">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtNumeric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtNumeric" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtString">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtUnicode">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtUnicode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtUnicode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.cvtUnusual">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">cvtUnusual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.cvtUnusual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.identity">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">identity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.identity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.mxDateTimeConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">mxDateTimeConverter</span></span><a class="headerlink" href="#adodbapi.apibase.mxDateTimeConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.TimeConverter" title="adodbapi.apibase.TimeConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeConverter</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.pyTypeToADOType">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">pyTypeToADOType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pyTypeToADOType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonDateTimeConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">pythonDateTimeConverter</span></span><a class="headerlink" href="#adodbapi.apibase.pythonDateTimeConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.TimeConverter" title="adodbapi.apibase.TimeConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeConverter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonDateTimeConverter.Date">
+<span class="sig-name descname"><span class="pre">Date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonDateTimeConverter.Date" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a date value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonDateTimeConverter.DateObjectFromCOMDate">
+<span class="sig-name descname"><span class="pre">DateObjectFromCOMDate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comDate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonDateTimeConverter.DateObjectFromCOMDate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an object of the wanted type from a ComDate</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonDateTimeConverter.Time">
+<span class="sig-name descname"><span class="pre">Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonDateTimeConverter.Time" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonDateTimeConverter.Timestamp">
+<span class="sig-name descname"><span class="pre">Timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonDateTimeConverter.Timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time stamp value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonTimeConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">pythonTimeConverter</span></span><a class="headerlink" href="#adodbapi.apibase.pythonTimeConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#adodbapi.apibase.TimeConverter" title="adodbapi.apibase.TimeConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeConverter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonTimeConverter.Date">
+<span class="sig-name descname"><span class="pre">Date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonTimeConverter.Date" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a date value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonTimeConverter.DateObjectFromCOMDate">
+<span class="sig-name descname"><span class="pre">DateObjectFromCOMDate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comDate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonTimeConverter.DateObjectFromCOMDate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns ticks since 1970</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonTimeConverter.Time">
+<span class="sig-name descname"><span class="pre">Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonTimeConverter.Time" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="adodbapi.apibase.pythonTimeConverter.Timestamp">
+<span class="sig-name descname"><span class="pre">Timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.pythonTimeConverter.Timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function constructs an object holding a time stamp value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.standardErrorHandler">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">standardErrorHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cursor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorclass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorvalue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.standardErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.apibase.variantConvertDate">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.apibase.</span></span><span class="sig-name descname"><span class="pre">variantConvertDate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.apibase.variantConvertDate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-adodbapi.is64bit">
+<span id="adodbapi-is64bit"></span><h2><a class="toc-backref" href="#id8" role="doc-backlink">adodbapi.is64bit</a><a class="headerlink" href="#module-adodbapi.is64bit" title="Permalink to this heading">¶</a></h2>
+<p>is64bit.Python() –&gt; boolean value of detected Python word size. is64bit.os() –&gt; os build version</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.is64bit.Python">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.is64bit.</span></span><span class="sig-name descname"><span class="pre">Python</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.is64bit.Python" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.is64bit.os">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.is64bit.</span></span><span class="sig-name descname"><span class="pre">os</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.is64bit.os" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-adodbapi.process_connect_string">
+<span id="adodbapi-process-connect-string"></span><h2><a class="toc-backref" href="#id9" role="doc-backlink">adodbapi.process_connect_string</a><a class="headerlink" href="#module-adodbapi.process_connect_string" title="Permalink to this heading">¶</a></h2>
+<p>a clumsy attempt at a macro language to let the programmer execute code on the server (ex: determine 64bit)</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.process_connect_string.macro_call">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.process_connect_string.</span></span><span class="sig-name descname"><span class="pre">macro_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">macro_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.process_connect_string.macro_call" title="Permalink to this definition">¶</a></dt>
+<dd><p>allow the programmer to perform limited processing on the server by passing macro names and args</p>
+<p>:new_key - the key name the macro will create
+:args[0] - macro name
+:args[1:] - any arguments
+:code - the value of the keyword item
+:kwargs - the connection keyword dictionary. ??key has been removed
+–&gt; the value to put in for kwargs[‘name’] = value</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.process_connect_string.process">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.process_connect_string.</span></span><span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_macros</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.process_connect_string.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>attempts to inject arguments into a connection string using Python “%” operator for strings</p>
+<p>co: adodbapi connection object
+args: positional parameters from the .connect() call
+kvargs: keyword arguments from the .connect() call</p>
+</dd></dl>
+
+</section>
+<section id="module-adodbapi.schema_table">
+<span id="adodbapi-schema-table"></span><h2><a class="toc-backref" href="#id10" role="doc-backlink">adodbapi.schema_table</a><a class="headerlink" href="#module-adodbapi.schema_table" title="Permalink to this heading">¶</a></h2>
+<p>call using an open ADO connection –&gt; list of table names</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="adodbapi.schema_table.names">
+<span class="sig-prename descclassname"><span class="pre">adodbapi.schema_table.</span></span><span class="sig-name descname"><span class="pre">names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection_object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#adodbapi.schema_table.names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">ADO DB-API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../quick_reference.html">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samples/index.html">Samples</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/adodbapi/apidoc/adodbapi.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

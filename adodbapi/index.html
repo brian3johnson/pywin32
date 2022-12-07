@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>ADO DB-API &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python ADODBAPI quick reference" href="quick_reference.html" />
+    <link rel="prev" title="com package" href="../com/apidoc/com.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="adodbapi">
+<h1>ADO DB-API<a class="headerlink" href="#adodbapi" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-existing-document admonition">
+<p class="admonition-title">Existing document</p>
+<p><code class="file docutils literal notranslate"><span class="pre">\adodbpi\readme.txt</span></code></p>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<nav class="contents local" id="current-document">
+<p class="topic-title">Current document:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#project" id="id1">Project</a></p></li>
+<li><p><a class="reference internal" href="#license" id="id2">License</a></p></li>
+<li><p><a class="reference internal" href="#documentation" id="id3">Documentation</a></p></li>
+<li><p><a class="reference internal" href="#mailing-lists" id="id4">Mailing lists</a></p></li>
+</ul>
+</nav>
+<section id="project">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Project</a><a class="headerlink" href="#project" title="Permalink to this heading">¶</a></h2>
+<p>A Python DB-API 2.0 (PEP-249) module that makes it easy to use Microsoft ADO for connecting with databases and other data sources using either CPython or IronPython.</p>
+<p>Home page: &lt;<a class="reference external" href="http://sourceforge.net/projects/adodbapi">http://sourceforge.net/projects/adodbapi</a>&gt;</p>
+<p>Features:
+* 100% DB-API 2.0 (PEP-249) compliant (including most extensions and recommendations).
+* Includes pyunit testcases that describe how to use the module.
+* Fully implemented in Python. – runs in Python 2.5+ Python 3.0+ and IronPython 2.6+
+* Licensed under the LGPL license, which means that it can be used freely even in commercial programs subject to certain restrictions.
+* The user can choose between paramstyles: ‘qmark’ ‘named’ ‘format’ ‘pyformat’ ‘dynamic’
+* Supports data retrieval by column name e.g.:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">myCurser</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;select name,age from students&quot;</span><span class="p">):</span>
+   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Student&quot;</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">age</span><span class="p">,</span> <span class="s2">&quot;years old.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ul class="simple">
+<li><p>Supports user-definable system-to-Python data conversion functions (selected by ADO data type, or by column)</p></li>
+</ul>
+<p>Prerequisites:
+* C Python 2.7 or 3.5 or higher and pywin32 (Mark Hammond’s python for windows extensions.) or Iron Python 2.7 or higher. (works in IPy2.0 for all data types except BUFFER)</p>
+<p>Installation:
+* (C-Python on Windows): Install pywin32 (“pip install pywin32”) which includes adodbapi.
+* (IronPython on Windows): Download adodbapi from <a class="reference external" href="http://sf.net/projects/adodbapi">http://sf.net/projects/adodbapi</a>.  Unpack the zip.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Open a command window as an administrator. CD to the folder containing the unzipped files.</p></li>
+<li><p>Run “setup.py install” using the IronPython of your choice.</p></li>
+</ul>
+</div></blockquote>
+<p>NOTE: ………..
+If you do not like the new default operation of returning Numeric columns as decimal.Decimal,
+you can select other options by the user defined conversion feature.
+Try:</p>
+<p>adodbapi.apibase.variantConversions[adodbapi.ado_consts.adNumeric] = adodbapi.apibase.cvtString</p>
+<p>or:</p>
+<p>adodbapi.apibase.variantConversions[adodbapi.ado_consts.adNumeric] = adodbapi.apibase.cvtFloat</p>
+<p>or:</p>
+<dl>
+<dt>adodbapi.apibase.variantConversions[adodbapi.ado_consts.adNumeric] = write_your_own_convertion_function</dt><dd><p>…</p>
+</dd>
+<dt>notes for 2.6.2:</dt><dd><p>The definitive source has been moved to <a class="reference external" href="https://github.com/mhammond/pywin32/tree/master/adodbapi">https://github.com/mhammond/pywin32/tree/master/adodbapi</a>.
+Remote has proven too hard to configure and test with Pyro4. I am moving it to unsupported status
+until I can change to a different connection method.</p>
+</dd>
+<dt>whats new in version 2.6</dt><dd><p>A cursor.prepare() method and support for prepared SQL statements.
+Lots of refactoring, especially of the Remote and Server modules (still to be treated as Beta code).
+The quick start document ‘quick_reference.odt’ will export as a nice-looking pdf.
+Added paramstyles ‘pyformat’ and ‘dynamic’. If your ‘paramstyle’ is ‘named’ you _must_ pass a dictionary of parameters to your .execute() method. If your ‘paramstyle’ is ‘format’ ‘pyformat’ or ‘dynamic’, you _may_ pass a dictionary of parameters – provided your SQL operation string is formatted correctly.</p>
+</dd>
+<dt>whats new in version 2.5</dt><dd><p>Remote module: (works on Linux!) allows a Windows computer to serve ADO databases via PyRO
+Server module: PyRO server for ADO.  Run using a command like= C:&gt;python -m adodbapi.server
+(server has simple connection string macros: is64bit, getuser, sql_provider, auto_security)
+Brief documentation included.  See adodbapi/examples folder adodbapi.rtf
+New connection method conn.get_table_names() –&gt; list of names of tables in database</p>
+<p>Vastly refactored. Data conversion things have been moved to the new adodbapi.apibase module.
+Many former module-level attributes are now class attributes. (Should be more thread-safe)
+Connection objects are now context managers for transactions and will commit or rollback.
+Cursor objects are context managers and will automatically close themselves.
+Autocommit can be switched on and off.
+Keyword and positional arguments on the connect() method work as documented in PEP 249.
+Keyword arguments from the connect call can be formatted into the connection string.
+New keyword arguments defined, such as: autocommit, paramstyle, remote_proxy, remote_port.</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Breaking change: variantConversion lookups are simplified: the following will raise KeyError:</p>
+<blockquote>
+<div><p>oldconverter=adodbapi.variantConversions[adodbapi.adoStringTypes]</p>
+</div></blockquote>
+<p>Refactor as: oldconverter=adodbapi.variantConversions[adodbapi.adoStringTypes[0]]</p>
+</div>
+</section>
+<section id="license">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">License</a><a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h2>
+<p>LGPL, see <a class="reference external" href="http://www.opensource.org/licenses/lgpl=license.php">http://www.opensource.org/licenses/lgpl=license.php</a></p>
+</section>
+<section id="documentation">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Documentation</a><a class="headerlink" href="#documentation" title="Permalink to this heading">¶</a></h2>
+<p>Look at <a class="reference internal" href="quick_reference.html"><span class="doc">Python ADODBAPI quick reference</span></a>
+<a class="reference external" href="http://www.python.org/topics/database/DatabaseAPI=2.0.html">http://www.python.org/topics/database/DatabaseAPI=2.0.html</a>
+read the examples in adodbapi/examples
+and look at the test cases in adodbapi/test directory.</p>
+</section>
+<section id="mailing-lists">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Mailing lists</a><a class="headerlink" href="#mailing-lists" title="Permalink to this heading">¶</a></h2>
+<p>The adodbapi mailing lists have been deactivated. Submit comments to the
+pywin32 or IronPython mailing lists.
+- the bug tracker on sourceforge.net/projects/adodbapi may be checked, (infrequently).
+- please use: <a class="reference external" href="https://github.com/mhammond/pywin32/issues">https://github.com/mhammond/pywin32/issues</a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ADO DB-API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quick_reference.html">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="samples/index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/adodbapi/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

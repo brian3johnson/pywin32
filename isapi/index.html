@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>ISAPI &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Samples" href="samples/index.html" />
+    <link rel="prev" title="adodbapi package" href="../adodbapi/apidoc/adodbapi.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="isapi">
+<h1>ISAPI<a class="headerlink" href="#isapi" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-existing-document admonition">
+<p class="admonition-title">Existing document</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">\isapi\doc\isapi.html</span></code></p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">\isapi\README.txt</span></code></p></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p>The <a class="reference internal" href="apidoc/isapi.html"><span class="doc">isapi related modules</span></a></p></li>
+<li><p>The isapi related objects</p></li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are viewing this documentation directly from disk, most links in this document will fail. You can also find this document in the CHM file that comes with pywin32, where the links will work.</p>
+</div>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction" id="id1">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#implementation" id="id2">Implementation</a></p></li>
+<li><p><a class="reference internal" href="#using-py2exe-and-the-isapi-package" id="id3">Using py2exe and the isapi package</a></p></li>
+<li><p><a class="reference internal" href="#from-the-readme-txt" id="id4">From the README.txt</a></p></li>
+</ul>
+</nav>
+<section id="introduction">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>This documents Python support for hosting ISAPI extensions and filters inside Microsoft Internet Information Server (IIS). It assumes a basic understanding of the ISAPI filter and extension mechanism.</p>
+<p>In summary, to implement a filter or extension, you provide a Python module which defines a Filter and/or Extension class. Once your class has been loaded, IIS/ISAPI will, via an extension DLL, call methods on your class.</p>
+<p>A filter and a class instance need only provide 3 methods - for filters they are called <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleFilter.GetFilterVersion" title="isapi.simple.SimpleFilter.GetFilterVersion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GetFilterVersion</span></code></a>, <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleFilter.HttpFilterProc" title="isapi.simple.SimpleFilter.HttpFilterProc"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HttpFilterProc</span></code></a>, and <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleFilter.TerminateFilter" title="isapi.simple.SimpleFilter.TerminateFilter"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TerminateFilter</span></code></a>. For extensions they are named <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleExtension.GetExtensionVersion" title="isapi.simple.SimpleExtension.GetExtensionVersion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GetExtensionVersion</span></code></a>, <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleExtension.HttpExtensionProc" title="isapi.simple.SimpleExtension.HttpExtensionProc"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HttpExtensionProc</span></code></a>, and <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleExtension.TerminateExtension" title="isapi.simple.SimpleExtension.TerminateExtension"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TerminateExtension</span></code></a>. If you are familiar with writing ISAPI extensions in C/C++, these names and their purpose will be familiar.</p>
+<p>Most of the work is done in the <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleFilter.HttpFilterProc" title="isapi.simple.SimpleFilter.HttpFilterProc"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HttpFilterProc</span></code></a> and <a class="reference internal" href="apidoc/isapi.html#isapi.simple.SimpleExtension.HttpExtensionProc" title="isapi.simple.SimpleExtension.HttpExtensionProc"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HttpExtensionProc</span></code></a> methods. These both take a single parameter - an <code class="docutils literal notranslate"><span class="pre">HTTP_FILTER_CONTEXT</span></code> and <code class="docutils literal notranslate"><span class="pre">EXTENSION_CONTROL_BLOCK</span></code> object, respectively.</p>
+<p>In addition to these components, there is an <a class="reference internal" href="apidoc/isapi.html"><span class="doc">isapi package</span></a>, containing support facilities (base-classes, exceptions, etc.), which can be leveraged by the extension.</p>
+<section id="base-classes">
+<h3>Base classes<a class="headerlink" href="#base-classes" title="Permalink to this heading">¶</a></h3>
+<p>There are a number of base classes provided to make writing extensions a little simpler. Of particular note is <a class="reference internal" href="apidoc/isapi.html#isapi.threaded_extension.ThreadPoolExtension" title="isapi.threaded_extension.ThreadPoolExtension"><code class="xref py py-class docutils literal notranslate"><span class="pre">isapi.threaded_extension.ThreadPoolExtension</span></code></a>. This implements a thread-pool and informs IIS that the request is progressing in the background. Your sub-class need only provide a <a class="reference internal" href="apidoc/isapi.html#isapi.threaded_extension.ThreadPoolExtension.Dispatch" title="isapi.threaded_extension.ThreadPoolExtension.Dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Dispatch</span></code></a> method, which is called on one of the worker threads rather than the thread that the request came in on.</p>
+<p>There is base-class for a filter in <a class="reference internal" href="apidoc/isapi.html#module-isapi.simple" title="isapi.simple"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">isapi.simple</span></code></a>, but there is no equivalent threaded filter - filters work under a different model, where background processing is not possible.</p>
+</section>
+<section id="samples">
+<h3>Samples<a class="headerlink" href="#samples" title="Permalink to this heading">¶</a></h3>
+<p>Please see the isapi/samples directory for some sample filters and extensions.</p>
+</section>
+</section>
+<section id="implementation">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Implementation</a><a class="headerlink" href="#implementation" title="Permalink to this heading">¶</a></h2>
+<p>A Python ISAPI filter extension consists of 2 main components:</p>
+<ul class="simple">
+<li><p>A DLL used by ISAPI to interface with Python.</p></li>
+<li><p>A Python script used by that DLL to implement the filter or extension functionality.</p></li>
+</ul>
+<section id="extension-dll">
+<h3>Extension DLL<a class="headerlink" href="#extension-dll" title="Permalink to this heading">¶</a></h3>
+<p>The DLL is usually managed automatically by the <a class="reference internal" href="apidoc/isapi.html#module-isapi.install" title="isapi.install"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">isapi.install</span></code></a> module. As the Python script for the extension is installed, a generic DLL provided with the isapi package is installed next to the script, and IIS configured to use this DLL.</p>
+<p>The name of the DLL always has the same base name as the Python script, but with a leading underscore (_), and an extension of .dll. For example, the sample “redirector.py” will, when installed, have “_redirector.dll” created in the same directory.</p>
+<p>The Python script may provide 2 entry points - methods named <code class="docutils literal notranslate"><span class="pre">__FilterFactory__</span></code> and <code class="docutils literal notranslate"><span class="pre">__ExtensionFactory__</span></code>, both taking no arguments and returning a filter or extension object.</p>
+</section>
+</section>
+<section id="using-py2exe-and-the-isapi-package">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Using py2exe and the isapi package</a><a class="headerlink" href="#using-py2exe-and-the-isapi-package" title="Permalink to this heading">¶</a></h2>
+<p>You can instruct py2exe to create a ‘frozen’ Python ISAPI filter/extension. In this case, py2exe will create a package with everything you need in one directory, and the Python source file embedded in the .zip file.</p>
+<p>In general, you will want to build a separate installation executable along with the ISAPI extension. This executable will be built from the same script. See the ISAPI sample in the py2exe distribution.</p>
+</section>
+<section id="from-the-readme-txt">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">From the README.txt</a><a class="headerlink" href="#from-the-readme-txt" title="Permalink to this heading">¶</a></h2>
+<p>A Python ISAPI extension. Contributed by Phillip Frantz, and is Copyright 2002-2003 by Blackdog Software Pty Ltd.</p>
+<p>See the <code class="file docutils literal notranslate"><span class="pre">samples</span></code> directory, and particularly <code class="file docutils literal notranslate"><span class="pre">samples\README.txt</span></code></p>
+<p>You can find documentation in the <code class="file docutils literal notranslate"><span class="pre">PyWin32.chm</span></code> file that comes with pywin32 -
+you can open this from Pythonwin-&gt;Help, or from the start menu.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../win32/index.html">Win32 Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adodbapi/index.html">ADO DB-API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ISAPI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="samples/index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/isapi/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

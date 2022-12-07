@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Extending Python (directory permissions w/GetNamedSecurityInfo) &#8212; pywin32 305 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Windows Network Management: win32net" href="win32net.html" />
+    <link rel="prev" title="Getting process info: Win32 and COM with python and C++" href="process_info.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="extending-python-directory-permissions-w-getnamedsecurityinfo">
+<h1>Extending Python (directory permissions w/GetNamedSecurityInfo)<a class="headerlink" href="#extending-python-directory-permissions-w-getnamedsecurityinfo" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-existing-document admonition">
+<p class="admonition-title">Existing document</p>
+<p><code class="file docutils literal notranslate"><span class="pre">\win32\help\security_directories.html</span></code></p>
+</div>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#introduction" id="id1">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#extending-python" id="id2">Extending Python</a></p></li>
+<li><p><a class="reference internal" href="#getnamedsecurityinfo" id="id3">GetNamedSecurityInfo</a></p></li>
+<li><p><a class="reference internal" href="#extending-python-for-directory-permissions" id="id4">Extending Python for Directory Permissions</a></p></li>
+<li><p><a class="reference internal" href="#in-conclusion" id="id5">In Conclusion</a></p></li>
+<li><p><a class="reference internal" href="#further-info" id="id6">Further Info</a></p></li>
+</ul>
+</nav>
+<p><em>Section author: John Nielsen &lt;<a class="reference external" href="mailto:jn&#37;&#52;&#48;who&#46;net">jn<span>&#64;</span>who<span>&#46;</span>net</a>&gt;</em></p>
+<p>Python has a good framework in place to extend it’s capabilities with C or C++. Often this is done for reasons of performance or to give it capabilities that aren’t present in it’s standard libraries. For example, standard python does not provide a way to acquire file and directory permissions on windows. However, Microsoft’s GetSecurityInfo/GetNamedSecurityInfo does and is accessible via C++. We’ll look at how one can build a small module that uses GetNamedSecurityInfo to return to python permission information for a file or directory.</p>
+<section id="introduction">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>Extending python, though not nearly as simple as pure python, is reasonably straightforward. The most convenient method of doing this is to separate the extension into it’s own module which would act like any other python module one uses. It is straightforward enough that one can limit the need to use C++ to narrow well-defined extensions and have python manage the rest. Extending python to use Microsoft’s Security API is an excellent candidate for this. Of the four security functions that allow one to deal with security descriptors, we’re going to look at GetNamedSecurityInfo. Specifically, python is going to be extended so it can get permissions from a filesystem.</p>
+</section>
+<section id="extending-python">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Extending Python</a><a class="headerlink" href="#extending-python" title="Permalink to this heading">¶</a></h2>
+<p>There are several ways one can extend python. You can take a raw wrapping approach, SWIG <a class="reference external" href="http://www.swig.org/">http://www.swig.org/</a> or BPL (Boost Python Libraries) <a class="reference external" href="http://www.boost.org/libs/python/doc/index.html">http://www.boost.org/libs/python/doc/index.html</a>. This extension is simple enough that we’re going to wrap the C++ w/out the help of SWIG of BPL. This won’t be an extensive discussion about extending python, just enough to serve as a starting point to deciphering and making your own win32 extensions. The approach to wrap has a few standard todos. You need a to:</p>
+<p>define whatever functions you want to expose
+manipulate C and python data types
+create a structure that has references to the functions
+initialize the module.
+Python has helper objects and functions to make this as painless as possible. You need to include Python.h to get access to these.
+To define the the function, you need to follow a specific format: static PyObject * module_function
+PyObject is the base type of Python Object. The name of the function needs to be the module followed by an ‘_’ followed by the function.
+To manipulate data types, there are numerous “Py” functions. The ones used in this extension are:</p>
+<p>PyList_New(),PyList_Append – make and add to a python list
+PyDict_New(),PyDict_SetItem – make a dictionary and add to a python dictionary
+PyArg_ParseTuple – process arguments sent to module
+PyBytes_FromString/PyLong_FromUnsignedLong – convert C datatypes to Python
+PyArg_ParseTuple – accept data from python and convert to C</p>
+<p>You also need to create a structure of all the functions that you want the Python interpreter to see. To do this you make an array of arrays of type static PyMethodDef. The array needs to end w/a NULL entry to mark it’s end.</p>
+<p>Finally, you need to initialize the module (which is what happens when the module is imported) This uses another “Py” function called Py_InitModule.</p>
+<p>These steps should become clearer once you see all the details of an actual extension.</p>
+</section>
+<section id="getnamedsecurityinfo">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">GetNamedSecurityInfo</a><a class="headerlink" href="#getnamedsecurityinfo" title="Permalink to this heading">¶</a></h2>
+<p>GetNamedSecurityInfo retrieves a security descriptor from a string that specifies the object. This works well for strings that contain filenames. A Security Descriptor contains the security information about an object. Of that information, we’re primarily concerned with the DACL (discretionary access control list), which contains a list of things that are allowed to interact with the object(in our case the file or directory). Specifically, we will process the ACEs in the DACL, each of which contains the removal/addition of permissions and what SIDs they are assigned to. To get and process the DACL, you need to follow these steps:
+GetNamedSecurityInfo – Get the DACL
+GetAclInformation – get the list of the ACL’s in the DACL to go through
+GetAce – get an ACE (which contains the access mask and the SID) from the list
+LookupAccountSid– gives you the domain and name for the SID
+The following code goes through those 4 steps in greater detail. Refer to Microsoft MSDN references <a class="reference external" href="http://msdn.microsoft.com/">http://msdn.microsoft.com/</a> for info about the various win32 calls made.</p>
+</section>
+<section id="extending-python-for-directory-permissions">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Extending Python for Directory Permissions</a><a class="headerlink" href="#extending-python-for-directory-permissions" title="Permalink to this heading">¶</a></h2>
+<p>To setup Visual Studio correctly for building an extension, it is easiest to use a program called compile.py <a class="reference external" href="http://starship.python.net/crew/da/compile">http://starship.python.net/crew/da/compile</a> which builds the project for you. The Extension creates a dictionary of user or group plus the access mask. To Python it will look like:
+import fileperm
+all_perms=fileperm.get_perms(r’\Simonsharedba.txt’)</p>
+<p>And if you print the perms you’ll get something like:</p>
+<p>print all_perms
+{’\Everyone’: 2032127L, ‘Domain\fred’: 1179817L, ‘BUILTIN\Users’: 1179817L}</p>
+<section id="c-code">
+<h3>C code<a class="headerlink" href="#c-code" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="cp">#include</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="c1">//win32 security</span>
+<span class="linenos">  4</span><span class="cp">#include</span>
+<span class="linenos">  5</span><span class="cp">#include</span>
+<span class="linenos">  6</span><span class="cp">#include</span>
+<span class="linenos">  7</span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="k">struct</span><span class="w"> </span><span class="nc">file_perms</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 10</span><span class="kt">char</span><span class="w"> </span><span class="n">user_domain</span><span class="p">[</span><span class="mi">2050</span><span class="p">];</span><span class="w"></span>
+<span class="linenos"> 11</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">user_mask</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 12</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 13</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="c1">//This function determines the username and domain</span>
+<span class="linenos"> 16</span><span class="kt">void</span><span class="w"> </span><span class="nf">lookup_sid</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">ACCESS_ALLOWED_ACE</span><span class="o">*</span><span class="w"> </span><span class="n">pACE</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">user_domain</span><span class="p">[]</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 17</span><span class="w">   </span><span class="kt">char</span><span class="w"> </span><span class="n">username</span><span class="p">[</span><span class="mi">1024</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 18</span><span class="w">   </span><span class="kt">char</span><span class="w"> </span><span class="n">domain</span><span class="p">[</span><span class="mi">1024</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span><span class="w">   </span><span class="n">ULONG</span><span class="w"> </span><span class="n">len_username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">username</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 21</span><span class="w">   </span><span class="n">ULONG</span><span class="w"> </span><span class="n">len_domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">domain</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 22</span><span class="w">   </span><span class="n">PSID</span><span class="w"> </span><span class="n">pSID</span><span class="w"> </span><span class="o">=</span><span class="p">(</span><span class="n">PSID</span><span class="p">)(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">pACE</span><span class="o">-&gt;</span><span class="n">SidStart</span><span class="p">));</span><span class="w"></span>
+<span class="linenos"> 23</span><span class="w">   </span><span class="n">SID_NAME_USE</span><span class="w"> </span><span class="n">sid_name_use</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 24</span>
+<span class="linenos"> 25</span><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">LookupAccountSid</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">pSID</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 26</span><span class="w">      </span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">len_username</span><span class="p">,</span><span class="w"> </span><span class="n">domain</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">len_domain</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">sid_name_use</span><span class="p">)){</span><span class="w"></span>
+<span class="linenos"> 27</span><span class="w">      </span><span class="n">strcpy</span><span class="p">(</span><span class="n">user_domain</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;unknown&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 28</span><span class="w">   </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 29</span><span class="w">      </span><span class="n">strcat</span><span class="p">(</span><span class="n">user_domain</span><span class="p">,</span><span class="n">domain</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 30</span><span class="w">      </span><span class="n">strcat</span><span class="p">(</span><span class="n">user_domain</span><span class="p">,</span><span class="s">&quot;</span><span class="se">\\</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 31</span><span class="w">      </span><span class="n">strcat</span><span class="p">(</span><span class="n">user_domain</span><span class="p">,</span><span class="n">username</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 32</span><span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 33</span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span><span class="c1">//Store the mask and username in the file_perms structure.</span>
+<span class="linenos"> 38</span><span class="c1">//call lookup_sid to get the username</span>
+<span class="linenos"> 39</span><span class="kt">void</span><span class="w"> </span><span class="nf">acl_info</span><span class="p">(</span><span class="w"> </span><span class="n">PACL</span><span class="w"> </span><span class="n">pACL</span><span class="p">,</span><span class="w"> </span><span class="n">ULONG</span><span class="w"> </span><span class="n">AceCount</span><span class="p">,</span><span class="w"> </span><span class="n">file_perms</span><span class="w"> </span><span class="n">fp</span><span class="p">[]){</span><span class="w"></span>
+<span class="linenos"> 40</span><span class="w">   </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ULONG</span><span class="w"> </span><span class="n">acl_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="n">acl_index</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">AceCount</span><span class="p">;</span><span class="n">acl_index</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="linenos"> 41</span><span class="w">      </span><span class="n">ACCESS_ALLOWED_ACE</span><span class="o">*</span><span class="w"> </span><span class="n">pACE</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">GetAce</span><span class="p">(</span><span class="n">pACL</span><span class="p">,</span><span class="w"> </span><span class="n">acl_index</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">PVOID</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pACE</span><span class="p">))</span><span class="w"></span>
+<span class="linenos"> 44</span><span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 45</span><span class="w">         </span><span class="kt">char</span><span class="w"> </span><span class="n">user_domain</span><span class="p">[</span><span class="mi">2050</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 46</span><span class="w">         </span><span class="n">lookup_sid</span><span class="p">(</span><span class="n">pACE</span><span class="p">,</span><span class="n">user_domain</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 47</span><span class="w">         </span><span class="n">strcpy</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="n">acl_index</span><span class="p">].</span><span class="n">user_domain</span><span class="p">,</span><span class="n">user_domain</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 48</span><span class="w">         </span><span class="n">fp</span><span class="p">[</span><span class="n">acl_index</span><span class="p">].</span><span class="n">user_mask</span><span class="o">=</span><span class="p">(</span><span class="n">ULONG</span><span class="p">)</span><span class="n">pACE</span><span class="o">-&gt;</span><span class="n">Mask</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 49</span><span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 50</span><span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 51</span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 52</span>
+<span class="linenos"> 53</span><span class="k">static</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="nf">get_perms</span><span class="p">(</span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="w"></span>
+<span class="linenos"> 54</span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 55</span>
+<span class="linenos"> 56</span><span class="w">   </span><span class="n">PyObject</span><span class="w"> </span><span class="o">*</span><span class="n">py_perms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PyDict_New</span><span class="p">();</span><span class="w"></span>
+<span class="linenos"> 57</span><span class="w">   </span><span class="c1">//get file or directory name</span>
+<span class="linenos"> 58</span><span class="w">   </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">file</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">PyArg_ParseTuple</span><span class="p">(</span><span class="n">args</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;s&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">file</span><span class="p">))</span><span class="w"></span>
+<span class="linenos"> 61</span><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span><span class="w">   </span><span class="c1">//setup security code</span>
+<span class="linenos"> 64</span><span class="w">   </span><span class="n">PSECURITY_DESCRIPTOR</span><span class="w"> </span><span class="n">pSD</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 65</span><span class="w">   </span><span class="n">PACL</span><span class="w"> </span><span class="n">pDACL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 66</span><span class="w">   </span><span class="c1">//GetNamedSecurityInfo() will give you the DACL when you ask for</span>
+<span class="linenos"> 67</span><span class="w">   </span><span class="c1">//DACL_SECURITY_INFORMATION. At this point, you have SIDs in the ACEs contained in the DACL.</span>
+<span class="linenos"> 68</span><span class="w">   </span><span class="n">ULONG</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetNamedSecurityInfo</span><span class="p">(</span><span class="n">file</span><span class="p">,</span><span class="n">SE_FILE_OBJECT</span><span class="p">,</span><span class="w"> </span><span class="n">DACL_SECURITY_INFORMATION</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 69</span><span class="w">   </span><span class="o">&amp;</span><span class="n">pDACL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pSD</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="p">){</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;}</span><span class="w"></span>
+<span class="linenos"> 72</span><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ERROR_SUCCESS</span><span class="p">){</span><span class="w"></span>
+<span class="linenos"> 73</span><span class="w">      </span><span class="n">ACL_SIZE_INFORMATION</span><span class="w"> </span><span class="n">aclSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span><span class="w"></span>
+<span class="linenos"> 74</span><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">pDACL</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">){</span><span class="w"></span>
+<span class="linenos"> 75</span><span class="w">         </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">GetAclInformation</span><span class="p">(</span><span class="n">pDACL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">aclSize</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">aclSize</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 76</span><span class="w">            </span><span class="n">AclSizeInformation</span><span class="p">)){</span><span class="w"></span>
+<span class="linenos"> 77</span><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 78</span><span class="w">         </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 79</span><span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span><span class="w">      </span><span class="n">file_perms</span><span class="w"> </span><span class="o">*</span><span class="n">fp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">file_perms</span><span class="p">[</span><span class="n">aclSize</span><span class="p">.</span><span class="n">AceCount</span><span class="p">];</span><span class="w"></span>
+<span class="linenos"> 82</span><span class="w">      </span><span class="n">acl_info</span><span class="p">(</span><span class="n">pDACL</span><span class="p">,</span><span class="w"> </span><span class="n">aclSize</span><span class="p">.</span><span class="n">AceCount</span><span class="p">,</span><span class="w"> </span><span class="n">fp</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 83</span>
+<span class="linenos"> 84</span><span class="w">      </span><span class="c1">//Dict</span>
+<span class="linenos"> 85</span><span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ULONG</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="w"></span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span>
+<span class="linenos"> 88</span>
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span><span class="c1">//Boilerplate functions</span>
+<span class="linenos"> 91</span>
+<span class="linenos"> 92</span><span class="c1">//3 parts</span>
+<span class="linenos"> 93</span><span class="c1">//name of python function</span>
+<span class="linenos"> 94</span><span class="c1">//C++ function</span>
+<span class="linenos"> 95</span><span class="c1">//flags METH_VARARGS means function takes variable number of args</span>
+<span class="linenos"> 96</span><span class="k">static</span><span class="w"> </span><span class="n">PyMethodDef</span><span class="w"> </span><span class="n">fileperm_methods</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 97</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="s">&quot;get_perms&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">get_perms</span><span class="p">,</span><span class="w"> </span><span class="n">METH_VARARGS</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="linenos"> 98</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="nb">NULL</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 99</span><span class="p">};</span><span class="w"></span>
+<span class="linenos">100</span>
+<span class="linenos">101</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span><span class="kt">void</span><span class="w"> </span><span class="n">initfileperm</span><span class="p">()</span><span class="w"></span>
+<span class="linenos">104</span><span class="p">{</span><span class="w"></span>
+<span class="linenos">105</span>
+<span class="linenos">106</span><span class="n">Py_InitModule</span><span class="p">(</span><span class="s">&quot;fileperm&quot;</span><span class="p">,</span><span class="n">fileperm_methods</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">107</span>
+<span class="linenos">108</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="python-code">
+<h3>Python code<a class="headerlink" href="#python-code" title="Permalink to this heading">¶</a></h3>
+<p>One thing the extension doesn’t do is process the access mask into human
+readable names. Python can easily do that as shown in the program below.</p>
+<p>This program looks down a directory tree, takes the access mask and the login/group information,
+processes the access mask to produce human readable names and prints out the
+permission structure for the tree.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="kn">import</span> <span class="nn">os</span>
+<span class="linenos">  2</span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="linenos">  3</span><span class="kn">import</span> <span class="nn">win32net</span>
+<span class="linenos">  4</span><span class="kn">import</span> <span class="nn">string</span>
+<span class="linenos">  5</span><span class="kn">import</span> <span class="nn">time</span>
+<span class="linenos">  6</span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="linenos">  7</span><span class="kn">import</span> <span class="nn">getopt</span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="c1">#the extension module</span>
+<span class="linenos"> 10</span><span class="kn">import</span> <span class="nn">fileperm</span>
+<span class="linenos"> 11</span>
+<span class="linenos"> 12</span><span class="n">All_perms</span><span class="o">=</span><span class="p">{</span>
+<span class="linenos"> 13</span>   <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;ACCESS_READ&quot;</span><span class="p">,</span>            <span class="c1">#0x00000001</span>
+<span class="linenos"> 14</span>   <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;ACCESS_WRITE&quot;</span><span class="p">,</span>           <span class="c1">#0x00000002</span>
+<span class="linenos"> 15</span>   <span class="mi">4</span><span class="p">:</span><span class="s2">&quot;ACCESS_CREATE&quot;</span><span class="p">,</span>          <span class="c1">#0x00000004</span>
+<span class="linenos"> 16</span>   <span class="mi">8</span><span class="p">:</span><span class="s2">&quot;ACCESS_EXEC&quot;</span><span class="p">,</span>            <span class="c1">#0x00000008</span>
+<span class="linenos"> 17</span>   <span class="mi">16</span><span class="p">:</span><span class="s2">&quot;ACCESS_DELETE&quot;</span><span class="p">,</span>         <span class="c1">#0x00000010</span>
+<span class="linenos"> 18</span>   <span class="mi">32</span><span class="p">:</span><span class="s2">&quot;ACCESS_ATRIB [sic]&quot;</span><span class="p">,</span>    <span class="c1">#0x00000020</span>
+<span class="linenos"> 19</span>   <span class="mi">64</span><span class="p">:</span><span class="s2">&quot;ACCESS_PERM&quot;</span><span class="p">,</span>           <span class="c1">#0x00000040</span>
+<span class="linenos"> 20</span>   <span class="mi">32768</span><span class="p">:</span><span class="s2">&quot;ACCESS_GROUP&quot;</span><span class="p">,</span>       <span class="c1">#0x00008000</span>
+<span class="linenos"> 21</span>   <span class="mi">65536</span><span class="p">:</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span>             <span class="c1">#0x00010000</span>
+<span class="linenos"> 22</span>   <span class="mi">131072</span><span class="p">:</span><span class="s2">&quot;READ_CONTROL&quot;</span><span class="p">,</span>      <span class="c1">#0x00020000</span>
+<span class="linenos"> 23</span>   <span class="mi">262144</span><span class="p">:</span><span class="s2">&quot;WRITE_DAC&quot;</span><span class="p">,</span>         <span class="c1">#0x00040000</span>
+<span class="linenos"> 24</span>   <span class="mi">524288</span><span class="p">:</span><span class="s2">&quot;WRITE_OWNER&quot;</span><span class="p">,</span>       <span class="c1">#0x00080000</span>
+<span class="linenos"> 25</span>   <span class="mi">1048576</span><span class="p">:</span><span class="s2">&quot;SYNCHRONIZE&quot;</span><span class="p">,</span>      <span class="c1">#0x00100000</span>
+<span class="linenos"> 26</span>   <span class="mi">16777216</span><span class="p">:</span><span class="s2">&quot;ACCESS_SYSTEM_SECURITY&quot;</span><span class="p">,</span><span class="c1">#0x01000000</span>
+<span class="linenos"> 27</span>   <span class="mi">33554432</span><span class="p">:</span><span class="s2">&quot;MAXIMUM_ALLOWED&quot;</span><span class="p">,</span> <span class="c1">#0x02000000</span>
+<span class="linenos"> 28</span>   <span class="mi">268435456</span><span class="p">:</span><span class="s2">&quot;GENERIC_ALL&quot;</span><span class="p">,</span>    <span class="c1">#0x10000000</span>
+<span class="linenos"> 29</span>   <span class="mi">536870912</span><span class="p">:</span><span class="s2">&quot;GENERIC_EXECUTE&quot;</span><span class="p">,</span><span class="c1">#0x20000000</span>
+<span class="linenos"> 30</span>   <span class="mi">1073741824</span><span class="p">:</span><span class="s2">&quot;GENERIC_WRITE&quot;</span><span class="p">,</span> <span class="c1">#0x40000000</span>
+<span class="linenos"> 31</span>   <span class="mi">65535</span><span class="p">:</span><span class="s2">&quot;SPECIFIC_RIGHTS_ALL&quot;</span><span class="p">,</span><span class="c1">#0x0000ffff</span>
+<span class="linenos"> 32</span>   <span class="mi">983040</span><span class="p">:</span><span class="s2">&quot;STANDARD_RIGHTS_REQUIRED&quot;</span><span class="p">,</span><span class="c1">#0x000f0000</span>
+<span class="linenos"> 33</span>   <span class="mi">2031616</span><span class="p">:</span><span class="s2">&quot;STANDARD_RIGHTS_ALL&quot;</span><span class="p">,</span><span class="c1">#0x001f0000</span>
+<span class="linenos"> 34</span>   <span class="p">}</span>
+<span class="linenos"> 35</span>
+<span class="linenos"> 36</span><span class="n">Typical_perms</span><span class="o">=</span><span class="p">{</span>
+<span class="linenos"> 37</span>   <span class="mi">2032127</span><span class="n">L</span><span class="p">:</span><span class="s2">&quot;Full Control(All)&quot;</span><span class="p">,</span>
+<span class="linenos"> 38</span>   <span class="mi">1179817</span><span class="n">L</span><span class="p">:</span><span class="s2">&quot;Read(RX)&quot;</span><span class="p">,</span>
+<span class="linenos"> 39</span>   <span class="mi">1180086</span><span class="n">L</span><span class="p">:</span><span class="s2">&quot;Add&quot;</span><span class="p">,</span>
+<span class="linenos"> 40</span>   <span class="mi">1180095</span><span class="n">L</span><span class="p">:</span><span class="s2">&quot;Add&amp;Read&quot;</span><span class="p">,</span>
+<span class="linenos"> 41</span>   <span class="mi">1245631</span><span class="n">L</span><span class="p">:</span><span class="s2">&quot;Change&quot;</span>
+<span class="linenos"> 42</span><span class="p">}</span>
+<span class="linenos"> 43</span>
+<span class="linenos"> 44</span>
+<span class="linenos"> 45</span><span class="k">def</span> <span class="nf">get_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+<span class="linenos"> 46</span>   <span class="n">a</span><span class="o">=</span><span class="mi">2147483648</span><span class="n">L</span>
+<span class="linenos"> 47</span>   <span class="k">if</span> <span class="n">Typical_perms</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+<span class="linenos"> 48</span>      <span class="k">return</span> <span class="n">Typical_perms</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+<span class="linenos"> 49</span>   <span class="k">else</span><span class="p">:</span>
+<span class="linenos"> 50</span>      <span class="n">result</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+<span class="linenos"> 51</span>      <span class="k">while</span> <span class="n">a</span><span class="o">&gt;&gt;</span><span class="mi">1</span><span class="p">:</span>
+<span class="linenos"> 52</span>            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">&gt;&gt;</span><span class="mi">1</span>
+<span class="linenos"> 53</span>            <span class="n">masked</span><span class="o">=</span><span class="n">mask</span><span class="o">&amp;</span><span class="n">a</span>
+<span class="linenos"> 54</span>            <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+<span class="linenos"> 55</span>               <span class="k">if</span> <span class="n">All_perms</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">masked</span><span class="p">):</span>
+<span class="linenos"> 56</span>                  <span class="n">result</span><span class="o">=</span><span class="n">All_perms</span><span class="p">[</span><span class="n">masked</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="n">result</span>
+<span class="linenos"> 57</span>   <span class="k">return</span> <span class="n">result</span>
+<span class="linenos"> 58</span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span><span class="k">def</span> <span class="nf">is_group</span><span class="p">(</span><span class="n">sys_id</span><span class="p">):</span>
+<span class="linenos"> 61</span>   <span class="c1">#get the server for the domain -- it has to be a primary dc</span>
+<span class="linenos"> 62</span>   <span class="n">group</span><span class="o">=</span><span class="mi">0</span>
+<span class="linenos"> 63</span>   <span class="n">resume</span><span class="o">=</span><span class="mi">0</span>
+<span class="linenos"> 64</span>   <span class="n">sys_id</span><span class="o">=</span><span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="n">sys_id</span><span class="p">)</span>
+<span class="linenos"> 65</span>   <span class="k">if</span> <span class="n">D_group</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">sys_id</span><span class="p">):</span>
+<span class="linenos"> 66</span>      <span class="n">group</span><span class="o">=</span><span class="mi">1</span>
+<span class="linenos"> 67</span>   <span class="k">elif</span> <span class="n">D_except</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">sys_id</span><span class="p">):</span>
+<span class="linenos"> 68</span>      <span class="n">group</span><span class="o">=</span><span class="mi">0</span>
+<span class="linenos"> 69</span>   <span class="k">else</span><span class="p">:</span>
+<span class="linenos"> 70</span>      <span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 71</span>            <span class="c1">#info returns a dictionary of information</span>
+<span class="linenos"> 72</span>            <span class="n">info</span> <span class="o">=</span> <span class="n">win32net</span><span class="o">.</span><span class="n">NetGroupGetInfo</span><span class="p">(</span><span class="n">Server</span><span class="p">,</span> <span class="n">sys_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 73</span>            <span class="n">group</span><span class="o">=</span><span class="mi">1</span>
+<span class="linenos"> 74</span>      <span class="k">except</span><span class="p">:</span>
+<span class="linenos"> 75</span>            <span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 76</span>               <span class="n">win32net</span><span class="o">.</span><span class="n">NetLocalGroupGetMembers</span><span class="p">(</span><span class="n">Server</span><span class="p">,</span> <span class="n">sys_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="n">resume</span><span class="p">,</span><span class="mi">4096</span><span class="p">)</span>
+<span class="linenos"> 77</span>               <span class="n">group</span><span class="o">=</span><span class="mi">1</span>
+<span class="linenos"> 78</span>            <span class="k">except</span><span class="p">:</span>
+<span class="linenos"> 79</span>               <span class="k">pass</span>
+<span class="linenos"> 80</span>   <span class="k">return</span> <span class="n">group</span>
+<span class="linenos"> 81</span>
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span><span class="k">def</span> <span class="nf">get_perm_base</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+<span class="linenos"> 84</span>   <span class="n">all_perms</span><span class="o">=</span><span class="n">fileperm</span><span class="o">.</span><span class="n">get_perms</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="linenos"> 85</span>   <span class="k">for</span> <span class="p">(</span><span class="n">domain_id</span><span class="p">,</span><span class="n">mask</span><span class="p">)</span> <span class="ow">in</span> <span class="n">all_perms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos"> 86</span>      <span class="p">(</span><span class="n">domain</span><span class="p">,</span><span class="n">sys_id</span><span class="p">)</span><span class="o">=</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">domain_id</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 87</span>      <span class="n">mask_name</span><span class="o">=</span><span class="n">get_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+<span class="linenos"> 88</span>      <span class="n">Results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="n">sys_id</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="n">mask_name</span><span class="p">)</span>
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span><span class="k">def</span> <span class="nf">get_perm</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+<span class="linenos"> 91</span>   <span class="n">perm_list</span><span class="o">=</span><span class="p">[]</span>
+<span class="linenos"> 92</span>   <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="linenos"> 93</span>   <span class="n">all_perms</span><span class="o">=</span><span class="n">fileperm</span><span class="o">.</span><span class="n">get_perms</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="linenos"> 94</span>   <span class="k">for</span> <span class="p">(</span><span class="n">domain_id</span><span class="p">,</span><span class="n">mask</span><span class="p">)</span> <span class="ow">in</span> <span class="n">all_perms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos"> 95</span>      <span class="p">(</span><span class="n">domain</span><span class="p">,</span><span class="n">sys_id</span><span class="p">)</span><span class="o">=</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">domain_id</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 96</span>      <span class="nb">print</span> <span class="n">domain</span><span class="p">,</span><span class="n">sys_id</span>
+<span class="linenos"> 97</span>      <span class="n">sys_id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">sys_id</span><span class="p">)</span>
+<span class="linenos"> 98</span>      <span class="n">mask_name</span><span class="o">=</span><span class="n">get_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+<span class="linenos"> 99</span>      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys_id</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">7</span><span class="p">:</span>
+<span class="linenos">100</span>            <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sys_id</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t\t\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">mask_name</span><span class="p">)</span>
+<span class="linenos">101</span>      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys_id</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">14</span><span class="p">:</span>
+<span class="linenos">102</span>            <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sys_id</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">mask_name</span><span class="p">)</span>
+<span class="linenos">103</span>      <span class="k">else</span><span class="p">:</span>
+<span class="linenos">104</span>            <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sys_id</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">mask_name</span><span class="p">)</span>
+<span class="linenos">105</span>   <span class="k">return</span> <span class="n">perm_list</span>
+<span class="linenos">106</span><span class="k">def</span> <span class="nf">get_perms</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
+<span class="linenos">107</span>   <span class="n">a</span><span class="o">=</span><span class="mi">2147483648</span><span class="n">L</span> <span class="c1">#1L&lt;&lt;31L</span>
+<span class="linenos">108</span>   <span class="nb">print</span> <span class="s1">&#39;Now at &#39;</span><span class="p">,</span><span class="n">d</span>
+<span class="linenos">109</span>   <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+<span class="linenos">110</span>      <span class="n">file</span><span class="o">=</span><span class="n">d</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">i</span>
+<span class="linenos">111</span>      <span class="k">if</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;-d&#39;</span><span class="p">]:</span>
+<span class="linenos">112</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">file</span><span class="p">):</span> <span class="c1"># skip non-directories</span>
+<span class="linenos">113</span>               <span class="k">continue</span>
+<span class="linenos">114</span>      <span class="n">all_perms</span><span class="o">=</span><span class="n">fileperm</span><span class="o">.</span><span class="n">get_perms</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="linenos">115</span>      <span class="k">for</span> <span class="p">(</span><span class="n">domain_id</span><span class="p">,</span><span class="n">mask</span><span class="p">)</span> <span class="ow">in</span> <span class="n">all_perms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">116</span>            <span class="k">if</span> <span class="n">string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">domain_id</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">!=-</span><span class="mi">1</span><span class="p">:</span>
+<span class="linenos">117</span>               <span class="p">(</span><span class="n">domain</span><span class="p">,</span><span class="n">sys_id</span><span class="p">)</span><span class="o">=</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">domain_id</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">118</span>            <span class="k">else</span><span class="p">:</span>
+<span class="linenos">119</span>               <span class="n">sys_id</span><span class="o">=</span><span class="n">domain_id</span>
+<span class="linenos">120</span>            <span class="n">mask_name</span><span class="o">=</span><span class="n">get_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+<span class="linenos">121</span>            <span class="n">Results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="n">sys_id</span><span class="o">+</span><span class="s1">&#39;,&#39;</span><span class="o">+</span><span class="n">mask_name</span><span class="p">)</span>
+<span class="linenos">122</span>   <span class="n">Results</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<span class="linenos">123</span>   <span class="k">return</span> <span class="n">Results</span>
+<span class="linenos">124</span>
+<span class="linenos">125</span><span class="c1">##############################################################################</span>
+<span class="linenos">126</span>
+<span class="linenos">127</span><span class="c1">#h - help</span>
+<span class="linenos">128</span><span class="c1">#r - recursive</span>
+<span class="linenos">129</span><span class="c1">#o - output file</span>
+<span class="linenos">130</span><span class="c1">#d - directories only</span>
+<span class="linenos">131</span>
+<span class="linenos">132</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;bedrock&#39;</span>
+<span class="linenos">133</span>
+<span class="linenos">134</span><span class="n">Server</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">win32net</span><span class="o">.</span><span class="n">NetGetDCName</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">domain</span><span class="p">))</span>
+<span class="linenos">135</span><span class="nb">print</span> <span class="s1">&#39;************************ Using domain &#39;</span><span class="p">,</span><span class="n">domain</span>
+<span class="linenos">136</span>
+<span class="linenos">137</span><span class="n">only_dir</span><span class="o">=</span><span class="mi">0</span>
+<span class="linenos">138</span><span class="n">D_group</span><span class="o">=</span><span class="p">{}</span>
+<span class="linenos">139</span><span class="n">D_except</span><span class="o">=</span><span class="p">{}</span>
+<span class="linenos">140</span><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+<span class="linenos">141</span>   <span class="nb">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s2">&quot; file or directory&quot;</span>
+<span class="linenos">142</span>   <span class="nb">print</span> <span class="s2">&quot;-r for recursive mode </span><span class="se">\n</span><span class="s2">-o for output file (default screen) </span><span class="se">\n</span><span class="s2">-d for directories only&quot;</span>
+<span class="linenos">143</span>   <span class="nb">print</span> <span class="s1">&#39;Example:&#39;</span><span class="p">,</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;-o a.txt -r c:</span><span class="se">\\</span><span class="s1">junk  </span><span class="se">\n</span><span class="s1"> ----goes down dir tree in c:</span><span class="se">\\</span><span class="s1">junk and saves in a.txt&#39;</span>
+<span class="linenos">144</span>   <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">145</span><span class="k">else</span><span class="p">:</span>
+<span class="linenos">146</span>   <span class="k">try</span><span class="p">:</span>
+<span class="linenos">147</span>      <span class="n">optlist</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s1">&#39;dho:r&#39;</span><span class="p">)</span>
+<span class="linenos">148</span>   <span class="k">except</span> <span class="n">getopt</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+<span class="linenos">149</span>      <span class="nb">print</span> <span class="s2">&quot;invalid option.  available options are: -d -h -r -o &quot;</span>
+<span class="linenos">150</span>      <span class="nb">print</span> <span class="s2">&quot;-r for recursive mode </span><span class="se">\n</span><span class="s2">-o for output file (default screen) </span><span class="se">\n</span><span class="s2">-d for directories only&quot;</span>
+<span class="linenos">151</span>
+<span class="linenos">152</span>      <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">153</span>
+<span class="linenos">154</span>   <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;-d&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;-h&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;-o&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;-r&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
+<span class="linenos">155</span>   <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">optlist</span><span class="p">:</span>
+<span class="linenos">156</span>      <span class="n">opts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+<span class="linenos">157</span>      <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;-o&#39;</span><span class="p">:</span>
+<span class="linenos">158</span>            <span class="n">opts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">value</span>
+<span class="linenos">159</span>   <span class="n">init</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+<span class="linenos">160</span>
+<span class="linenos">161</span>
+<span class="linenos">162</span>   <span class="n">Results</span><span class="o">=</span><span class="p">[]</span>
+<span class="linenos">163</span>   <span class="k">if</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;-r&#39;</span><span class="p">]:</span>
+<span class="linenos">164</span>      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+<span class="linenos">165</span>            <span class="nb">print</span> <span class="s1">&#39;walking thru&#39;</span><span class="p">,</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">166</span>            <span class="n">get_perm_base</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">167</span>            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">get_perms</span><span class="p">,</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;-d&#39;</span><span class="p">])</span>
+<span class="linenos">168</span>      <span class="k">else</span><span class="p">:</span>
+<span class="linenos">169</span>            <span class="nb">print</span> <span class="s1">&#39;Directory&#39;</span><span class="p">,</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;does not exist&#39;</span>
+<span class="linenos">170</span>            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">171</span>   <span class="k">else</span><span class="p">:</span>
+<span class="linenos">172</span>      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+<span class="linenos">173</span>            <span class="n">Results</span><span class="o">=</span><span class="n">get_perm</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">174</span>      <span class="k">else</span><span class="p">:</span>
+<span class="linenos">175</span>            <span class="nb">print</span> <span class="s1">&#39;Directory or file&#39;</span><span class="p">,</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;does not exist&#39;</span>
+<span class="linenos">176</span>            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">177</span>
+<span class="linenos">178</span>   <span class="c1">#now print out the results</span>
+<span class="linenos">179</span>   <span class="k">if</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;-o&#39;</span><span class="p">]:</span>
+<span class="linenos">180</span>      <span class="c1">#send to a file</span>
+<span class="linenos">181</span>      <span class="nb">print</span> <span class="s1">&#39;Storing results in&#39;</span><span class="p">,</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;-o&#39;</span><span class="p">]</span>
+<span class="linenos">182</span>      <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;-o&#39;</span><span class="p">],</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="linenos">183</span>      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Results</span><span class="p">:</span>
+<span class="linenos">184</span>            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="linenos">185</span>            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">186</span>   <span class="k">else</span><span class="p">:</span>
+<span class="linenos">187</span>      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Results</span><span class="p">:</span>
+<span class="linenos">188</span>            <span class="nb">print</span> <span class="n">i</span>
+<span class="linenos">189</span>      <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span><span class="o">-</span><span class="n">init</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="in-conclusion">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">In Conclusion</a><a class="headerlink" href="#in-conclusion" title="Permalink to this heading">¶</a></h2>
+<p>Extending python isn’t as simple as writing python, but it greatly expands
+python’s capabilities. There are many details not covered here like
+reference counting, threading, and error handeling. The python website has documentation about
+Extending Python <a class="reference external" href="http://www.python.org/doc/current/ext/ext.html">http://www.python.org/doc/current/ext/ext.html</a> .</p>
+<p><em>Have a great time with programming with python!</em></p>
+</section>
+<section id="further-info">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Further Info</a><a class="headerlink" href="#further-info" title="Permalink to this heading">¶</a></h2>
+<p>Microsoft MSDN references <a class="reference external" href="http://msdn.microsoft.com/">http://msdn.microsoft.com/</a>
+Extending Python <a class="reference external" href="http://www.python.org/doc/current/ext/ext.html">http://www.python.org/doc/current/ext/ext.html</a>
+compile.py <a class="reference external" href="http://starship.python.net/crew/da/compile">http://starship.python.net/crew/da/compile</a>
+SWIG <a class="reference external" href="http://www.swig.org/">http://www.swig.org/</a>
+BPL (Boost Python Libraries) <a class="reference external" href="http://www.boost.org/libs/python/doc/index.html">http://www.boost.org/libs/python/doc/index.html</a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pywin32</a></h1>
+
+
+
+<p class="blurb">Python for Windows Extensions</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=mhammond&repo=pywin32&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Win32 Extensions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="process_info.html">Getting process info</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Extending Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="win32net.html">win32net</a></li>
+<li class="toctree-l2"><a class="reference internal" href="event.html">Windows NT Eventlog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="event_threading.html">Eventlog &amp; Threading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file.html">File Locking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file_recursive.html">Directory Deleting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security.html">Windows NT Security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="samples/index.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apidoc/index.html">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../com/index.html">PythonCOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adodbapi/index.html">ADO DB-API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../isapi/index.html">ISAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Pythonwin/index.html"> Pythonwin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SWIG/index.html">SWIG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resources.html">Resources</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Mark Hammond.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/win32/security_directories.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
