@@ -56,6 +56,8 @@ Connection methods
 
 .. automethod:: adodbapi.Connection.cursor
 
+   returns an :class:`adodbapi.adodbapi.Cursor`
+
 Connection methods (non-standard)
 ---------------------------------
 
@@ -140,13 +142,15 @@ Attributes
 
 .. note:: 
 
-   There is no .description
+   .description is created/accessed only via __getattr__. Is a list[tuple]
 
 .. autoattribute:: adodbapi.Cursor._description
 
    as defined by :pep:`249`, a sequence of 7-item sequences
 
 .. autoattribute:: adodbapi.Cursor.rowcount
+
+   type is / returns int
 
    :code:`-1` means "not known". Will be ADO :code:`recordset.RecordCount` (if it works), otherwise, the count returned by the last ADO :code:`Execute` operation.
 
@@ -155,7 +159,7 @@ Attributes (standard extensions)
 
 .. autoattribute:: adodbapi.Cursor.connection
 
-   back-link to the connection
+   back-link to the :class:`adodbapi.adodbapi.Connection`
 
 .. autoattribute:: adodbapi.Cursor.errorhandler
 
@@ -227,7 +231,7 @@ Methods (standard)
 .. automethod:: adodbapi.Cursor.execute
 
    .. py:attribute:: operation
-      :type: Any
+      :type: str
 
       the text of the SQL.
 
@@ -239,15 +243,20 @@ Methods (standard)
 
    execute a query or command...
 
+   does not return anything / returns None
+
 .. automethod:: adodbapi.Cursor.executemany
 
    runs the SQL operation several times, once for each group of parameters in sequence-of-parameters.
 
 .. automethod:: adodbapi.Cursor.fetchone
 
+   returns :class:`adodbapi.apibase.SQLrow`
    get the next row from the result set. Calls ADO :code:`recordset.GetRows(1)`
 
 .. automethod:: adodbapi.Cursor.fetchmany
+
+   returns :class:`adodbapi.apibase.SQLrows`
 
    get a :code:`size` sequence of rows. Calls ADO :code:`recordset.GetRows(size)`
 
@@ -296,6 +305,13 @@ Methods (extensions)
    the cursor is a context manager which will auto-close
 
 .. automethod:: adodbapi.Cursor.__exit__
+
+connect
+-------
+
+.. autofunction:: adodbapi.connect
+
+   returns :class:`adodbapi.adodbapi.Connection`
 
 adodbapi.apibase
 ================
